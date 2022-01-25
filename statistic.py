@@ -54,14 +54,9 @@ data_path="/data/ATIS_Automotive_Detection_Dataset/detection_dataset_duration_60
 for data_folder in data_folders:
     final_path = os.path.join(data_path,data_folder)
     files = os.listdir(final_path)
-    min_point=5000
-    events_list=[]
-    boxes_list=[]
-    boxes_count=[]
-    unique_invs = []
     for item in files:
         lastStamp=0
-        if os.path.isfile(os.path.join(data_path, item)):
+        if os.path.isfile(os.path.join(final_path, item)):
             if item.endswith(".npy"):
                 try:
                     inv_statistic(final_path,item)
