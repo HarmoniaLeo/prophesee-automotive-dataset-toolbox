@@ -50,13 +50,18 @@ for item in files:
         if item.endswith(".npy"):
             #gt = PSEELoader(os.path.join(data_path, item))
             bbox_file = os.path.join(data_path, item)
-            f_bbox = open(bbox_file, "rb")
-            start, v_type, ev_size, size = npy_events_tools.parse_header(f_bbox)
-            dat_bbox = np.fromfile(f_bbox, dtype=v_type, count=-1)
-            f_bbox.close()
+            try:
+                f_bbox = open(bbox_file, "rb")
+                start, v_type, ev_size, size = npy_events_tools.parse_header(f_bbox)
+                dat_bbox = np.fromfile(f_bbox, dtype=v_type, count=-1)
+                f_bbox.close()
+            except Exception:
+                break
             unique_ts, unique_indices = np.unique(dat_bbox['t'], return_index=True)
             unique_inv = np.unique(unique_ts[1:] - unique_ts[:-1])
-            print(item,unique_inv)
+            if np.sum(np.where(unique_inv<=200000)):
+                print(item,unique_inv)
+            
             '''video = PSEELoader(os.path.join(data_path, item[:-8]+"td.dat"))
             while not video.done:
                 events = video.load_delta_t(10000)
