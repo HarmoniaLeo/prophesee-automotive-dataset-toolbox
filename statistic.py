@@ -37,8 +37,7 @@ def make_print_to_file(path='./'):
     print(fileName.center(60,'*'))
 
 def inv_statistic(data_path,item):
-    data_path = os.path.join(data_path, item[:-6]+"bbox.npy")
-    bbox_file = os.path.join(data_path, item)
+    bbox_file = os.path.join(data_path, item[:-6]+"bbox.npy")
     f_bbox = open(bbox_file, "rb")
     start, v_type, ev_size, size = npy_events_tools.parse_header(f_bbox)
     dat_bbox = np.fromfile(f_bbox, dtype=v_type, count=-1)
