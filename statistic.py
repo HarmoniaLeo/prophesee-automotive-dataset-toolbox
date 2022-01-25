@@ -72,7 +72,7 @@ def full_statistic(data_path,item):
             img_neg = np.zeros((H * W,), dtype="float32")
 
             np.add.at(img_pos, x[p == 1] + W * y[p == 1], 0.05)
-            np.add.at(img_neg, x[p == -1] + W * y[p == -1], 0.05)
+            np.add.at(img_neg, x[p == 0] + W * y[p == 0], 0.05)
 
             img_pos = np.where(img_pos>0,1,0)
             img_neg = np.where(img_neg>0,1,0)
