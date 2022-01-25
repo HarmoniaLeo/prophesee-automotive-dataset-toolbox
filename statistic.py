@@ -63,11 +63,12 @@ def full_statistic(data_path,item):
         if start_time >= 0:
             f_event.seek_time(start_time)
             events = f_event.load_delta_t(time_window)
-            H, W = 240, 304
+            H, W = 256, 256
+            ori_H, ori_W = 240, 304
             x,y,t,p = events['x'], events['y'], events['t'], events['p']
             
-            rh = 256 / H
-            rw = 256 / W
+            rh = H / ori_H
+            rw = W / ori_W
 
             x = x * rw
             y = y * rh
