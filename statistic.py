@@ -55,7 +55,7 @@ for item in files:
             dat_bbox = np.fromfile(f_bbox, dtype=v_type, count=-1)
             f_bbox.close()
             unique_ts, unique_indices = np.unique(dat_bbox['t'], return_index=True)
-            unique_inv = unique_ts[1:] - unique_ts[:-1]
+            unique_inv = np.unique(unique_ts[1:] - unique_ts[:-1])
             print(item,unique_inv)
             '''video = PSEELoader(os.path.join(data_path, item[:-8]+"td.dat"))
             while not video.done:
