@@ -66,6 +66,7 @@ for data_folder in data_folders:
                 try:
                     inv_statistic(final_path,item)
                 except Exception:
+                    print(item)
                     continue
                 
                 '''video = PSEELoader(os.path.join(data_path, item[:-8]+"td.dat"))
