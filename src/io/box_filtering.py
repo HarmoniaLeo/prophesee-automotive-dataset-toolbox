@@ -27,9 +27,12 @@ def filter_boxes(boxes, skip_ts=int(5e5), min_box_diag=60, min_box_side=20):
     Returns:
         boxes: filtered boxes
     """
-    ts = boxes['t'] 
-    width = boxes['w']
-    height = boxes['h']
+    #ts = boxes['t'] 
+    ts = boxes[:,0] 
+    #width = boxes['w']
+    width = boxes[:,3]
+    #height = boxes['h']
+    height = boxes[:,4]
     diag_square = width**2+height**2
     mask = (ts>skip_ts)*(diag_square >= min_box_diag**2)*(width >= min_box_side)*(height >= min_box_side)
     return boxes[mask]

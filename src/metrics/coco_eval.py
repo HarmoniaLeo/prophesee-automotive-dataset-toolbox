@@ -30,17 +30,17 @@ def evaluate_detection(gt_boxes_list, dt_boxes_list, classes=("car", "pedestrian
     flattened_gt = []
     flattened_dt = []
     for gt_boxes, dt_boxes in zip(gt_boxes_list, dt_boxes_list):
-
-        assert np.all(gt_boxes['t'][1:] >= gt_boxes['t'][:-1])
-        assert np.all(dt_boxes['t'][1:] >= dt_boxes['t'][:-1])
-
-        all_ts = np.unique(gt_boxes['t'])
+        if gt_boxes.shape[0]==0 or dt_boxes.shape[0]==0:
+            continue
+        #assert np.all(gt_boxes['t'][1:] >= gt_boxes['t'][:-1])
+        #assert np.all(dt_boxes['t'][1:] >= dt_boxes['t'][:-1])
+        #all_ts = np.unique(gt_boxes['t'])
+        all_ts = np.unique(gt_boxes[:,0])
         n_steps = len(all_ts)
 
         gt_win, dt_win = _match_times(all_ts, gt_boxes, dt_boxes, time_tol)
         flattened_gt = flattened_gt + gt_win
         flattened_dt = flattened_dt + dt_win
-
     _coco_eval(flattened_gt, flattened_dt, height, width, labelmap=classes)
 
 
@@ -59,21 +59,25 @@ def _match_times(all_ts, gt_boxes, dt_boxes, time_tol):
     low_dt, high_dt = 0, 0
     for ts in all_ts:
 
-        while low_gt < gt_size and gt_boxes[low_gt]['t'] < ts:
+        #while low_gt < gt_size and gt_boxes[low_gt]['t'] < ts:
+        while low_gt < gt_size and gt_boxes[low_gt,0] < ts:
             low_gt += 1
         # the high index is at least as big as the low one
         high_gt = max(low_gt, high_gt)
-        while high_gt < gt_size and gt_boxes[high_gt]['t'] <= ts:
+        #while high_gt < gt_size and gt_boxes[high_gt]['t'] <= ts:
+        while high_gt < gt_size and gt_boxes[high_gt,0] <= ts:
             high_gt += 1
 
         # detection are allowed to be inside a window around the right detection timestamp
         low = ts - time_tol
         high = ts + time_tol
-        while low_dt < dt_size and dt_boxes[low_dt]['t'] < low:
+        #while low_dt < dt_size and dt_boxes[low_dt]['t'] < low:
+        while low_dt < dt_size and dt_boxes[low_dt,0] < low:
             low_dt += 1
         # the high index is at least as big as the low one
         high_dt = max(low_dt, high_dt)
-        while high_dt < dt_size and dt_boxes[high_dt]['t'] <= high:
+        #while high_dt < dt_size and dt_boxes[high_dt]['t'] <= high:
+        while high_dt < dt_size and dt_boxes[high_dt,0] <= high:
             high_dt += 1
 
         windowed_gt.append(gt_boxes[low_gt:high_gt])
@@ -129,8 +133,10 @@ def _to_coco_format(gts, detections, categories, height=240, width=304):
              "width": width})
 
         for bbox in gt:
-            x1, y1 = bbox['x'], bbox['y']
-            w, h = bbox['w'], bbox['h']
+            #x1, y1 = bbox['x'], bbox['y']
+            x1, y1 = bbox[1], bbox[2]
+            #w, h = bbox['w'], bbox['h']
+            w, h = bbox[3], bbox[4]
             area = w * h
 
             annotation = {
@@ -138,7 +144,8 @@ def _to_coco_format(gts, detections, categories, height=240, width=304):
                 "iscrowd": False,
                 "image_id": im_id,
                 "bbox": [x1, y1, w, h],
-                "category_id": int(bbox['class_id']) + 1,
+                #"category_id": int(bbox['class_id']) + 1,
+                "category_id": int(bbox[5]) + 1,
                 "id": len(annotations) + 1
             }
             annotations.append(annotation)
@@ -147,9 +154,12 @@ def _to_coco_format(gts, detections, categories, height=240, width=304):
 
             image_result = {
                 'image_id': im_id,
-                'category_id': int(bbox['class_id']) + 1,
-                'score': float(bbox['class_confidence']),
-                'bbox': [bbox['x'], bbox['y'], bbox['w'], bbox['h']],
+                #'category_id': int(bbox['class_id']) + 1,
+                'category_id': int(bbox[5]) + 1,
+                #'score': float(bbox['class_confidence']),
+                'score': float(bbox[6]),
+                #'bbox': [bbox['x'], bbox['y'], bbox['w'], bbox['h']],
+                'bbox': [bbox[1], bbox[2], bbox[3], bbox[4]],
             }
             results.append(image_result)
 
