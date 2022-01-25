@@ -37,7 +37,7 @@ def make_print_to_file(path='./'):
     print(fileName.center(60,'*'))
 
 make_print_to_file(path='result_inv')
-data_path="/data/ATIS_Automotive_Detection_Dataset/detection_dataset_duration_60s_ratio_1.0/test"
+data_path="/data/ATIS_Automotive_Detection_Dataset/detection_dataset_duration_60s_ratio_1.0/val"
 files = os.listdir(data_path)
 min_point=5000
 events_list=[]
@@ -59,7 +59,7 @@ for item in files:
                 break
             unique_ts, unique_indices = np.unique(dat_bbox['t'], return_index=True)
             unique_inv = np.unique(unique_ts[1:] - unique_ts[:-1])
-            if np.sum(np.where(unique_inv>=200000)):
+            if np.sum(np.where(unique_inv<=200000)):
                 print(item,unique_inv)
             
             '''video = PSEELoader(os.path.join(data_path, item[:-8]+"td.dat"))
