@@ -36,46 +36,52 @@ def make_print_to_file(path='./'):
     #############################################################
     print(fileName.center(60,'*'))
 
-make_print_to_file(path='result_inv')
-data_path="/data/ATIS_Automotive_Detection_Dataset/detection_dataset_duration_60s_ratio_1.0/val"
-files = os.listdir(data_path)
-min_point=5000
-events_list=[]
-boxes_list=[]
-boxes_count=[]
-unique_invs = []
-for item in files:
-    lastStamp=0
-    if os.path.isfile(os.path.join(data_path, item)):
-        if item.endswith(".npy"):
-            #gt = PSEELoader(os.path.join(data_path, item))
-            bbox_file = os.path.join(data_path, item)
-            try:
-                f_bbox = open(bbox_file, "rb")
-                start, v_type, ev_size, size = npy_events_tools.parse_header(f_bbox)
-                dat_bbox = np.fromfile(f_bbox, dtype=v_type, count=-1)
-                f_bbox.close()
-            except Exception:
-                break
-            unique_ts, unique_indices = np.unique(dat_bbox['t'], return_index=True)
-            unique_inv = np.unique(unique_ts[1:] - unique_ts[:-1])
-            if np.sum(np.where(unique_inv<=200000)):
-                print(item,unique_inv)
-            
-            '''video = PSEELoader(os.path.join(data_path, item[:-8]+"td.dat"))
-            while not video.done:
-                events = video.load_delta_t(10000)
-                boxes = gt.load_delta_t(10000)
-                if events.shape[0]>min_point:
-                    events_list.append((os.path.join(data_path, item[:-8]+"td.dat"),np.min(events["t"]),np.max(events["t"])))
-                    #print("event:",(os.path.join(data_path, item[:-8]+"td.dat"),np.min(events["t"]),np.max(events["t"])))
-                if boxes.shape[0]>0:
-                    print(boxes.shape[0])
-                    while len(boxes_list)<len(events_list):
-                        boxes_list.append((os.path.join(data_path, item),np.min(boxes["t"])))
-                        #print("boxes:",(os.path.join(data_path, item),np.min(boxes["t"]),np.max(boxes["t"])))
-                #print("start: ",np.min(events["t"]),np.max(events["t"]))
-                #print(events.shape)
-                #print(boxes.shape)
-#print(np.mean(count),np.max(count))'''
+def inv_statistic(data_path,item):
+    bbox_file = os.path.join(data_path, item)
+    f_bbox = open(bbox_file, "rb")
+    start, v_type, ev_size, size = npy_events_tools.parse_header(f_bbox)
+    dat_bbox = np.fromfile(f_bbox, dtype=v_type, count=-1)
+    f_bbox.close()
+    unique_ts, unique_indices = np.unique(dat_bbox['t'], return_index=True)
+    unique_inv = np.unique(unique_ts[1:] - unique_ts[:-1])
+    if np.sum(np.where(unique_inv<=200000)):
+        print(item,unique_inv)
+
+result_path = 'result_inv'
+make_print_to_file(path=result_path)
+data_folders = ["train","test","val"]
+data_path="/data/ATIS_Automotive_Detection_Dataset/detection_dataset_duration_60s_ratio_1.0"
+for data_folder in data_folders:
+    final_path = os.path.join(data_path,data_folder)
+    files = os.listdir(final_path)
+    min_point=5000
+    events_list=[]
+    boxes_list=[]
+    boxes_count=[]
+    unique_invs = []
+    for item in files:
+        lastStamp=0
+        if os.path.isfile(os.path.join(data_path, item)):
+            if item.endswith(".npy"):
+                try:
+                    inv_statistic(final_path,item)
+                except Exception:
+                    continue
+                
+                '''video = PSEELoader(os.path.join(data_path, item[:-8]+"td.dat"))
+                while not video.done:
+                    events = video.load_delta_t(10000)
+                    boxes = gt.load_delta_t(10000)
+                    if events.shape[0]>min_point:
+                        events_list.append((os.path.join(data_path, item[:-8]+"td.dat"),np.min(events["t"]),np.max(events["t"])))
+                        #print("event:",(os.path.join(data_path, item[:-8]+"td.dat"),np.min(events["t"]),np.max(events["t"])))
+                    if boxes.shape[0]>0:
+                        print(boxes.shape[0])
+                        while len(boxes_list)<len(events_list):
+                            boxes_list.append((os.path.join(data_path, item),np.min(boxes["t"])))
+                            #print("boxes:",(os.path.join(data_path, item),np.min(boxes["t"]),np.max(boxes["t"])))
+                    #print("start: ",np.min(events["t"]),np.max(events["t"]))
+                    #print(events.shape)
+                    #print(boxes.shape)
+    #print(np.mean(count),np.max(count))'''
             
