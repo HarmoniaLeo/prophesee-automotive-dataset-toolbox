@@ -64,7 +64,7 @@ def full_statistic(data_path,item):
             f_event.seek_time(start_time)
             events = f_event.load_delta_t(time_window)
             H, W = 304, 240
-            x, y, t, p = events.T
+            x,y,t,p = events['x'], events['y'], events['ts'], events['p']
             x = x.astype(np.int)
             y = y.astype(np.int)
 
