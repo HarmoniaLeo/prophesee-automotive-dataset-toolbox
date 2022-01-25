@@ -82,9 +82,9 @@ def full_statistic(data_path,item):
             np.add.at(img_pos, x[p == 1] + W * y[p == 1], 0.05)
             np.add.at(img_neg, x[p == 0] + W * y[p == 0], 0.05)
 
-            img_pos = np.where(img_pos>0,1,0)
-            img_neg = np.where(img_neg>0,1,0)
-            print(event_file,unique_time,np.sum(img_pos)/len(img_pos),np.sum(img_neg)/len(img_neg))
+            img = np.where((img_pos>0)&(img_neg>0),1,0)
+            if np.sum(img)/len(img)<0.3:
+                print(event_file,unique_time,np.sum(img)/len(img))
 
 result_path = 'result_full'
 make_print_to_file(path=result_path)
