@@ -36,7 +36,7 @@ def make_print_to_file(path='./'):
     #############################################################
     print(fileName.center(60,'*'))
 
-make_print_to_file(path='result_inv.txt')
+make_print_to_file(path='result_inv')
 data_path="/data/ATIS_Automotive_Detection_Dataset/detection_dataset_duration_60s_ratio_1.0/train"
 files = os.listdir(data_path)
 min_point=5000
