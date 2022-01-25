@@ -59,7 +59,7 @@ for item in files:
                 break
             unique_ts, unique_indices = np.unique(dat_bbox['t'], return_index=True)
             unique_inv = np.unique(unique_ts[1:] - unique_ts[:-1])
-            if np.sum(np.where(unique_inv<=200000)):
+            if np.sum(np.where(unique_inv>=200000)):
                 print(item,unique_inv)
             
             '''video = PSEELoader(os.path.join(data_path, item[:-8]+"td.dat"))
