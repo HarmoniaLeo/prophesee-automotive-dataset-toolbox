@@ -32,8 +32,8 @@ def denseToSparse(dense_tensor):
     non_zero_indices = np.nonzero(dense_tensor)
     locations = np.stack(non_zero_indices, axis=-1)
 
-    select_indices = np.array(np.split(locations,range(1,len(locations)))).squeeze(1).T
-    features = dense_tensor[select_indices]
+    select_indices = np.array(np.split(locations,range(1,len(locations)))).squeeze(1)
+    features = dense_tensor[select_indices[:,0],select_indices[:,1],select_indices[:,2],select_indices[:,3]]
 
     return locations, features
 

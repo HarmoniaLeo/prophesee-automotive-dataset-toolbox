@@ -116,7 +116,7 @@ if __name__ == '__main__':
     f_event.seek_time(time_stamp_start)
     events = f_event.load_delta_t(time_stamp_end - time_stamp_start)
     x,y,t,p = events['x'], events['y'], events['t'], events['p']
-    events = np.stack([x.astype(np.int), y.astype(np.int), t, p], axis=-1)
+    events = np.stack([x.astype(int), y.astype(int), t, p], axis=-1)
     if args.possion:
         events = possioned_events(events,time_stamp_start,time_stamp_end,(240,304))
     volume = generate_event_volume(events,(240,304))
