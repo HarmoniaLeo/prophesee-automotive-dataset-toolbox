@@ -52,7 +52,7 @@ def possioned_events(events, start_time, end_time, shape, samel_window = 10000, 
     ts = []
     ps = []
     for n in np.unique(ns):
-        y_n, x_n, t_b, t_n, p_n = y[ns==n], x[ns==n], t_b[ns==n], t[ns==n], p[ns==n]
+        y_n, x_n, t_b_n, t_n, p_n = y[ns==n], x[ns==n], t_b[ns==n], t[ns==n], p[ns==n]
         y_n = np.repeat(y_n,n)
         x_n = np.repeat(x_n,n)
         t_b_n = np.repeat(t_b_n,n) * samel_window + start_time
