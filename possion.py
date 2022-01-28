@@ -44,4 +44,6 @@ def possioned_events(events, start_time, end_time, shape, possion_window = 1000)
     l = np.repeat(l[:,:,None,:],n,2)
     possion_result = np.random.poisson(l)
     locations, ns = denseToSparse(possion_result)
-    print(locations[:5],ns[:5])
+    y, x, t, p = locations[:,0], locations[:,1], locations[:,2], locations[:,3]
+    events = np.stack([x, y, start_time + t * time_window, p, ns])
+    print(events[:5])
