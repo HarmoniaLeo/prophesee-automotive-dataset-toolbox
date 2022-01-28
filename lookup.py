@@ -39,7 +39,7 @@ def generate_event_volume(events,shape,bins=5):
         img_pos = np.zeros((H * W , bins),dtype=float)
         img_neg = np.zeros((H * W , bins),dtype=float)
 
-    histogram = np.concatenate([img_neg, img_pos], -1).reshape((H, W, bins*2))
+    histogram = np.concatenate([img_neg, img_pos], -1).reshape((H, W, bins*2)).transpose(2,0,1)
 
     return histogram
 
