@@ -103,8 +103,7 @@ if __name__ == '__main__':
     start, v_type, ev_size, size = npy_events_tools.parse_header(f_bbox)
     dat_bbox = np.fromfile(f_bbox, dtype=v_type, count=-1)
     f_bbox.close()
-    unique_ts, unique_indices = np.unique(dat_bbox['t'], return_index=True)
-    target = dat_bbox[(unique_ts>=time_stamp_start)&(unique_ts<=time_stamp_end)]
+    target = dat_bbox[(dat_bbox['t']>=time_stamp_start)&(dat_bbox['t']<=time_stamp_end)]
     print(target)
     f_event = PSEELoader(event_file)
     f_event.seek_time(time_stamp_start)
