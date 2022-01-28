@@ -44,15 +44,21 @@ def possioned_events(events, start_time, end_time, shape, samel_window = 10000, 
     tick = time.time()
     n = samel_window//possion_window
     l = generate_event_histogram(events,shape, samel_window, start_time, end_time)/n
+    print("time1:", time.time() - tick)
+    tick = time.time()
     l = np.repeat(l[:,:,:,None,:],n,3)
     possion_result = np.random.poisson(l)
+    print("time2:", time.time() - tick)
+    tick = time.time()
     locations, ns = denseToSparse(possion_result)
+    print("time3:", time.time() - tick)
     y, x, t_b, t, p = locations[:,0], locations[:,1], locations[:,2], locations[:,3], locations[:,4]
     ys = []
     xs = []
     ts = []
     ps = []
     for n in np.unique(ns):
+        tick = time.time()
         y_n, x_n, t_b_n, t_n, p_n = y[ns==n], x[ns==n], t_b[ns==n], t[ns==n], p[ns==n]
         y_n = np.repeat(y_n,n)
         x_n = np.repeat(x_n,n)
@@ -64,10 +70,12 @@ def possioned_events(events, start_time, end_time, shape, samel_window = 10000, 
         xs.append(x_n)
         ts.append(t_n)
         ps.append(p_n)
+        print("time loop {0}:".format(n), time.time() - tick)
+    tick = time.time()
     y = np.concatenate(ys)
     x = np.concatenate(xs)
     t = np.concatenate(ts)
     p = np.concatenate(ps)
     events = np.stack([x, y, t, p],axis=-1)
-    print("time:", time.time() - tick)
+    print("time4:", time.time() - tick)
     return events
