@@ -38,6 +38,7 @@ def denseToSparse(dense_tensor):
     return locations, features
 
 def possioned_events(events, start_time, end_time, shape, possion_window = 1000):
+    print(len(events))
     time_window = end_time - start_time
     n = time_window//possion_window
     l = generate_event_histogram(events,shape)/n
@@ -47,4 +48,4 @@ def possioned_events(events, start_time, end_time, shape, possion_window = 1000)
     y, x, t, p = locations[:,0], locations[:,1], locations[:,2], locations[:,3]
     events = np.stack([x, y, start_time + t * time_window, p, ns],axis=-1)
     print(events[:5])
-    print(np.unique(events[:,-1]))
+    print(np.sum(events[:,-1]))
