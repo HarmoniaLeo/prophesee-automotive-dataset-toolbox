@@ -108,7 +108,7 @@ if __name__ == '__main__':
     f_event = PSEELoader(event_file)
     f_event.seek_time(time_stamp_start)
     events = f_event.load_delta_t(time_stamp_end - time_stamp_start)
-    x,y,t,p = events['x'], events['y'], events['ts'], events['p']
+    x,y,t,p = events['x'], events['y'], events['t'], events['p']
     events = np.stack([x.astype(np.int), y.astype(np.int), 0, t, p], axis=-1)
     volume = generate_event_volume(events,(240,304))
     visualizeVolume(volume,target,item,result_path)
