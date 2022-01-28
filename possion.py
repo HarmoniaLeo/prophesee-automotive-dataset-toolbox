@@ -57,7 +57,7 @@ def possioned_events(events, start_time, end_time, shape, samel_window = 10000, 
         x_n = np.repeat(x_n,n)
         t_b_n = np.repeat(t_b_n,n) * samel_window + start_time
         t_n = np.repeat(t_n,n)
-        t_n = np.random.uniform(t_n * time_window,(t_n+1) * time_window) + t_b_n
+        t_n = np.random.uniform(t_n * possion_window,(t_n+1) * possion_window) + t_b_n
         p_n = np.repeat(p_n,n)
         ys.append(y_n)
         xs.append(x_n)
