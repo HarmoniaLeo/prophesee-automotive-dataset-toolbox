@@ -1,5 +1,5 @@
 import numpy as np
-import scipy
+from scipy.stats import poisson
 import time
 
 def generate_event_histogram(events, shape, samel_window, start_time, end_time):
@@ -40,17 +40,17 @@ def denseToSparse(dense_tensor):
 
     return locations, features
 
-def possioned_events(events, start_time, end_time, shape, samel_window = 10000, possion_window = 1000):
+def poissoned_events(events, start_time, end_time, shape, samel_window = 10000, poisson_window = 1000):
     tick = time.time()
-    n = samel_window//possion_window
+    n = samel_window//poisson_window
     l = generate_event_histogram(events,shape, samel_window, start_time, end_time)/n
     print("time1:", time.time() - tick)
     tick = time.time()
     l = np.repeat(l[:,:,:,None,:],n,3)
-    possion_result = np.random.poisson(l)
+    poisson_result = np.random.poisson(l)
     print("time2:", time.time() - tick)
     tick = time.time()
-    locations, ns = denseToSparse(possion_result)
+    locations, ns = denseToSparse(poisson_result)
     print("time3:", time.time() - tick)
     y, x, t_b, t, p = locations[:,0], locations[:,1], locations[:,2], locations[:,3], locations[:,4]
     ys = []
@@ -64,7 +64,7 @@ def possioned_events(events, start_time, end_time, shape, samel_window = 10000, 
         x_n = np.repeat(x_n,n)
         t_b_n = np.repeat(t_b_n,n) * samel_window + start_time
         t_n = np.repeat(t_n,n)
-        t_n = np.random.uniform(t_n * possion_window,(t_n+1) * possion_window) + t_b_n
+        t_n = np.random.uniform(t_n * poisson_window,(t_n+1) * poisson_window) + t_b_n
         p_n = np.repeat(p_n,n)
         ys.append(y_n)
         xs.append(x_n)

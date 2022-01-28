@@ -4,7 +4,7 @@ from src.io import npy_events_tools
 import os
 import cv2
 import argparse
-from possion import possioned_events
+from poisson import poissoned_events
 
 def generate_event_volume(events,shape,bins=5):
     H, W = shape
@@ -88,12 +88,12 @@ if __name__ == '__main__':
     parser.add_argument('-item', type=str)
     parser.add_argument('-start', type=int)
     parser.add_argument('-end', type=int)
-    parser.add_argument('-possion', type=bool, default=False)
+    parser.add_argument('-poisson', type=bool, default=False)
 
     args = parser.parse_args()
 
-    if args.possion:
-        result_path = 'result_possion'
+    if args.poisson:
+        result_path = 'result_poisson'
     else:
         result_path = 'result_lookup'
     if not os.path.exists(result_path):
@@ -117,7 +117,7 @@ if __name__ == '__main__':
     events = f_event.load_delta_t(time_stamp_end - time_stamp_start)
     x,y,t,p = events['x'], events['y'], events['t'], events['p']
     events = np.stack([x.astype(int), y.astype(int), t, p], axis=-1)
-    if args.possion:
-        events = possioned_events(events,time_stamp_start,time_stamp_end,(240,304))
+    if args.poisson:
+        events = poissoned_events(events,time_stamp_start,time_stamp_end,(240,304))
     volume = generate_event_volume(events,(240,304))
     visualizeVolume(volume,target,item,result_path)
