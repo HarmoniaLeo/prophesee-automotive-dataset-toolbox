@@ -91,13 +91,14 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     result_path = 'result_lookup'
+    data_folder = 'test'
     item = args.item
     time_stamp_start = args.start
     time_stamp_end = args.end
-    data_path = "/data/ATIS_Automotive_Detection_Dataset/detection_dataset_duration_60s_ratio_1.0/test"
+    data_path = "/data/ATIS_Automotive_Detection_Dataset/detection_dataset_duration_60s_ratio_1.0"
     final_path = os.path.join(data_path,data_folder)
-    event_file = os.path.join(data_path, item+"_td.dat")
-    bbox_file = os.path.join(data_path, item+"_bbox.npy")
+    event_file = os.path.join(final_path, item+"_td.dat")
+    bbox_file = os.path.join(final_path, item+"_bbox.npy")
     f_bbox = open(bbox_file, "rb")
     start, v_type, ev_size, size = npy_events_tools.parse_header(f_bbox)
     dat_bbox = np.fromfile(f_bbox, dtype=v_type, count=-1)
