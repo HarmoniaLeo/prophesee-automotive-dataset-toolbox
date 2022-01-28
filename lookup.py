@@ -91,11 +91,10 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     result_path = 'result_lookup'
-    data_folder = 'test'
     item = args.item
     time_stamp_start = args.start
     time_stamp_end = args.end
-    data_path = "/data/ATIS_Automotive_Detection_Dataset/detection_dataset_duration_60s_ratio_1.0"
+    data_path = "/data/ATIS_Automotive_Detection_Dataset/detection_dataset_duration_60s_ratio_1.0/test"
     final_path = os.path.join(data_path,data_folder)
     event_file = os.path.join(data_path, item+"_td.dat")
     bbox_file = os.path.join(data_path, item+"_bbox.npy")
