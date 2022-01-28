@@ -41,7 +41,7 @@ def possioned_events(events, start_time, end_time, shape, possion_window = 1000)
     time_window = end_time - start_time
     n = time_window//possion_window
     l = generate_event_histogram(events,shape)/n
-    l = np.repeat(l[:,:,:,None],n,-1)
+    l = np.repeat(l[:,:,None,:],n,2)
     possion_result = np.random.poisson(l)
     locations, ns = denseToSparse(possion_result)
     print(locations[:5],ns[:5])
