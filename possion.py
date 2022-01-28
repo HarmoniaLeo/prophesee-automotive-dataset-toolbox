@@ -1,5 +1,6 @@
 import numpy as np
 import scipy
+import time
 
 def generate_event_histogram(events, shape, samel_window, start_time, end_time):
     """
@@ -40,7 +41,7 @@ def denseToSparse(dense_tensor):
     return locations, features
 
 def possioned_events(events, start_time, end_time, shape, samel_window = 10000, possion_window = 1000):
-    time_window = end_time - start_time
+    tick = time.time()
     n = samel_window//possion_window
     l = generate_event_histogram(events,shape, samel_window, start_time, end_time)/n
     l = np.repeat(l[:,:,:,None,:],n,3)
@@ -68,4 +69,5 @@ def possioned_events(events, start_time, end_time, shape, samel_window = 10000, 
     t = np.concatenate(ts)
     p = np.concatenate(ps)
     events = np.stack([x, y, t, p],axis=-1)
+    print("time:", time.time() - tick)
     return events
