@@ -17,7 +17,7 @@ def generate_event_histogram(events, shape, samel_window, start_time, end_time):
     img_neg = np.zeros((H * W * T,), dtype="float32")
 
     np.add.at(img_pos, t[p == 1] + T * x[p == 1] + W * T * y[p == 1], 1)
-    np.add.at(img_neg, t[p == 1] + T * x[p == 0] + W * T * y[p == 0], 1)
+    np.add.at(img_neg, t[p == 0] + T * x[p == 0] + W * T * y[p == 0], 1)
 
     histogram = np.stack([img_neg, img_pos], -1).reshape((H, W, T, 2))
 
