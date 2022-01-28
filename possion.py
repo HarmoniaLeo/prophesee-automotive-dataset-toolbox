@@ -30,10 +30,10 @@ def denseToSparse(dense_tensor):
     :return features: NumberOfActive x FeatureDimension
     """
     non_zero_indices = np.nonzero(np.abs(dense_tensor).sum(axis=-1))
-    print(non_zero_indices)
-    locations = np.concatenate((non_zero_indices[:, 1:], non_zero_indices[:, 0, None]), axis=-1)
+    locations = np.stack(non_zero_indices, axis=-1)
 
-    select_indices = non_zero_indices.split(1, axis=1)
+    select_indices = locations.split(1, axis=1)
+    print(locations,select_indices)
     features = np.squeeze(dense_tensor[select_indices], axis=-2)
 
     return locations, features
