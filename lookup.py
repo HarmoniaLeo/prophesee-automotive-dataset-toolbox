@@ -4,6 +4,7 @@ from src.io import npy_events_tools
 import os
 import cv2
 import argparse
+from possion import possioned_events
 
 def generate_event_volume(events,shape,bins=5):
     H, W = shape
@@ -87,10 +88,14 @@ if __name__ == '__main__':
     parser.add_argument('-item', type=str)
     parser.add_argument('-start', type=int)
     parser.add_argument('-end', type=int)
+    parser.add_argument('-possion', type=bool, default=False)
 
     args = parser.parse_args()
 
-    result_path = 'result_lookup'
+    if args.possion:
+        result_path = 'result_lookup'
+    else:
+        result_path = 'result_possion'
     if not os.path.exists(result_path):
         os.mkdir(result_path)
     data_folder = 'test'
@@ -112,5 +117,7 @@ if __name__ == '__main__':
     events = f_event.load_delta_t(time_stamp_end - time_stamp_start)
     x,y,t,p = events['x'], events['y'], events['t'], events['p']
     events = np.stack([x.astype(np.int), y.astype(np.int), t, p], axis=-1)
+    if args.possion:
+        events = possioned_events(events)
     volume = generate_event_volume(events,(240,304))
     visualizeVolume(volume,target,item,result_path)
