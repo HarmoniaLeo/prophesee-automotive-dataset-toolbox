@@ -51,7 +51,7 @@ def possioned_events(events, start_time, end_time, shape, possion_window = 1000)
     ts = []
     ps = []
     for n in np.unique(ns):
-        y_n, x_n, t_n, p_n = events[ns==n]
+        y_n, x_n, t_n, p_n = y[ns==n], x[ns==n], t[ns==n], p[ns==n]
         y_n = np.repeat(y_n,n)
         x_n = np.repeat(x_n,n)
         t_n = np.repeat(t_n,n)
