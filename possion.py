@@ -47,3 +47,4 @@ def possioned_events(events, start_time, end_time, shape, possion_window = 1000)
     y, x, t, p = locations[:,0], locations[:,1], locations[:,2], locations[:,3]
     events = np.stack([x, y, start_time + t * time_window, p, ns],axis=-1)
     print(events[:5])
+    print(events[:,-1].unique())
