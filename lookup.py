@@ -118,6 +118,6 @@ if __name__ == '__main__':
     x,y,t,p = events['x'], events['y'], events['t'], events['p']
     events = np.stack([x.astype(np.int), y.astype(np.int), t, p], axis=-1)
     if args.possion:
-        events = possioned_events(events,time_stamp_start,time_stamp_end)
+        events = possioned_events(events,time_stamp_start,time_stamp_end,(240,304))
     volume = generate_event_volume(events,(240,304))
     visualizeVolume(volume,target,item,result_path)

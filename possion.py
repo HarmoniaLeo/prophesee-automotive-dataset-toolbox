@@ -37,10 +37,10 @@ def denseToSparse(dense_tensor):
 
     return locations, features
 
-def possioned_events(events, start_time, end_time, possion_window = 1000):
+def possioned_events(events, start_time, end_time, shape, possion_window = 1000):
     time_window = end_time - start_time
     n = time_window//possion_window
-    l = generate_event_histogram(events)/n
+    l = generate_event_histogram(events,shape)/n
     l = np.repeat(l[:,:,:,None],n,-1)
     possion_result = np.random.poisson(l)
     locations, ns = denseToSparse(possion_result)
