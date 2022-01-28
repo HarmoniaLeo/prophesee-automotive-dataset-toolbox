@@ -53,11 +53,11 @@ def draw_bboxes(img, boxes, dt = 0, labelmap=LABELMAP):
     colors = [tuple(*item) for item in colors.tolist()]
 
     for i in range(boxes.shape[0]):
-        pt1 = (int(boxes[i,1]), int(boxes[i,2]))
-        size = (int(boxes[i,3]), int(boxes[i,4]))
+        pt1 = (int(boxes[i][1]), int(boxes[i][2]))
+        size = (int(boxes[i][3]), int(boxes[i][4]))
         pt2 = (pt1[0] + size[0], pt1[1] + size[1])
-        score = boxes[i,-2]
-        class_id = boxes[i,-3]
+        score = boxes[i][-2]
+        class_id = boxes[i][-3]
         class_name = labelmap[int(class_id)]
         color = colors[(dt+1) * 60]
         center = ((pt1[0] + pt2[0]) // 2, (pt1[1] + pt2[1]) // 2)
