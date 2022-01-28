@@ -46,6 +46,25 @@ def possioned_events(events, start_time, end_time, shape, possion_window = 1000)
     possion_result = np.random.poisson(l)
     locations, ns = denseToSparse(possion_result)
     y, x, t, p = locations[:,0], locations[:,1], locations[:,2], locations[:,3]
-    events = np.stack([x, y, start_time + t * time_window, p, ns],axis=-1)
-    print(events[:5])
-    print(np.sum(events[:,-1]))
+    ys = []
+    xs = []
+    ts = []
+    ps = []
+    for n in np.unique(ns):
+        y_n, x_n, t_n, p_n = events[ns==n]
+        y_n = np.repeat(y_n,n)
+        x_n = np.repeat(x_n,n)
+        t_n = np.repeat(t_n,n)
+        t_n = np.random.uniform(start_time + t_n * time_window,start_time + (t_n+1) * time_window)
+        p_n = np.repeat(p_n,n)
+        ys.append(y_n)
+        xs.append(x_n)
+        ts.append(t_n)
+        ps.append(p_n)
+    y = np.concatenate(ys)
+    x = np.concatenate(xs)
+    t = np.concatenate(ts)
+    p = np.concatenate(ps)
+    events = np.stack([x, y, t, p],axis=-1)
+    print(len(events))
+    return events
