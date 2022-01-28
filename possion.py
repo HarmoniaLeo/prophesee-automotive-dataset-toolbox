@@ -32,7 +32,7 @@ def denseToSparse(dense_tensor):
     non_zero_indices = np.nonzero(np.abs(dense_tensor).sum(axis=-1))
     locations = np.stack(non_zero_indices, axis=-1)
 
-    select_indices = np.array(np.split(locations,range(len(1,locations))))
+    select_indices = np.array(np.split(locations,range(1,len(locations))))
     print(select_indices)
     features = dense_tensor[select_indices]
 
