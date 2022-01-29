@@ -41,6 +41,7 @@ def denseToSparse(dense_tensor):
     return locations, features
 
 def poissoned_events(events, start_time, end_time, shape, samel_window = 10000, poisson_window = 1000):
+    print(len(events))
     tick = time.time()
     n = samel_window//poisson_window
     l = generate_event_histogram(events,shape, samel_window, start_time, end_time)/n
@@ -79,4 +80,5 @@ def poissoned_events(events, start_time, end_time, shape, samel_window = 10000, 
     p = np.concatenate(ps)
     events = np.stack([x, y, t, p],axis=-1)
     print("time4:", time.time() - tick)
+    print(len(events))
     return events

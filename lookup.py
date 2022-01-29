@@ -69,10 +69,10 @@ def draw_bboxes(img, boxes, dt = 0, labelmap=LABELMAP):
 def visualizeVolume(volume,gt,filename,path):
     img = 127 * np.ones((volume.shape[1], volume.shape[2], 3), dtype=np.uint8)
     for i in range(0,volume.shape[0]//2):
-        c_p = volume[i]
+        c_p = volume[i+volume.shape[0]//2]
         c_p = 127 * c_p / np.percentile(c_p,0.9)
         c_p = np.where(c_p>127, 127, c_p)
-        c_n = volume[i+volume.shape[0]//2]
+        c_n = volume[i]
         c_n = 127 * c_n / np.percentile(c_n,0.9)
         c_n = np.where(c_n>127, 127, c_n)
         img_s = img + c_p[:,:,None].astype(np.uint8) - c_n[:,:,None].astype(np.uint8)
