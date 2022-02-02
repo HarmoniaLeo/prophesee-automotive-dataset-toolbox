@@ -49,8 +49,7 @@ def poissoned_events(events, start_time, end_time, shape, samel_window = 1000, p
     tick = time.time()
     #l = np.repeat(l[:,:,:,None,:],n,3)
     gamma = 0.2
-    poisson_result = np.random.poisson(l * gamma, list(l.shape) + [n])
-    poisson_result = poisson.transpose(0,1,2,4,3)
+    poisson_result = np.random.poisson(l[:,:,:,None,:] * gamma, (l.shape[0],l.shape[1],l.shape[2],n,l.shape[3]))
     print("time2:", time.time() - tick)
     tick = time.time()
     locations, ns = denseToSparse(poisson_result)
