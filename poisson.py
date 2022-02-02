@@ -47,9 +47,10 @@ def poissoned_events(events, start_time, end_time, shape, samel_window = 10000, 
     l = generate_event_histogram(events,shape, samel_window, start_time, end_time)/n
     print("time1:", time.time() - tick)
     tick = time.time()
-    #l = np.repeat(l[:,:,:,None,:],n,3)
+    l = np.repeat(l[:,:,:,None,:],n,3)
     gamma = 0.2
-    poisson_result = np.random.poisson(l[:,:,:,None,:] * gamma, (l.shape[0],l.shape[1],l.shape[2],n,l.shape[3]))
+    poisson_result = np.random.poisson(l * gamma)
+    #poisson_result = np.random.poisson(l[:,:,:,None,:] * gamma, (l.shape[0],l.shape[1],l.shape[2],n,l.shape[3]))
     print("time2:", time.time() - tick)
     tick = time.time()
     locations, ns = denseToSparse(poisson_result)
