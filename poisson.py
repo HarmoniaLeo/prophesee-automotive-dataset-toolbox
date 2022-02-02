@@ -40,7 +40,7 @@ def denseToSparse(dense_tensor):
 
     return locations, features
 
-def poissoned_events(events, start_time, end_time, shape, samel_window = 1000, poisson_window = 100):
+def poissoned_events(events, start_time, end_time, shape, samel_window = 10000, poisson_window = 1000):
     print(len(events))
     tick = time.time()
     n = samel_window//poisson_window
