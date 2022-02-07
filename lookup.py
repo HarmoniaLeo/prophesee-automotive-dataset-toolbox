@@ -88,6 +88,7 @@ if __name__ == '__main__':
     parser.add_argument('-item', type=str)
     parser.add_argument('-start', type=int)
     parser.add_argument('-end', type=int)
+    parser.add_argument('-bins', type=int, default=5)
     parser.add_argument('-poisson', type=bool, default=False)
     parser.add_argument('-upper_thr', type=float, default=0.9)
 
@@ -120,5 +121,5 @@ if __name__ == '__main__':
     events = np.stack([x.astype(int), y.astype(int), t, p], axis=-1)
     if args.poisson:
         events = poissoned_events(events,time_stamp_start,time_stamp_end,(240,304))
-    volume = generate_event_volume(events,(240,304))
+    volume = generate_event_volume(events,(240,304),args.bins)
     visualizeVolume(volume,target,item,result_path,args.upper_thr)
