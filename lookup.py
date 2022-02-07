@@ -66,14 +66,14 @@ def draw_bboxes(img, boxes, dt = 0, labelmap=LABELMAP):
         cv2.putText(img, class_name, (center[0], pt2[1] - 1), cv2.FONT_HERSHEY_SIMPLEX, 0.5, color)
         cv2.putText(img, str(score), (center[0], pt1[1] - 1), cv2.FONT_HERSHEY_SIMPLEX, 0.5, color)
 
-def visualizeVolume(volume,gt,filename,path):
+def visualizeVolume(volume,gt,filename,path,pct):
     img = 127 * np.ones((volume.shape[1], volume.shape[2], 3), dtype=np.uint8)
     for i in range(0,volume.shape[0]//2):
         c_p = volume[i+volume.shape[0]//2]
-        c_p = 127 * c_p / np.percentile(c_p,0.9)
+        c_p = 127 * c_p / np.percentile(c_p,pct)
         c_p = np.where(c_p>127, 127, c_p)
         c_n = volume[i]
-        c_n = 127 * c_n / np.percentile(c_n,0.9)
+        c_n = 127 * c_n / np.percentile(c_n,pct)
         c_n = np.where(c_n>127, 127, c_n)
         img_s = img + c_p[:,:,None].astype(np.uint8) - c_n[:,:,None].astype(np.uint8)
         draw_bboxes(img_s,gt)
@@ -89,6 +89,7 @@ if __name__ == '__main__':
     parser.add_argument('-start', type=int)
     parser.add_argument('-end', type=int)
     parser.add_argument('-poisson', type=bool, default=False)
+    parser.add_argument('-upper_thr', type=float, default=0.9)
 
     args = parser.parse_args()
 
@@ -120,4 +121,4 @@ if __name__ == '__main__':
     if args.poisson:
         events = poissoned_events(events,time_stamp_start,time_stamp_end,(240,304))
     volume = generate_event_volume(events,(240,304))
-    visualizeVolume(volume,target,item,result_path)
+    visualizeVolume(volume,target,item,result_path,args.upper_thr)

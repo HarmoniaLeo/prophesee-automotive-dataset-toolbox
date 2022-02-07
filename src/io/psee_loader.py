@@ -223,6 +223,7 @@ class PSEELoader(object):
         self.seek_event(low + final_index)
         self.current_time = final_time
         self.done = self._file.tell() >= self._end
+        return low + final_index
 
     def total_time(self):
         """
