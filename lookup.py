@@ -119,6 +119,7 @@ if __name__ == '__main__':
     events = f_event.load_delta_t(time_stamp_end - time_stamp_start)
     x,y,t,p = events['x'], events['y'], events['t'], events['p']
     events = np.stack([x.astype(int), y.astype(int), t, p], axis=-1)
+    print(len(events))
     if args.poisson:
         events = poissoned_events(events,time_stamp_start,time_stamp_end,(240,304))
     volume = generate_event_volume(events,(240,304),args.bins)
