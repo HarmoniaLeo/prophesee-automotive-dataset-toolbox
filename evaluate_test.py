@@ -35,8 +35,8 @@ pred2=np.array([
 #result_boxes_list = [reformat_boxes(p) for p in result_boxes_list]
 #gt_boxes_list = [reformat_boxes(p) for p in gt_boxes_list]
 
-gt_boxes_list=[]
-result_boxes_list=[]
+gt_boxes_list=[gts1,gts2]
+result_boxes_list=[pred1,pred2]
 
 # For fair comparison with paper results
 gt_boxes_list = map(filter_boxes, gt_boxes_list)
