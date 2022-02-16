@@ -29,8 +29,8 @@ if __name__ == '__main__':
 
     f = h5py.File(h5_file, 'w')
 
-    time_upperbound = -100000
-    count_upperbound = 0
+    count_upperbound = -1
+    time_upperbound = -1000000
     id = -1
     for bbox_count,unique_time in enumerate(unique_ts):
         if (unique_time <= 500000):
@@ -44,9 +44,12 @@ if __name__ == '__main__':
         start_time = f_event.current_time
         bins = (end_time - start_time)//50000 + 1
         start_time = end_time - bins * 50000
-        if start_time < 0:
-            start_count = 0
+        
         if start_time > time_upperbound:
+            if start_time < 0:
+                start_count = f_event.seek_time(0)
+            else:
+                start_count = f_event.seek_time(start_time)
             id += 1
             events_all = f_event.load_n_events(end_count - start_count)
             f.create_dataset("events/{0}".format(id), data = events_all, maxshape=(None, ), chunks=True)
@@ -54,6 +57,7 @@ if __name__ == '__main__':
             bboxes = dat_bbox[indices]
             f.create_dataset("bboxes/{0}".format(id), data = bboxes, maxshape=(None, ), chunks=True)
         else:
+            f_event.seek_event(count_upperbound)
             events_all = f_event.load_n_events(end_count - count_upperbound)
             f["events/{0}".format(id)].resize((f["events/{0}".format(id)].shape[0] + len(events_all),))
             f["events/{0}".format(id)][-len(events_all):] = events_all
