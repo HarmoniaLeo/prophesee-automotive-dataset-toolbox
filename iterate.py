@@ -44,4 +44,4 @@ if __name__ == '__main__':
         start_time = end_time - bins * 50000
         events_all = f_event.load_n_events(end_count - start_count)
         total_time += time.time() - tick
-    print(total_time//len(unique_ts))
+    print(total_time/len(unique_ts))
