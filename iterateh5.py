@@ -17,21 +17,16 @@ if __name__ == '__main__':
     item = args.item
     data_path = "/data/ATIS_Automotive_Detection_Dataset/detection_dataset_duration_60s_ratio_1.0"
     final_path = os.path.join(data_path,data_folder)
-    event_file = os.path.join(final_path, item+"_td.dat")
-    bbox_file = os.path.join(final_path, item+"_bbox.npy")
-    f_bbox = open(bbox_file, "rb")
-    start, v_type, ev_size, size = npy_events_tools.parse_header(f_bbox)
-    dat_bbox = np.fromfile(f_bbox, dtype=v_type, count=-1)
-    f_bbox.close()
-    unique_ts, unique_indices = np.unique(dat_bbox['t'], return_index=True)
+    h5_file = os.path.join(final_path, item+"_h5.h5")
+
+    f = h5py.File(h5_file, 'w')
 
     total_time = 0
-    for bbox_count,unique_time in enumerate(unique_ts):
+    for idx,data in enumerate(f.keys()):
         tick = time.time()
         if (unique_time <= 500000):
             continue
         end_time = unique_time
-        f_event = PSEELoader(event_file)
         end_count = f_event.seek_time(end_time)
         start_count = end_count - 200000
         if start_count < 0:
