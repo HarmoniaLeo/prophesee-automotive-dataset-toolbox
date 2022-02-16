@@ -49,21 +49,17 @@ if __name__ == '__main__':
         if start_time > time_upperbound:
             id += 1
             events_all = f_event.load_n_events(end_count - start_count)
-            x,y,t,p = events_all['x'], events_all['y'], events_all['t'], events_all['p']
-            events_all = np.stack([x.astype(int), y.astype(int), t, p], axis=-1)
-            f.create_dataset("events/{0}".format(id), data = events_all, maxshape=(None, events_all.shape[1]), chunks=True)
+            f.create_dataset("events/{0}".format(id), data = events_all, maxshape=(None, ), chunks=True)
             indices = (dat_bbox['t'] == unique_time)
             bboxes = dat_bbox[indices]
-            f.create_dataset("bboxes/{0}".format(id), data = bboxes, maxshape=(None, bboxes.shape[1]), chunks=True)
+            f.create_dataset("bboxes/{0}".format(id), data = bboxes, maxshape=(None, ), chunks=True)
         else:
             events_all = f_event.load_n_events(end_count - count_upperbound)
-            x,y,t,p = events_all['x'], events_all['y'], events_all['t'], events_all['p']
-            events_all = np.stack([x.astype(int), y.astype(int), t, p], axis=-1)
-            f["events/{0}".format(id)].resize((f["events/{0}".format(id)].shape[0] + len(events_all),events_all.shape[1]))
+            f["events/{0}".format(id)].resize((f["events/{0}".format(id)].shape[0] + len(events_all),))
             f["events/{0}".format(id)][-len(events_all):] = events_all
             indices = (unique_ts == unique_time)
             bboxes = dat_bbox[indices]
-            f["bboxes/{0}".format(id)].resize((f["bboxes/{0}".format(id)].shape[0] + len(bboxes),bboxes.shape[1]))
+            f["bboxes/{0}".format(id)].resize((f["bboxes/{0}".format(id)].shape[0] + len(bboxes),))
             f["bboxes/{0}".format(id)][-len(bboxes):] = bboxes
         time_upperbound = end_time
         count_upperbound = end_count
