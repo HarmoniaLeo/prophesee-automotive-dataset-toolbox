@@ -43,6 +43,8 @@ if __name__ == '__main__':
                     continue
                 end_time = unique_time
                 end_count = f_event.seek_time(end_time)
+                if end_count is None:
+                    continue
                 start_count = end_count - 200000
                 if start_count < 0:
                     start_count = 0
