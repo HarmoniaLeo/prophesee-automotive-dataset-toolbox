@@ -28,4 +28,5 @@ if __name__ == '__main__':
         events = f1["events/{0}".format(idx)]
         bboxes = f1["bboxes/{0}".format(idx)]
         total_time += time.time() - tick
+        print(events[:5],events.shape,bboxes[:5],bboxes.shape)
     print(total_time/f.attrs["total"])
