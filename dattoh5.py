@@ -27,7 +27,7 @@ if __name__ == '__main__':
 
     f_event = PSEELoader(event_file)
 
-    f = h5py.File(h5_file, 'r')
+    f = h5py.File(h5_file, 'w')
 
     time_upperbound = -100000
     count_upperbound = 0
