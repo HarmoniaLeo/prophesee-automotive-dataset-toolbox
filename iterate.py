@@ -31,6 +31,10 @@ if __name__ == '__main__':
         if (unique_time <= 500000):
             continue
         end_time = unique_time
+        f_bbox = open(bbox_file, "rb")
+        start, v_type, ev_size, size = npy_events_tools.parse_header(f_bbox)
+        dat_bbox = np.fromfile(f_bbox, dtype=v_type, count=-1)
+        f_bbox.close()
         f_event = PSEELoader(event_file)
         end_count = f_event.seek_time(end_time)
         start_count = end_count - 200000
