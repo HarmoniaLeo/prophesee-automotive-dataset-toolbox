@@ -53,11 +53,10 @@ if __name__ == '__main__':
                 
                 if start_time > time_upperbound:
                     if start_time < 0:
-                        start_count = f_event.seek_time(0)
+                        start_count = 0
+                        f_event.seek_event(0)
                     else:
                         start_count = f_event.seek_time(start_time)
-                    if start_count is None:
-                        print(start_time)
                     id += 1
                     events_all = f_event.load_n_events(end_count - start_count)
                     f.create_dataset("events/{0}".format(id), data = events_all, maxshape=(None, ), chunks=True)
