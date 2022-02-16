@@ -65,10 +65,10 @@ if __name__ == '__main__':
                     f.create_dataset("bboxes/{0}".format(id), data = bboxes, maxshape=(None, ), chunks=True)
                 else:
                     f_event.seek_event(count_upperbound)
-                    print(end_time,end_count,count_upperbound)
                     events_all = f_event.load_n_events(end_count - count_upperbound)
-                    f["events/{0}".format(id)].resize((f["events/{0}".format(id)].shape[0] + len(events_all),))
-                    f["events/{0}".format(id)][-len(events_all):] = events_all
+                    if len(events_all) > 0:
+                        f["events/{0}".format(id)].resize((f["events/{0}".format(id)].shape[0] + len(events_all),))
+                        f["events/{0}".format(id)][-len(events_all):] = events_all
                     indices = (dat_bbox['t'] == unique_time)
                     bboxes = dat_bbox[indices]
                     f["bboxes/{0}".format(id)].resize((f["bboxes/{0}".format(id)].shape[0] + len(bboxes),))
