@@ -37,6 +37,6 @@ if __name__ == '__main__':
         f_bbox.close()
         f_event = PSEELoader(event_file)
         end_count = f_event.seek_time(end_time)
-        events_all = f_event.load_n_events(50000)
+        events_all = f_event.load_delta_t(50000)
         total_time += time.time() - tick
     print(total_time/len(unique_ts))
