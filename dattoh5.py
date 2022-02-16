@@ -63,4 +63,5 @@ if __name__ == '__main__':
             f["bboxes/{0}".format(id)][-len(bboxes):] = bboxes
         time_upperbound = end_time
         count_upperbound = end_count
+    f.attrs["total"] = id + 1
     f.close()
