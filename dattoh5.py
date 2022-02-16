@@ -57,7 +57,7 @@ if __name__ == '__main__':
             events_all = f_event.load_n_events(end_count - count_upperbound)
             f["events/{0}".format(id)].resize((f["events/{0}".format(id)].shape[0] + len(events_all),))
             f["events/{0}".format(id)][-len(events_all):] = events_all
-            indices = (unique_ts == unique_time)
+            indices = (dat_bbox['t'] == unique_time)
             bboxes = dat_bbox[indices]
             f["bboxes/{0}".format(id)].resize((f["bboxes/{0}".format(id)].shape[0] + len(bboxes),))
             f["bboxes/{0}".format(id)][-len(bboxes):] = bboxes
