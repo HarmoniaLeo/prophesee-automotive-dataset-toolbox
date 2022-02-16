@@ -52,7 +52,7 @@ if __name__ == '__main__':
             x,y,t,p = events_all['x'], events_all['y'], events_all['t'], events_all['p']
             events_all = np.stack([x.astype(int), y.astype(int), t, p], axis=-1)
             f.create_dataset("events/{0}".format(id), data = events_all, maxshape=(None, events_all.shape[1]), chunks=True)
-            indices = (unique_ts == unique_time)
+            indices = (dat_bbox['t'] == unique_time)
             bboxes = dat_bbox[indices]
             f.create_dataset("bboxes/{0}".format(id), data = bboxes, maxshape=(None, bboxes.shape[1]), chunks=True)
         else:
