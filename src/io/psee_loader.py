@@ -214,7 +214,7 @@ class PSEELoader(object):
             else:
                 self.current_time = final_time
                 self.done = self._file.tell() >= self._end
-                return
+                return middle
         # we now know that it is between low and high
         self.seek_event(low)
         final_buffer = np.fromfile(self._file, dtype=self._dtype, count=high - low)['t']
