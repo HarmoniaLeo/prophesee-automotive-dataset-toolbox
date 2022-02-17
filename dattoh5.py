@@ -60,6 +60,7 @@ if __name__ == '__main__':
                     else:
                         start_count = f_event.seek_time(start_time)
                     id += 1
+                    print(start_time,start_count)
                     events_all = f_event.load_n_events(end_count - start_count)
                     f.create_dataset("events/{0}".format(id), data = events_all, maxshape=(None, ), chunks=True)
                     indices = (dat_bbox['t'] == unique_time)
