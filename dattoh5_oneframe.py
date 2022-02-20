@@ -53,7 +53,6 @@ if __name__ == '__main__':
                     start_count = f_event.seek_time(start_time)
                 events_all = f_event.load_n_events(end_count - start_count)
                 events_all  = rfn.structured_to_unstructured(events_all)[:, [1, 2, 0, 3]]
-                print(events_all[:,0].max(),events_all[:,1].max(),events_all[:,2].max(),events_all[:,3].max())
                 f.create_dataset("events/{0}".format(id), data = events_all, maxshape=(None, 4), chunks=True)
                 f["events/{0}".format(id)].attrs["file_name"] = item
                 indices = (dat_bbox['t'] == unique_time)

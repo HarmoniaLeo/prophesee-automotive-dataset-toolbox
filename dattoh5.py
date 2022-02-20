@@ -53,7 +53,6 @@ if __name__ == '__main__':
                     start_count = f_event.seek_time(start_time)
                 events_all = f_event.load_n_events(end_count - start_count)
                 events_all  = rfn.structured_to_unstructured(events_all)[:, [1, 2, 0, 3]]
-                print(events_all[:,0].max(),events_all[:,1].max(),events_all[:,2].max(),events_all[:,3].max())
                 f.create_dataset("events/{0}".format(id), data = events_all, maxshape=(None, 4), chunks=True)
                 f["events/{0}".format(id)].attrs["file_name"] = item
                 indices = (dat_bbox['t'] == unique_time)
@@ -114,7 +113,7 @@ if __name__ == '__main__':
                     start_count = f_event.seek_time(start_time)
                 id += 1
                 events_all = f_event.load_n_events(end_count - start_count)
-                events_all  = rfn.structured_to_unstructured(events_all)[:, [0, 1, 2, 3]]
+                events_all  = rfn.structured_to_unstructured(events_all)[:, [1, 2, 0, 3]]
                 f.create_dataset("events/{0}".format(id), data = events_all, maxshape=(None, 4), chunks=True)
                 f["events/{0}".format(id)].attrs["file_name"] = item
                 indices = (dat_bbox['t'] == unique_time)
@@ -125,7 +124,7 @@ if __name__ == '__main__':
             else:
                 f_event.seek_event(count_upperbound)
                 events_all = f_event.load_n_events(end_count - count_upperbound)
-                events_all  = rfn.structured_to_unstructured(events_all)[:, [0, 1, 2, 3]]
+                events_all  = rfn.structured_to_unstructured(events_all)[:, [1, 2, 0, 3]]
                 if len(events_all) > 0:
                     f["events/{0}".format(id)].resize((f["events/{0}".format(id)].shape[0] + len(events_all), 4))
                     f["events/{0}".format(id)][-len(events_all):] = events_all
