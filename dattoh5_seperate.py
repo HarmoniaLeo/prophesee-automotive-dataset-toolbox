@@ -25,7 +25,7 @@ if __name__ == '__main__':
             item = item[:-7]
             event_file = os.path.join(final_path, item+"_td.dat")
             bbox_file = os.path.join(final_path, item+"_bbox.npy")
-            h5_file = os.path.join(final_output_path,item+"_h5.npy")
+            h5_file = os.path.join(final_output_path,item+"_h5.h5")
             f = h5py.File(h5_file, 'w')
             
             f_bbox = open(bbox_file, "rb")
