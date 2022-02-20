@@ -15,7 +15,7 @@ if __name__ == '__main__':
     data_path = "/data/ATIS_Automotive_Detection_Dataset/detection_dataset_duration_60s_ratio_1.0"
     output_path = "/data/ATIS_h5"
 
-    for data_folder in ['val']:
+    for data_folder in ['train','val','test']:
         print(data_folder)
         final_path = os.path.join(data_path,data_folder)
         final_output_path = os.path.join(output_path,data_folder)
