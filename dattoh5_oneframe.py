@@ -6,6 +6,7 @@ import os
 import numpy as np
 from src.io.psee_loader import PSEELoader
 import tqdm
+from numpy.lib import recfunctions as rfn
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(
@@ -51,11 +52,13 @@ if __name__ == '__main__':
                 else:
                     start_count = f_event.seek_time(start_time)
                 events_all = f_event.load_n_events(end_count - start_count)
-                f.create_dataset("events/{0}".format(id), data = events_all, maxshape=(None, ), chunks=True)
+                events_all  = rfn.structured_to_unstructured(events_all)[:, [0, 1, 2, 3]]
+                f.create_dataset("events/{0}".format(id), data = events_all, maxshape=(None, 4), chunks=True)
                 f["events/{0}".format(id)].attrs["file_name"] = item
                 indices = (dat_bbox['t'] == unique_time)
                 bboxes = dat_bbox[indices]
-                f.create_dataset("bboxes/{0}".format(id), data = bboxes, maxshape=(None, ), chunks=True)
+                bboxes = rfn.structured_to_unstructured(bboxes)[:, [1, 2, 3, 4, 5, 0, 6, 7]]
+                f.create_dataset("bboxes/{0}".format(id), data = bboxes, maxshape=(None, 8), chunks=True)
                 f["bboxes/{0}".format(id)].attrs["file_name"] = item
                 id += 1
             pbar.update(1)
