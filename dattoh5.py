@@ -59,7 +59,7 @@ if __name__ == '__main__':
                 f["bboxes/{0}".format(id)].attrs["file_name"] = item
                 id += 1
             pbar.update(1)
-        f.attrs["total"] = id + 1
+        f.attrs["total"] = id
         f.close()
         pbar.close()
     
