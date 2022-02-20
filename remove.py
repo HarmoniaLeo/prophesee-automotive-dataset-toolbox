@@ -9,3 +9,5 @@ for data_folder in ['train','test']:
     pbar = tqdm.tqdm(total=len(files), unit='File', unit_scale=True)
     for item in files:
         os.remove(os.path.join(final_path,item))
+        pbar.update(1)
+    pbar.close()
