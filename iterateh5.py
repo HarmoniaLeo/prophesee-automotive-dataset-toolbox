@@ -14,19 +14,19 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     data_folder = 'test'
-    item = args.item
-    data_path = "/data/ATIS_Automotive_Detection_Dataset/detection_dataset_duration_60s_ratio_1.0"
-    final_path = os.path.join(data_path,data_folder)
-    h5_file = os.path.join(final_path, item+"_h5.h5")
+    #item = args.item
+    #data_path = "/data/ATIS_Automotive_Detection_Dataset/detection_dataset_duration_60s_ratio_1.0"
+    #final_path = os.path.join(data_path,data_folder)
+    #h5_file = os.path.join(final_path, item+"_h5.h5")
+    h5_file = "/data/ATIS_h5/train.h5"
 
     f = h5py.File(h5_file, 'r')
 
     total_time = 0
-    for idx in range(f.attrs["total"]):
+    for idx in range(1000):
         tick = time.time()
         f1 = h5py.File(h5_file, 'r')
         events = f1["events/{0}".format(idx)]
         bboxes = f1["bboxes/{0}".format(idx)]
         total_time += time.time() - tick
-        print(events[:5],events.shape,bboxes[:5],bboxes.shape)
     print(total_time/f.attrs["total"])
