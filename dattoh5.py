@@ -20,12 +20,15 @@ if __name__ == '__main__':
         final_path = os.path.join(data_path,data_folder)
         final_output_path = os.path.join(output_path,data_folder)
         files = [item for item in os.listdir(final_path) if ".dat" in item]
+        h5_file = final_output_path + ".h5"
+        f = h5py.File(h5_file, 'w')
+        id = 0
         pbar = tqdm.tqdm(total=len(files), unit='File', unit_scale=True)
         for item in files:
             item = item[:-7]
             event_file = os.path.join(final_path, item+"_td.dat")
             bbox_file = os.path.join(final_path, item+"_bbox.npy")
-            h5_file = os.path.join(final_output_path, item+"_h5.h5")
+            
             f_bbox = open(bbox_file, "rb")
             start, v_type, ev_size, size = npy_events_tools.parse_header(f_bbox)
             dat_bbox = np.fromfile(f_bbox, dtype=v_type, count=-1)
@@ -33,8 +36,6 @@ if __name__ == '__main__':
             unique_ts, unique_indices = np.unique(dat_bbox['t'], return_index=True)
 
             f_event = PSEELoader(event_file)
-
-            f = h5py.File(h5_file, 'w')
             
             for bbox_count,unique_time in enumerate(unique_ts):
                 if (data_folder == 'val') and (unique_time <= 500000):
@@ -50,13 +51,16 @@ if __name__ == '__main__':
                 else:
                     start_count = f_event.seek_time(start_time)
                 events_all = f_event.load_n_events(end_count - start_count)
-                f.create_dataset("events/{0}".format(bbox_count), data = events_all, maxshape=(None, ), chunks=True)
+                f.create_dataset("events/{0}".format(id), data = events_all, maxshape=(None, ), chunks=True)
+                f["events/{0}".format(id)].attrs["file_name"] = item
                 indices = (dat_bbox['t'] == unique_time)
                 bboxes = dat_bbox[indices]
-                f.create_dataset("bboxes/{0}".format(bbox_count), data = bboxes, maxshape=(None, ), chunks=True)
-            f.attrs["total"] = len(unique_ts)
-            f.close()
+                f.create_dataset("bboxes/{0}".format(id), data = bboxes, maxshape=(None, ), chunks=True)
+                f["bboxes/{0}".format(id)].attrs["file_name"] = item
+                id += 1
             pbar.update(1)
+        f.attrs["total"] = id + 1
+        f.close()
         pbar.close()
     
     data_folder = "test"
@@ -64,12 +68,15 @@ if __name__ == '__main__':
     final_path = os.path.join(data_path,data_folder)
     final_output_path = os.path.join(output_path,data_folder)
     files = [item for item in os.listdir(final_path) if ".dat" in item]
+    h5_file = final_output_path + ".h5"
+    f = h5py.File(h5_file, 'w')
+    id = -1
     pbar = tqdm.tqdm(total=len(files), unit='File', unit_scale=True)
     for item in files:
         item = item[:-7]
         event_file = os.path.join(final_path, item+"_td.dat")
         bbox_file = os.path.join(final_path, item+"_bbox.npy")
-        h5_file = os.path.join(final_output_path, item+"_h5.h5")
+
         f_bbox = open(bbox_file, "rb")
         start, v_type, ev_size, size = npy_events_tools.parse_header(f_bbox)
         dat_bbox = np.fromfile(f_bbox, dtype=v_type, count=-1)
@@ -78,11 +85,8 @@ if __name__ == '__main__':
 
         f_event = PSEELoader(event_file)
 
-        f = h5py.File(h5_file, 'w')
-
         count_upperbound = -1
         time_upperbound = -1e16
-        id = -1
         for bbox_count,unique_time in enumerate(unique_ts):
             if unique_time <= 500000:
                 continue
@@ -107,9 +111,11 @@ if __name__ == '__main__':
                 id += 1
                 events_all = f_event.load_n_events(end_count - start_count)
                 f.create_dataset("events/{0}".format(id), data = events_all, maxshape=(None, ), chunks=True)
+                f["events/{0}".format(id)].attrs["file_name"] = item
                 indices = (dat_bbox['t'] == unique_time)
                 bboxes = dat_bbox[indices]
                 f.create_dataset("bboxes/{0}".format(id), data = bboxes, maxshape=(None, ), chunks=True)
+                f["events/{0}".format(id)].attrs["file_name"] = item
             else:
                 f_event.seek_event(count_upperbound)
                 events_all = f_event.load_n_events(end_count - count_upperbound)
@@ -122,7 +128,7 @@ if __name__ == '__main__':
                 f["bboxes/{0}".format(id)][-len(bboxes):] = bboxes
             time_upperbound = end_time
             count_upperbound = end_count
-        f.attrs["total"] = id + 1
-        f.close()
         pbar.update(1)
+    f.attrs["total"] = id + 1
+    f.close()
     pbar.close()
