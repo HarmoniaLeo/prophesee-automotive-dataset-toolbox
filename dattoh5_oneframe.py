@@ -38,7 +38,7 @@ if __name__ == '__main__':
             f_event = PSEELoader(event_file)
             
             for bbox_count,unique_time in enumerate(unique_ts):
-                if (data_folder == 'val') and (unique_time <= 500000):
+                if (data_folder == 'val') or (data_folder == 'test') and (unique_time <= 500000):
                     continue
                 end_time = unique_time
                 end_count = f_event.seek_time(end_time)
