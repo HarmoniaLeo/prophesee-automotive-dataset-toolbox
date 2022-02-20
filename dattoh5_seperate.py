@@ -57,6 +57,6 @@ if __name__ == '__main__':
                 f.create_dataset("bboxes/{0}".format(id), data = bboxes, maxshape=(None, ), chunks=True)
                 id += 1
             pbar.update(1)
-            f.close()
             f.attrs["total"] = id
+            f.close()
         pbar.close()
