@@ -67,11 +67,10 @@ def draw_bboxes(img, boxes, dt = 0, labelmap=LABELMAP):
         cv2.putText(img, str(score), (center[0], pt1[1] - 1), cv2.FONT_HERSHEY_SIMPLEX, 0.5, color)
 
 def visualizeVolume(volume,gt,filename,path,pct,time_stamp_start,time_stamp_end):
-    step = (time_stamp_end - time_stamp_end)/(volume.shape[0]//2)
+    step = (time_stamp_end - time_stamp_start)/(volume.shape[0]//2)
     img = 127 * np.ones((volume.shape[1], volume.shape[2], 3), dtype=np.uint8)
     for i in range(0,volume.shape[0]//2):
         gt_i = gt[(dat_bbox['t']>=time_stamp_start + i * step)&(dat_bbox['t']<=time_stamp_start + (i + 1) * step)]
-        print(i,gt_i,time_stamp_start + i * step,time_stamp_start + (i + 1) * step)
         c_p = volume[i+volume.shape[0]//2]
         c_p = 127 * c_p / np.percentile(c_p,pct)
         c_p = np.where(c_p>127, 127, c_p)
