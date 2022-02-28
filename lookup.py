@@ -97,11 +97,12 @@ def visualizeVolume(volume,gt,filename,path,pct,time_stamp_start,time_stamp_end,
         plt.xlim(-0.3,4)
         plt.xlabel("Value")
         plt.legend()
-        plt.savefig(os.path.join(path_t,'{0}_kde_overzero.png'.format(i)),dpi=500, bbox_inches = 'tight')
+        plt.savefig(os.path.join(path_t,'{0}_kde_overzero.png'.format(i)),dpi=100, bbox_inches = 'tight')
+        plt.clf()
         sns.distplot(pd.DataFrame({"Negative":c_n_ravel[c_n_ravel>=0]}).Negative,label="Negative")
         sns.distplot(pd.DataFrame({"Positive":c_p_ravel[c_p_ravel>=0]}).Positive,label="Positive")
         plt.legend()
-        plt.savefig(os.path.join(path_t,'{0}_kde.png'.format(i)),dpi=500, bbox_inches = 'tight')
+        plt.savefig(os.path.join(path_t,'{0}_kde.png'.format(i)),dpi=100, bbox_inches = 'tight')
         plt.clf()
 
 if __name__ == '__main__':
