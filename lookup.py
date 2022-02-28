@@ -73,10 +73,6 @@ def draw_bboxes(img, boxes, dt = 0, labelmap=LABELMAP):
 def visualizeVolume(volume,gt,filename,path,pct,time_stamp_start,time_stamp_end,per_time_bbox=False):
     step = (time_stamp_end - time_stamp_start)/(volume.shape[0]//2)
     img = 127 * np.ones((volume.shape[1], volume.shape[2], 3), dtype=np.uint8)
-    if equal_zero:
-        thr = 0
-    else:
-        thr = -0.1
     for i in range(0,volume.shape[0]//2):
         if per_time_bbox:
             gt_i = gt[(dat_bbox['t']>=time_stamp_start + i * step)&(dat_bbox['t']<=time_stamp_start + (i + 1) * step)]
