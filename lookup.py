@@ -73,6 +73,10 @@ def draw_bboxes(img, boxes, dt = 0, labelmap=LABELMAP):
 def visualizeVolume(volume,gt,filename,path,pct,time_stamp_start,time_stamp_end,per_time_bbox=False):
     step = (time_stamp_end - time_stamp_start)/(volume.shape[0]//2)
     img = 127 * np.ones((volume.shape[1], volume.shape[2], 3), dtype=np.uint8)
+    if equal_zero:
+        thr = 0
+    else:
+        thr = -0.1
     for i in range(0,volume.shape[0]//2):
         if per_time_bbox:
             gt_i = gt[(dat_bbox['t']>=time_stamp_start + i * step)&(dat_bbox['t']<=time_stamp_start + (i + 1) * step)]
@@ -80,12 +84,10 @@ def visualizeVolume(volume,gt,filename,path,pct,time_stamp_start,time_stamp_end,
             gt_i = gt[(dat_bbox['t']>=time_stamp_start)&(dat_bbox['t']<=time_stamp_end)]
         c_p = volume[i+volume.shape[0]//2]
         c_p_ravel = c_p.reshape(c_p.shape[0]*c_p.shape[1])
-        sns.distplot(pd.DataFrame({"Positive":c_p_ravel[c_p_ravel>=0]}).Positive,label="Positive")
         c_p = 127 * c_p / np.percentile(c_p,pct)
         c_p = np.where(c_p>127, 127, c_p)
         c_n = volume[i]
         c_n_ravel = c_n.reshape(c_n.shape[0]*c_n.shape[1])
-        sns.distplot(pd.DataFrame({"Negative":c_n_ravel[c_n_ravel>=0]}).Negative,label="Negative")
         c_n = 127 * c_n / np.percentile(c_n,pct)
         c_n = np.where(c_n>127, 127, c_n)
         img_s = img + c_p[:,:,None].astype(np.uint8) - c_n[:,:,None].astype(np.uint8)
@@ -94,8 +96,14 @@ def visualizeVolume(volume,gt,filename,path,pct,time_stamp_start,time_stamp_end,
         if not(os.path.exists(path_t)):
             os.mkdir(path_t)
         cv2.imwrite(os.path.join(path_t,'{0}.png'.format(i)),img_s)
+        sns.distplot(pd.DataFrame({"Negative":c_n_ravel[c_n_ravel>0]}).Negative,label="Negative")
+        sns.distplot(pd.DataFrame({"Positive":c_p_ravel[c_p_ravel>0]}).Positive,label="Positive")
         plt.xlim(-0.3,4)
         plt.xlabel("Value")
+        plt.legend()
+        plt.savefig(os.path.join(path_t,'{0}_kde_overzero.png'.format(i)),dpi=500, bbox_inches = 'tight')
+        sns.distplot(pd.DataFrame({"Negative":c_n_ravel[c_n_ravel>=0]}).Negative,label="Negative")
+        sns.distplot(pd.DataFrame({"Positive":c_p_ravel[c_p_ravel>=0]}).Positive,label="Positive")
         plt.legend()
         plt.savefig(os.path.join(path_t,'{0}_kde.png'.format(i)),dpi=500, bbox_inches = 'tight')
         plt.clf()
