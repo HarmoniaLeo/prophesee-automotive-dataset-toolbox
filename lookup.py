@@ -79,7 +79,7 @@ def visualizeVolume(volume,gt,filename,path,pct,time_stamp_start,time_stamp_end)
         c_n = np.where(c_n>127, 127, c_n)
         img_s = img + c_p[:,:,None].astype(np.uint8) - c_n[:,:,None].astype(np.uint8)
         draw_bboxes(img_s,gt_i)
-        path_t = os.path.join(path,filename+"_{0}".format(int(gt[0][0])))
+        path_t = os.path.join(path,filename+"_start{0}_end{1}".format(int(time_stamp_start),int(time_stamp_end)))
         if not(os.path.exists(path_t)):
             os.mkdir(path_t)
         cv2.imwrite(os.path.join(path_t,'{0}.png'.format(i)),img_s)
