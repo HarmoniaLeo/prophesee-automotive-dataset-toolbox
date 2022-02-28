@@ -116,7 +116,7 @@ if __name__ == '__main__':
     parser.add_argument('-end', type=int)
     parser.add_argument('-bins', type=int, default=5)
     parser.add_argument('-poisson', type=bool, default=False)
-    parser.add_argument('-upper_thr', type=float, default=0.9)
+    parser.add_argument('-upper_thr', type=float, default=90)
     parser.add_argument('-per_time_bbox', type=bool, default=False)
 
     args = parser.parse_args()
