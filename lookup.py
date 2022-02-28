@@ -81,6 +81,7 @@ def visualizeVolume(volume,gt,filename,path,pct,time_stamp_start,time_stamp_end,
         c_p = volume[i+volume.shape[0]//2]
         c_p_ravel = c_p.reshape(c_p.shape[0]*c_p.shape[1])
         c_p = 127 * c_p / np.percentile(c_p,pct)
+        print(np.percentile(c_p,pct))
         c_p = np.where(c_p>127, 127, c_p)
         c_n = volume[i]
         c_n_ravel = c_n.reshape(c_n.shape[0]*c_n.shape[1])
