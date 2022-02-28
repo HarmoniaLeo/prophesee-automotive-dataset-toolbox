@@ -18,17 +18,17 @@ def generate_event_volume(events,shape,bins=5):
         t = t.astype(np.float)
         t = (t-t_min)/(t_max-t_min+1e-8)
 
-        t_star = (bins-1)*t[:,None]
+        t_star = bins * t[:,None]
         
         xpos = x[p == 1]
         ypos = y[p == 1]
-        adderpos = np.arange(bins)[None,:]
+        adderpos = np.arange(1,bins+1)[None,:]
         adderpos = 1 - np.abs(adderpos-t_star[p == 1])
         adderpos = np.where(adderpos>=0,adderpos,0)
 
         xneg = x[p == 0]
         yneg = y[p == 0]
-        adderneg = np.arange(bins)[None,:]
+        adderneg = np.arange(1,bins+1)[None,:]
         adderneg = 1 - np.abs(adderneg-t_star[p == 0])
         adderneg = np.where(adderneg>=0,adderneg,0)
 

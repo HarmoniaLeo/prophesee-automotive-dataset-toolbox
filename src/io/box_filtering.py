@@ -27,6 +27,8 @@ def filter_boxes(boxes, skip_ts=int(5e5), min_box_diag=60, min_box_side=20):
     Returns:
         boxes: filtered boxes
     """
+    #gen1 diag30 side10
+    #gen2 diag60 side20
     #ts = boxes['t'] 
     ts = boxes[:,0] 
     #width = boxes['w']
