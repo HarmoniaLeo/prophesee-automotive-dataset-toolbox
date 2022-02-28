@@ -7,6 +7,7 @@ import argparse
 from poisson import poissoned_events
 import seaborn as sns
 import matplotlib.pyplot as plt
+import pandas as pd
 sns.set_style("darkgrid")
 
 def generate_event_volume(events,shape,bins=5):
@@ -79,12 +80,12 @@ def visualizeVolume(volume,gt,filename,path,pct,time_stamp_start,time_stamp_end,
             gt_i = gt[(dat_bbox['t']>=time_stamp_start)&(dat_bbox['t']<=time_stamp_end)]
         c_p = volume[i+volume.shape[0]//2]
         c_p_ravel = c_p.reshape(c_p.shape[0]*c_p.shape[1])
-        sns.kdeplot(c_p_ravel,label="positive")
+        sns.kdeplot(pd.DataFrame({"Positive":c_p_ravel}).Positive,label="Positive")
         c_p = 127 * c_p / np.percentile(c_p,pct)
         c_p = np.where(c_p>127, 127, c_p)
         c_n = volume[i]
         c_n_ravel = c_n.reshape(c_n.shape[0]*c_n.shape[1])
-        sns.kdeplot(c_n_ravel,label="negative")
+        sns.kdeplot(pd.DataFrame({"Negative":c_n_ravel}).Negative,label="Negative")
         c_n = 127 * c_n / np.percentile(c_n,pct)
         c_n = np.where(c_n>127, 127, c_n)
         img_s = img + c_p[:,:,None].astype(np.uint8) - c_n[:,:,None].astype(np.uint8)
@@ -93,6 +94,8 @@ def visualizeVolume(volume,gt,filename,path,pct,time_stamp_start,time_stamp_end,
         if not(os.path.exists(path_t)):
             os.mkdir(path_t)
         cv2.imwrite(os.path.join(path_t,'{0}.png'.format(i)),img_s)
+        plt.xlim(0,2)
+        plt.xlabel("Value")
         plt.savefig(os.path.join(path_t,'{0}_kde.png'.format(i)),dpi=500, bbox_inches = 'tight')
         plt.clf()
 
