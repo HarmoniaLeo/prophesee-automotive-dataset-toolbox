@@ -94,7 +94,7 @@ def visualizeVolume(volume,gt,filename,path,pct,time_stamp_start,time_stamp_end,
         if not(os.path.exists(path_t)):
             os.mkdir(path_t)
         cv2.imwrite(os.path.join(path_t,'{0}.png'.format(i)),img_s)
-        plt.xlim(0,2)
+        plt.xlim(-1,2)
         plt.xlabel("Value")
         plt.savefig(os.path.join(path_t,'{0}_kde.png'.format(i)),dpi=500, bbox_inches = 'tight')
         plt.clf()
