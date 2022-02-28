@@ -66,9 +66,11 @@ def draw_bboxes(img, boxes, dt = 0, labelmap=LABELMAP):
         cv2.putText(img, class_name, (center[0], pt2[1] - 1), cv2.FONT_HERSHEY_SIMPLEX, 0.5, color)
         cv2.putText(img, str(score), (center[0], pt1[1] - 1), cv2.FONT_HERSHEY_SIMPLEX, 0.5, color)
 
-def visualizeVolume(volume,gt,filename,path,pct):
+def visualizeVolume(volume,gt,filename,path,pct,time_stamp_start,time_stamp_end):
+    step = (time_stamp_end - time_stamp_end)/(volume.shape[0]//2)
     img = 127 * np.ones((volume.shape[1], volume.shape[2], 3), dtype=np.uint8)
     for i in range(0,volume.shape[0]//2):
+        gt_i = gt[(dat_bbox['t']>=time_stamp_start + i * step)&(dat_bbox['t']<=time_stamp_start + (i + 1) * step)]
         c_p = volume[i+volume.shape[0]//2]
         c_p = 127 * c_p / np.percentile(c_p,pct)
         c_p = np.where(c_p>127, 127, c_p)
@@ -76,7 +78,7 @@ def visualizeVolume(volume,gt,filename,path,pct):
         c_n = 127 * c_n / np.percentile(c_n,pct)
         c_n = np.where(c_n>127, 127, c_n)
         img_s = img + c_p[:,:,None].astype(np.uint8) - c_n[:,:,None].astype(np.uint8)
-        draw_bboxes(img_s,gt)
+        draw_bboxes(img_s,gt_i)
         path_t = os.path.join(path,filename+"_{0}".format(int(gt[0][0])))
         if not(os.path.exists(path_t)):
             os.mkdir(path_t)
@@ -112,8 +114,7 @@ if __name__ == '__main__':
     start, v_type, ev_size, size = npy_events_tools.parse_header(f_bbox)
     dat_bbox = np.fromfile(f_bbox, dtype=v_type, count=-1)
     f_bbox.close()
-    target = dat_bbox[(dat_bbox['t']>=time_stamp_start)&(dat_bbox['t']<=time_stamp_end)]
-    print(target)
+    #print(target)
     f_event = PSEELoader(event_file)
     f_event.seek_time(time_stamp_start)
     events = f_event.load_delta_t(time_stamp_end - time_stamp_start)
@@ -123,4 +124,4 @@ if __name__ == '__main__':
     if args.poisson:
         events = poissoned_events(events,time_stamp_start,time_stamp_end,(240,304))
     volume = generate_event_volume(events,(240,304),args.bins)
-    visualizeVolume(volume,target,item,result_path,args.upper_thr)
+    visualizeVolume(volume,dat_bbox,item,result_path,args.upper_thr,time_stamp_start,time_stamp_end)
