@@ -95,7 +95,7 @@ def visualizeVolume(volume,gt,filename,path,pct,time_stamp_start,time_stamp_end,
         sns.distplot(pd.DataFrame({"Negative":c_n_ravel[c_n_ravel>0]}).Negative,label="Negative")
         sns.distplot(pd.DataFrame({"Positive":c_p_ravel[c_p_ravel>0]}).Positive,label="Positive")
         #sns.distplot(pd.DataFrame({"Either":(c_n_ravel+c_p_ravel)[(c_n_ravel>0)|(c_p_ravel>0)]}).Either,label="Either")
-        plt.xlim(-0.3,1.0)
+        #plt.xlim(-0.3,1.0)
         plt.xlabel("Value")
         plt.legend()
         plt.savefig(os.path.join(path_t,'{0}_kde_overzero.png'.format(i)),dpi=100, bbox_inches = 'tight')
@@ -103,7 +103,7 @@ def visualizeVolume(volume,gt,filename,path,pct,time_stamp_start,time_stamp_end,
         sns.distplot(pd.DataFrame({"Negative":c_n_ravel[c_n_ravel>=0]}).Negative,label="Negative")
         sns.distplot(pd.DataFrame({"Positive":c_p_ravel[c_p_ravel>=0]}).Positive,label="Positive")
         #sns.distplot(pd.DataFrame({"Either":(c_n_ravel+c_p_ravel)[(c_n_ravel>=0)|(c_p_ravel>=0)]}).Either,label="Either")
-        #plt.xlim(-0.3,3)
+        plt.xlim(-0.3,1.0)
         plt.xlabel("Value")
         plt.legend()
         plt.savefig(os.path.join(path_t,'{0}_kde.png'.format(i)),dpi=100, bbox_inches = 'tight')
@@ -112,7 +112,7 @@ def visualizeVolume(volume,gt,filename,path,pct,time_stamp_start,time_stamp_end,
     img = 127 * np.ones((volume.shape[1], volume.shape[2], 3), dtype=np.uint8)
     img = np.where(volume[0]>0, 0, img)
     img = np.where(volume[1]>0, 255, img)
-    cv2.imwrite(os.path.join(path_t,'time_view.png'.format(i)),img)
+    cv2.imwrite(os.path.join(path_t,'time_view.png'.format(i)),img[:5])
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(
