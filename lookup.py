@@ -103,7 +103,7 @@ def visualizeVolume(volume,gt,filename,path,pct,time_stamp_start,time_stamp_end,
         sns.distplot(pd.DataFrame({"Negative":c_n_ravel[c_n_ravel>=0]}).Negative,label="Negative")
         sns.distplot(pd.DataFrame({"Positive":c_p_ravel[c_p_ravel>=0]}).Positive,label="Positive")
         #sns.distplot(pd.DataFrame({"Either":(c_n_ravel+c_p_ravel)[(c_n_ravel>=0)|(c_p_ravel>=0)]}).Either,label="Either")
-        plt.xlim(-0.3,1.0)
+        plt.xlim(-0.1,1.0)
         plt.xlabel("Value")
         plt.legend()
         plt.savefig(os.path.join(path_t,'{0}_kde.png'.format(i)),dpi=100, bbox_inches = 'tight')
@@ -112,7 +112,7 @@ def visualizeVolume(volume,gt,filename,path,pct,time_stamp_start,time_stamp_end,
     img = 127 * np.ones((volume.shape[1], volume.shape[2], 3), dtype=np.uint8)
     img = np.where(volume[0]>0, 0, img)
     img = np.where(volume[1]>0, 255, img)
-    cv2.imwrite(os.path.join(path_t,'time_view.png'.format(i)),img[:5])
+    cv2.imwrite(os.path.join(path_t,'time_view.png'.format(i)),img[:200,:200])
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(
@@ -121,14 +121,14 @@ if __name__ == '__main__':
     parser.add_argument('-start', type=int)
     parser.add_argument('-end', type=int)
     parser.add_argument('-bins', type=int, default=5)
-    parser.add_argument('-poisson', type=bool, default=False)
     parser.add_argument('-upper_thr', type=float, default=90)
     parser.add_argument('-per_time_bbox', type=bool, default=False)
+    parser.add_argument('-sim', type=bool, default=False)
 
     args = parser.parse_args()
 
-    if args.poisson:
-        result_path = 'result_poisson'
+    if args.sim:
+        result_path = 'result_sim'
     else:
         result_path = 'result_lookup'
     if not os.path.exists(result_path):
@@ -152,7 +152,8 @@ if __name__ == '__main__':
     x,y,t,p = events['x'], events['y'], events['t'], events['p']
     events = np.stack([x.astype(int), y.astype(int), t, p], axis=-1)
     print(len(events))
-    if args.poisson:
-        events = poissoned_events(events,time_stamp_start,time_stamp_end,(240,304))
-    volume = generate_event_volume(events,(240,304),args.bins)
-    visualizeVolume(volume,dat_bbox,item,result_path,args.upper_thr,time_stamp_start,time_stamp_end,args.per_time_bbox)
+    if args.sim:
+
+    else:
+        volume = generate_event_volume(events,(240,304),args.bins)
+        visualizeVolume(volume,dat_bbox,item,result_path,args.upper_thr,time_stamp_start,time_stamp_end,args.per_time_bbox)
