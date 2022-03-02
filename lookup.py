@@ -108,7 +108,7 @@ def visualizeVolume(volume,gt,filename,path,pct,time_stamp_start,time_stamp_end,
         plt.legend()
         plt.savefig(os.path.join(path_t,'{0}_kde.png'.format(i)),dpi=100, bbox_inches = 'tight')
         plt.clf()
-    volume = volume.reshape(2,volume.shape[0]//2,volume.shape[1]*volume.shape[2],1).transpose(0,2,1)
+    volume = volume.reshape(2,volume.shape[0]//2,volume.shape[1]*volume.shape[2],1).transpose(0,2,1,3)
     img = 127 * np.ones((volume.shape[1], volume.shape[2], 3), dtype=np.uint8)
     img = np.where(volume[0]>0, 0, img)
     img = np.where(volume[1]>0, 255, img)
