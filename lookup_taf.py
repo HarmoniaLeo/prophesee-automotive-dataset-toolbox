@@ -101,7 +101,7 @@ def draw_bboxes(img, boxes, dt = 0, labelmap=LABELMAP):
 def visualizeVolume(volume,ecd,gt_i,filename,path,pct,time_stamp_start,time_stamp_end,i):
     for j in [1,3]:
         img_s = 127 * np.ones((volume.shape[1], volume.shape[2], 3), dtype=np.uint8)
-        img = (90 * np.exp(ecd[:,j])).astype(np.uint8)
+        img = (90 * np.exp(ecd[:,:,j])).astype(np.uint8)
         img_s[:,:,0] = img
         img_s = cv2.cvtColor(img_s, cv2.COLOR_HSV2BGR)
         draw_bboxes(img_s,gt_i)
