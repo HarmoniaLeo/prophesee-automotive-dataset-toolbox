@@ -103,7 +103,7 @@ def visualizeVolume(volume,ecd,gt_i,filename,path,pct,time_stamp_start,time_stam
     for j in range(2):
         img_s = 255 * np.ones((volume.shape[1], volume.shape[2], 3), dtype=np.uint8)
         tar = (ecd[j] + 10)/10
-        tar = np.where(tar>0,0,tar)
+        tar = np.where(tar>0,tar,0)
         #tar = np.where(tar * 10 > 1, 1, tar)
         img_0 = (60 * tar).astype(np.uint8) + 119
         #img_1 = (255 * tar).astype(np.uint8)
