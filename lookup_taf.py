@@ -59,9 +59,11 @@ def generate_event_volume(events,shape,time_start,time_end,past_volume=None):
         neg_ecd = np.concatenate([neg_ecd,np.zeros_like(neg_ecd[:,-1:])],axis=1)
         for i in range(1,img_pos.shape[1])[::-1]:
             img_pos[:,i] = np.where(forward_pos, img_pos[:,i-1],img_pos[:,i])
-            pos_ecd[:,i] = np.where(forward_pos, pos_ecd[:,i-1]-1,pos_ecd[:,i])
+            pos_ecd[:,i-1] = pos_ecd[:,i-1] - 1
+            pos_ecd[:,i] = np.where(forward_pos, pos_ecd[:,i-1],pos_ecd[:,i])
             img_neg[:,i] = np.where(forward_neg, img_neg[:,i-1],img_neg[:,i])
-            neg_ecd[:,i] = np.where(forward_neg, neg_ecd[:,i-1]-1,neg_ecd[:,i])
+            neg_ecd[:,i-1] = neg_ecd[:,i-1] - 1
+            neg_ecd[:,i] = np.where(forward_neg, neg_ecd[:,i-1],neg_ecd[:,i])
         img_pos[:,0] = np.where(forward_pos, 0, img_pos[:,0])
         pos_ecd[:,0] = np.where(forward_pos, -1e6, pos_ecd[:,0])
         img_neg[:,0] = np.where(forward_neg, 0, img_neg[:,0])
