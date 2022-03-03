@@ -71,6 +71,7 @@ def generate_event_volume(events,shape,time_start,time_end,past_volume=None):
         pos_ecd = np.stack([pos_ecd,pos_ecd])
         neg_ecd = np.where(forward_neg, -1e6, 0)
         neg_ecd = np.stack([neg_ecd,neg_ecd])
+        img_neg, img_pos = img_neg[:,1:], img_pos[:,1:]
 
     histogram = np.concatenate([img_neg, img_pos], -1).reshape((H, W, 2)).transpose(2,0,1)
     ecd = np.concatenate([neg_ecd, pos_ecd], -1).reshape((H, W, 2)).transpose(2,0,1)
