@@ -47,8 +47,8 @@ def generate_event_volume(events,shape,time_start,time_end,past_volume=None):
         img_pos = np.zeros((H * W , 2),dtype=float)
         img_neg = np.zeros((H * W , 2),dtype=float)
     
-    forward_pos = (img_pos==0)
-    forward_neg = (img_neg==0)
+    forward_pos = (img_pos[:,-1]==0)
+    forward_neg = (img_neg[:,-1]==0)
     if not (past_volume is None):
         img_pos_old, img_neg_old, latest_pos, latest_neg, pos_ecd, neg_ecd = past_volume
         img_pos_old[:,-1] = np.where(latest_pos,img_pos_old[:,-1] + img_pos[:,0],img_pos_old[:,-1])
