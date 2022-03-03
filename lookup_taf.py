@@ -102,8 +102,9 @@ def draw_bboxes(img, boxes, dt = 0, labelmap=LABELMAP):
 def visualizeVolume(volume,ecd,gt_i,filename,path,pct,time_stamp_start,time_stamp_end,i):
     for j in range(2):
         img_s = 255 * np.ones((volume.shape[1], volume.shape[2], 3), dtype=np.uint8)
-        tar = np.exp(ecd[j])
-        tar = np.where(tar * 10 > 1, 1, tar)
+        tar = (ecd[j] + 10)/10
+        tar = np.where(tar>0,0,tar)
+        #tar = np.where(tar * 10 > 1, 1, tar)
         img_0 = (60 * tar).astype(np.uint8) + 119
         img_1 = (255 * tar).astype(np.uint8)
         img_2 = (255 * tar).astype(np.uint8)
