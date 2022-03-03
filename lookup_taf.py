@@ -53,10 +53,10 @@ def generate_event_volume(events,shape,time_start,time_end,past_volume=None):
         img_pos_old, img_neg_old, latest_pos, latest_neg, pos_ecd, neg_ecd = past_volume
         img_pos_old[:,-1] = np.where(latest_pos,img_pos_old[:,-1] + img_pos[:,0],img_pos_old[:,-1])
         img_neg_old[:,-1] = np.where(latest_neg,img_neg_old[:,-1] + img_neg[:,0],img_neg_old[:,-1])
-        img_pos = np.concatenate([img_pos_old,img_pos[:,1:]],dim=1)[:,1:]
-        pos_ecd = np.concatenate([pos_ecd,np.zeros_like(pos_ecd[:,-1:])],dim=1)[:,1:]
-        img_neg = np.concatenate([img_neg_old,img_neg[:,1:]],dim=1)[:,1:]
-        neg_ecd = np.concatenate([neg_ecd,np.zeros_like(neg_ecd[:,-1:])],dim=1)[:,1:]
+        img_pos = np.concatenate([img_pos_old,img_pos[:,1:]],axis=1)[:,1:]
+        pos_ecd = np.concatenate([pos_ecd,np.zeros_like(pos_ecd[:,-1:])],axis=1)[:,1:]
+        img_neg = np.concatenate([img_neg_old,img_neg[:,1:]],axis=1)[:,1:]
+        neg_ecd = np.concatenate([neg_ecd,np.zeros_like(neg_ecd[:,-1:])],axis=1)[:,1:]
         for i in range(1,img_pos.shape[1])[::-1]:
             img_pos[:,i] = np.where(forward_pos, img_pos[:,i-1],img_pos[:,i])
             pos_ecd[:,i] = np.where(forward_pos, pos_ecd[:,i-1]-1,pos_ecd[:,i])
