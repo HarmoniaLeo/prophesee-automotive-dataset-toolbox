@@ -146,7 +146,7 @@ if __name__ == '__main__':
     events = np.stack([x.astype(int), y.astype(int), t, p], axis=-1)
     print(len(events))
     past_volume = None
-    for i,start in enumerate(range(time_stamp_end, time_stamp_start, args.window)):
+    for i,start in enumerate(range(time_stamp_start, time_stamp_end, args.window)):
         volume, ecd, past_volume = generate_event_volume(events,(240,304),start,start+args.window,past_volume)
         if args.per_time_bbox:
             gt_i = dat_bbox[(dat_bbox['t']>=start)&(dat_bbox['t']<=time_stamp_end)]
