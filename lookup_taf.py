@@ -63,12 +63,12 @@ def generate_event_volume(events,shape,time_start,time_end,past_volume=None):
             img_neg[:,i] = np.where(forward_neg, img_neg[:,i-1],img_neg[:,i])
             neg_ecd[:,i] = np.where(forward_neg, neg_ecd[:,i-1]-1,neg_ecd[:,i])
         img_pos[:,0] = np.where(forward_pos, 0, img_pos[:,0])
-        pos_ecd[:,0] = np.where(forward_pos, -1e6, pos_ecd[:,0])
+        pos_ecd[:,0] = np.where(forward_pos, 0, pos_ecd[:,0])
         img_neg[:,0] = np.where(forward_neg, 0, img_neg[:,0])
-        neg_ecd[:,0] = np.where(forward_neg, -1e6, neg_ecd[:,0])
+        neg_ecd[:,0] = np.where(forward_neg, 0, neg_ecd[:,0])
     else:
-        pos_ecd = np.where(forward_pos, -1e6, 0)[:,None]
-        neg_ecd = np.where(forward_neg, -1e6, 0)[:,None]
+        pos_ecd = np.zeros_like(forward_pos)[:,None]
+        neg_ecd = np.zeros_like(forward_neg)[:,None]
         img_neg, img_pos = img_neg[:,1:], img_pos[:,1:]
 
     histogram = np.concatenate([img_neg, img_pos], -1).reshape((H, W, 2)).transpose(2,0,1)
@@ -100,15 +100,15 @@ def draw_bboxes(img, boxes, dt = 0, labelmap=LABELMAP):
 
 def visualizeVolume(volume,ecd,gt_i,filename,path,pct,time_stamp_start,time_stamp_end,i):
     for j in range(2):
-        img_s = 127 * np.ones((volume.shape[1], volume.shape[2], 3), dtype=np.uint8)
-        img = (90 * np.exp(ecd[j])).astype(np.uint8)
+        img_s = 255 * np.ones((volume.shape[1], volume.shape[2], 3), dtype=np.uint8)
+        img = (90 * np.exp(ecd[j]) * (volume[j]>0).astype(int)).astype(np.uint8) + 89
         img_s[:,:,0] = img
         img_s = cv2.cvtColor(img_s, cv2.COLOR_HSV2BGR)
         draw_bboxes(img_s,gt_i)
         path_t = os.path.join(path,filename+"_start{0}_end{1}".format(int(time_stamp_start),int(time_stamp_end)))
         if not(os.path.exists(path_t)):
             os.mkdir(path_t)
-        cv2.imwrite(os.path.join(path_t,'{0}-{1}.png'.format(i,j)),img_s)
+        cv2.imwrite(os.path.join(path_t,'{1}-{0}.png'.format(i,j)),img_s)
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(
