@@ -103,9 +103,13 @@ def visualizeVolume(volume,ecd,gt_i,filename,path,pct,time_stamp_start,time_stam
     for j in range(2):
         img_s = 255 * np.ones((volume.shape[1], volume.shape[2], 3), dtype=np.uint8)
         tar = np.exp(ecd[j])
-        tar = np.where(tar * 1 > 1, 1, tar)
-        img = (60 * tar).astype(np.uint8) + 119
-        img_s[:,:,0] = img
+        tar = np.where(tar * 10 > 1, 1, tar)
+        img_0 = (60 * tar).astype(np.uint8) + 119
+        img_1 = (255 * tar).astype(np.uint8)
+        img_2 = (255 * tar).astype(np.uint8)
+        img_s[:,:,0] = img_0
+        img_s[:,:,1] = img_1
+        img_s[:,:,2] = img_2
         img_s = cv2.cvtColor(img_s, cv2.COLOR_HSV2BGR)
         draw_bboxes(img_s,gt_i)
         path_t = os.path.join(path,filename+"_start{0}_end{1}".format(int(time_stamp_start),int(time_stamp_end)))
