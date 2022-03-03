@@ -158,7 +158,7 @@ if __name__ == '__main__':
     for i,start in enumerate(range(time_stamp_start, time_stamp_end, args.window)):
         volume, ecd, past_volume = generate_event_volume(events,(240,304),start,start+args.window,past_volume)
         if args.per_time_bbox:
-            gt_i = dat_bbox[(dat_bbox['t']>=start)&(dat_bbox['t']<=time_stamp_end)]
+            gt_i = dat_bbox[(dat_bbox['t']>=start)&(dat_bbox['t']<=start+args.window,)]
         else:
             gt_i = dat_bbox[(dat_bbox['t']>=time_stamp_start)&(dat_bbox['t']<=time_stamp_end)]
         visualizeVolume(volume,ecd,gt_i,item,result_path,args.upper_thr,time_stamp_start,time_stamp_end,i)
