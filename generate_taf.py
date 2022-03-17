@@ -1,9 +1,11 @@
 import numpy as np
+from sklearn import datasets
 from src.io import npy_events_tools
 from src.io import psee_loader
 import tqdm
 import os
 from numpy.lib import recfunctions as rfn
+import h5py
 
 def taf_cuda(x, y, t, p, shape, volume_bins, past_volume):
     H, W = shape
@@ -81,11 +83,14 @@ events_window = 50000
 events_window_abin = 10000
 event_volume_bins = 5
 shape = [240,304]
+raw_dir = "/data/ATIS_Automotive_Detection_Dataset/detection_dataset_duration_60s_ratio_1.0"
 
 for mode in ["train","val","test"]:
-    file_dir = os.path.join("/data/ATIS_Automotive_Detection_Dataset/detection_dataset_duration_60s_ratio_1.0", mode)
+    
+    file_dir = os.path.join(raw_dir, mode)
     root = file_dir
-    target_root = os.path.join("/data/ATIS_taf", mode)
+    #target_root = os.path.join("/data/ATIS_taf", mode)
+    h5 = h5py.File(raw_dir + '/ATIS_taf+_'+mode+'+.h5', 'w')
     files = os.listdir(file_dir)
     # Remove duplicates (.npy and .dat)
     files = [time_seq_name[:-7] for time_seq_name in files
@@ -99,7 +104,7 @@ for mode in ["train","val","test"]:
     sequence_end_n = []
     file_names = []
 
-    route = os.path.join(target_root, 'buffer_t{0}_n{1}.npz'.format(events_window,min_event_count))
+    route = os.path.join(root, 'buffer_t{0}_n{1}.npz'.format(events_window,min_event_count))
 
     for i_file, file_name in enumerate(files):
         event_file = os.path.join(root, file_name + '_td.dat')
@@ -172,8 +177,10 @@ for mode in ["train","val","test"]:
                 events_ = events[events[...,4] == iter]
                 volume, memory = generate_taf_cuda(events_, shape, memory, event_volume_bins)
                 iter += 1
-            volume_save_path = os.path.join(target_root, file_name+"_"+str(unique_time)+".npy")
-            np.save(volume_save_path, volume)
+            h5.create_dataset(file_name+"/"+str(unique_time), volume.shape)
+            #volume_save_path = os.path.join(target_root, file_name+"_"+str(unique_time)+".npy")
+            #np.save(volume_save_path, volume)
+            h5[file_name+"/"+str(unique_time)] = volume
 
             time_upperbound = end_time
             count_upperbound = end_count
@@ -195,3 +202,4 @@ for mode in ["train","val","test"]:
                 file_name = np.array(file_names))
     print("Save buffer to "+route)
     pbar.close()
+    h5.close()
