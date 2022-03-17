@@ -144,8 +144,6 @@ for mode in ["train","val","test"]:
                     sequence_end_n.append(count_upperbound)
                     sequence_end_t.append(time_upperbound)
                 already = True
-            time_upperbound = end_time
-            count_upperbound = end_count
 
             dat_event = f_event
             dat_event.seek_event(start_count)
@@ -176,6 +174,9 @@ for mode in ["train","val","test"]:
                 iter += 1
             volume_save_path = os.path.join(target_root, file_name+"_"+unique_time+".npy")
             np.save(volume_save_path, volume)
+            
+            time_upperbound = end_time
+            count_upperbound = end_count
 
         pbar.update(1)
 
