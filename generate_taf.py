@@ -172,7 +172,7 @@ for mode in ["train","val","test"]:
                 events_ = events[events[...,4] == iter]
                 volume, memory = generate_taf_cuda(events_, shape, memory, event_volume_bins)
                 iter += 1
-            volume_save_path = os.path.join(target_root, file_name+"_"+unique_time+".npy")
+            volume_save_path = os.path.join(target_root, file_name+"_"+str(unique_time)+".npy")
             np.save(volume_save_path, volume)
 
             time_upperbound = end_time
