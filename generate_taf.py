@@ -88,6 +88,7 @@ def denseToSparse(dense_tensor):
     """
     non_zero_indices = np.nonzero(np.abs(dense_tensor).sum(axis=-1))
 
+    print(non_zero_indices)
     select_indices = non_zero_indices.split(1, axis=1)
     features = np.squeeze(dense_tensor[select_indices], axis=-2)
 
