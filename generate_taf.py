@@ -86,7 +86,7 @@ def denseToSparse(dense_tensor):
     :return locations: NumberOfActive x (SumSpatialDimensions + 1). The + 1 includes the batch index
     :return features: NumberOfActive x FeatureDimension
     """
-    non_zero_indices = np.nonzero(np.abs(dense_tensor).sum(axis=-1))
+    non_zero_indices = np.nonzero(np.abs(dense_tensor))
 
     print(non_zero_indices)
     select_indices = non_zero_indices.split(1, axis=1)
@@ -196,7 +196,6 @@ for mode in ["train","val","test"]:
             #h5.create_dataset(file_name+"/"+str(unique_time), shape = volume.shape, data = volume)
             volume_ = volume.copy()
             volume_[...,1] = np.where(volume_[...,1]>-1e6, volume_[...,1] - 1, 0)
-            volume_ = volume_.transpose(1,2,3,0)
             locations, features = denseToSparse(volume_)
             volume_save_path = os.path.join(target_root, file_name+"_"+str(unique_time)+".npz")
             np.save(volume_save_path, locations = locations, features = features)
