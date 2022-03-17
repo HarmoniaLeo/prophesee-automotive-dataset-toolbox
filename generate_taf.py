@@ -63,9 +63,9 @@ def taf_cuda(x, y, t, p, shape, volume_bins, past_volume):
     return histogram, ecd, past_volume
 
 def generate_taf_cuda(events, shape, past_volume = None, volume_bins=5):
-    x, y, t, p, z = events.unbind(-1)
+    x, y, t, p, z = events.T
 
-    x, y, p = x.long(), y.long(), p.long()
+    x, y, p = x.astype(int), y.astype(int), p.astype(int)
     
     if past_volume is None:
         for bin in range(volume_bins):
@@ -174,7 +174,7 @@ for mode in ["train","val","test"]:
                 iter += 1
             volume_save_path = os.path.join(target_root, file_name+"_"+unique_time+".npy")
             np.save(volume_save_path, volume)
-            
+
             time_upperbound = end_time
             count_upperbound = end_count
 
