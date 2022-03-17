@@ -78,6 +78,21 @@ def generate_taf_cuda(events, shape, past_volume = None, volume_bins=5):
 
     return np.stack([histogram, ecd], -1), past_volume
 
+def denseToSparse(dense_tensor):
+    """
+    Converts a dense tensor to a sparse vector.
+
+    :param dense_tensor: BatchSize x SpatialDimension_1 x SpatialDimension_2 x ... x FeatureDimension
+    :return locations: NumberOfActive x (SumSpatialDimensions + 1). The + 1 includes the batch index
+    :return features: NumberOfActive x FeatureDimension
+    """
+    non_zero_indices = np.nonzero(np.abs(dense_tensor).sum(axis=-1))
+
+    select_indices = non_zero_indices.split(1, axis=1)
+    features = np.squeeze(dense_tensor[select_indices], axis=-2)
+
+    return non_zero_indices, features
+
 min_event_count = 200000
 events_window = 50000
 events_window_abin = 10000
@@ -89,8 +104,8 @@ for mode in ["train","val","test"]:
     
     file_dir = os.path.join(raw_dir, mode)
     root = file_dir
-    #target_root = os.path.join("/data/ATIS_taf", mode)
-    h5 = h5py.File(raw_dir + '/ATIS_taf_'+mode+'.h5', 'w')
+    target_root = os.path.join("/data/ATIS_taf", mode)
+    #h5 = h5py.File(raw_dir + '/ATIS_taf_'+mode+'.h5', 'w')
     files = os.listdir(file_dir)
     # Remove duplicates (.npy and .dat)
     files = [time_seq_name[:-7] for time_seq_name in files
@@ -177,9 +192,13 @@ for mode in ["train","val","test"]:
                 events_ = events[events[...,4] == iter]
                 volume, memory = generate_taf_cuda(events_, shape, memory, event_volume_bins)
                 iter += 1
-            h5.create_dataset(file_name+"/"+str(unique_time), shape = volume.shape, data = volume)
-            #volume_save_path = os.path.join(target_root, file_name+"_"+str(unique_time)+".npy")
-            #np.save(volume_save_path, volume)
+            #h5.create_dataset(file_name+"/"+str(unique_time), shape = volume.shape, data = volume)
+            volume_ = volume.copy()
+            volume_[...,1] = np.where(volume_[...,1]>-1e6, volume_[...,1] - 1, 0)
+            volume_ = volume_.transpose(1,2,3,0)
+            locations, features = denseToSparse(volume_)
+            volume_save_path = os.path.join(target_root, file_name+"_"+str(unique_time)+".npz")
+            np.save(volume_save_path, locations = locations, features = features)
 
             time_upperbound = end_time
             count_upperbound = end_count
@@ -201,4 +220,4 @@ for mode in ["train","val","test"]:
                 file_name = np.array(file_names))
     print("Save buffer to "+route)
     pbar.close()
-    h5.close()
+    #h5.close()
