@@ -172,6 +172,7 @@ for mode in ["train","val","test"]:
             del dat_event
             events = rfn.structured_to_unstructured(events)[:, [1, 2, 0, 3]].astype(float)
 
+            print(events[:5])
             z = np.zeros_like(events[:,0])
 
             bins = int((end_time - start_time) / events_window_abin)
@@ -194,7 +195,6 @@ for mode in ["train","val","test"]:
                 volume, memory = generate_taf_cuda(events_, shape, memory, event_volume_bins)
                 iter += 1
             #h5.create_dataset(file_name+"/"+str(unique_time), shape = volume.shape, data = volume)
-            locations, features = denseToSparse(volume)
             volume_ = volume.copy()
             volume_[...,1] = np.where(volume_[...,1]>-1e6, volume_[...,1] - 1, 0)
             locations, features = denseToSparse(volume_)
