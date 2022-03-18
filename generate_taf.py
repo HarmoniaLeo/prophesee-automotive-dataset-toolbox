@@ -1,3 +1,4 @@
+from itertools import count
 import numpy as np
 from sklearn import datasets
 from src.io import npy_events_tools
@@ -113,12 +114,6 @@ for mode in ["train","val","test"]:
 
     pbar = tqdm.tqdm(total=len(files), unit='File', unit_scale=True)
 
-    sequence_start_t = []
-    sequence_start_n = []
-    sequence_end_t = []
-    sequence_end_n = []
-    file_names = []
-
     route = os.path.join(root, 'buffer_t{0}_n{1}.npz'.format(events_window,min_event_count))
 
     for i_file, file_name in enumerate(files):
@@ -157,76 +152,54 @@ for mode in ["train","val","test"]:
                 start_count = f_event.seek_time(start_time)
                 if (start_count is None) or (start_time < 0):
                     start_count = 0
-                sequence_start_t.append(start_time)
-                sequence_start_n.append(start_count)
-                #print("start append", len(sequence_end_n), len(sequence_end_t), len(sequence_start_n), len(sequence_start_t), len(file_names))
-                file_names.append(file_name)
-                #print("start_append")
-                if already:
-                    sequence_end_n.append(count_upperbound)
-                    sequence_end_t.append(time_upperbound)
-                    #print("end append", len(sequence_end_n), len(sequence_end_t), len(sequence_start_n), len(sequence_start_t), len(file_names))
-                already = True
+                memory = None
+            else:
+                start_count = count_upperbound
 
             volume_save_path = os.path.join(target_root, file_name+"_"+str(unique_time)+".npz")
-            if not (os.path.exists(volume_save_path)):
-                dat_event = f_event
-                dat_event.seek_event(start_count)
-                events = dat_event.load_n_events(int(end_count - start_count))
-                del dat_event
-                events = torch.from_numpy(rfn.structured_to_unstructured(events)[:, [1, 2, 0, 3]].astype(float)).cuda()
+            #if not (os.path.exists(volume_save_path)):
+            dat_event = f_event
+            dat_event.seek_event(start_count)
+            events = dat_event.load_n_events(int(end_count - start_count))
+            del dat_event
+            events = torch.from_numpy(rfn.structured_to_unstructured(events)[:, [1, 2, 0, 3]].astype(float)).cuda()
 
-                z = torch.zeros_like(events[:,0])
+            z = torch.zeros_like(events[:,0])
 
-                bins = int((end_time - start_time) / events_window_abin)
-                assert bins == (end_time - start_time) / events_window_abin
-                
-                for i in range(bins):
-                    z = torch.where((events[:,2] >= start_time + i * events_window_abin)&(events[:,2] <= start_time + (i + 1) * events_window_abin), torch.zeros_like(events[:,2])+i, torch.zeros_like(events[:,2])+z)
-                    #events_timestamps.append(start_time + (i + 1) * self.events_window_abin)
-                events = torch.cat([events,z[:,None]], dim=1)
+            bins = int((end_time - start_time) / events_window_abin)
+            assert bins == (end_time - start_time) / events_window_abin
+            
+            for i in range(bins):
+                z = torch.where((events[:,2] >= start_time + i * events_window_abin)&(events[:,2] <= start_time + (i + 1) * events_window_abin), torch.zeros_like(events[:,2])+i, torch.zeros_like(events[:,2])+z)
+                #events_timestamps.append(start_time + (i + 1) * self.events_window_abin)
+            events = torch.cat([events,z[:,None]], dim=1)
 
-                if start_time > time_upperbound:
-                    memory = None
-                    events_ = events[events[...,4] < event_volume_bins]
-                    t_max = start_time + event_volume_bins * events_window_abin
-                    t_min = start_time
-                    events_[:,2] = (events_[:, 2] - t_min)/(t_max - t_min + 1e-8)
-                    volume, memory = generate_taf_cuda(events_, shape, memory, event_volume_bins)
-                    iter = event_volume_bins
-                else:
-                    iter = 0
-                while(iter < bins):
-                    events_ = events[events[...,4] == iter]
-                    t_max = start_time + iter * events_window_abin
-                    t_min = start_time + (iter -1) * events_window_abin
-                    events_[:,2] = (events_[:, 2] - t_min)/(t_max - t_min + 1e-8)
-                    volume, memory = generate_taf_cuda(events_, shape, memory, event_volume_bins)
-                    iter += 1
-                #h5.create_dataset(file_name+"/"+str(unique_time), shape = volume.shape, data = volume)
-                volume_ = volume.cpu().numpy().copy()
-                volume_[...,1] = np.where(volume_[...,1]>-1e6, volume_[...,1] - 1, 0)
-                locations, features = denseToSparse(volume_)
-                np.savez(volume_save_path, locations = locations, features = features)
+            if start_time > time_upperbound:
+                memory = None
+                events_ = events[events[...,4] < event_volume_bins]
+                t_max = start_time + event_volume_bins * events_window_abin
+                t_min = start_time
+                events_[:,2] = (events_[:, 2] - t_min)/(t_max - t_min + 1e-8)
+                volume, memory = generate_taf_cuda(events_, shape, memory, event_volume_bins)
+                iter = event_volume_bins
+            else:
+                iter = 0
+            while(iter < bins):
+                events_ = events[events[...,4] == iter]
+                t_max = start_time + iter * events_window_abin
+                t_min = start_time + (iter -1) * events_window_abin
+                events_[:,2] = (events_[:, 2] - t_min)/(t_max - t_min + 1e-8)
+                volume, memory = generate_taf_cuda(events_, shape, memory, event_volume_bins)
+                iter += 1
+            #h5.create_dataset(file_name+"/"+str(unique_time), shape = volume.shape, data = volume)
+            volume_ = volume.cpu().numpy().copy()
+            volume_[...,1] = np.where(volume_[...,1]>-1e6, volume_[...,1] - 1, 0)
+            locations, features = denseToSparse(volume_)
+            np.savez(volume_save_path, locations = locations, features = features)
 
             time_upperbound = end_time
             count_upperbound = end_count
 
         pbar.update(1)
-
-        if count_upperbound > 0:
-            sequence_end_n.append(count_upperbound)
-            sequence_end_t.append(time_upperbound)
-            #print("end append a file", len(sequence_end_n), len(sequence_end_t), len(sequence_start_n), len(sequence_start_t), len(file_names))
-        #print("end_append_last")
-
-        assert len(sequence_end_n) == len(sequence_end_t) == len(sequence_start_n) == len(sequence_start_t) == len(file_names)
-    
-    np.savez(route,sequence_start_t = np.array(sequence_start_t),
-                sequence_end_t = np.array(sequence_end_t),
-                sequence_start_n = np.array(sequence_start_n),
-                sequence_end_n = np.array(sequence_end_n),
-                file_name = np.array(file_names))
-    print("Save buffer to "+route)
     pbar.close()
     #h5.close()
