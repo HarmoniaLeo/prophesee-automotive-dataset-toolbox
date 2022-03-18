@@ -158,16 +158,17 @@ for mode in ["train","val","test"]:
                     start_count = 0
                 sequence_start_t.append(start_time)
                 sequence_start_n.append(start_count)
+                print("start append", len(sequence_end_n), len(sequence_end_t), len(sequence_start_n), len(sequence_start_t), len(file_names))
                 file_names.append(file_name)
                 #print("start_append")
                 if already:
                     sequence_end_n.append(count_upperbound)
                     sequence_end_t.append(time_upperbound)
+                    print("end append", len(sequence_end_n), len(sequence_end_t), len(sequence_start_n), len(sequence_start_t), len(file_names))
                 already = True
 
             volume_save_path = os.path.join(target_root, file_name+"_"+str(unique_time)+".npz")
             if not (os.path.exists(volume_save_path)):
-                print("generate")
                 dat_event = f_event
                 dat_event.seek_event(start_count)
                 events = dat_event.load_n_events(int(end_count - start_count))
@@ -215,6 +216,7 @@ for mode in ["train","val","test"]:
         if count_upperbound > 0:
             sequence_end_n.append(count_upperbound)
             sequence_end_t.append(time_upperbound)
+            print("end append a file", len(sequence_end_n), len(sequence_end_t), len(sequence_start_n), len(sequence_start_t), len(file_names))
         #print("end_append_last")
 
         assert len(sequence_end_n) == len(sequence_end_t) == len(sequence_start_n) == len(sequence_start_t) == len(file_names)
