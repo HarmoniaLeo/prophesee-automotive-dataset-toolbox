@@ -172,7 +172,6 @@ for mode in ["train","val","test"]:
             del dat_event
             events = rfn.structured_to_unstructured(events)[:, [1, 2, 0, 3]].astype(float)
 
-            print(events[:5])
             z = np.zeros_like(events[:,0])
 
             bins = int((end_time - start_time) / events_window_abin)
@@ -186,6 +185,7 @@ for mode in ["train","val","test"]:
             if start_time > time_upperbound:
                 memory = None
                 events_ = events[events[...,4] < event_volume_bins]
+                print(events_[:5])
                 volume, memory = generate_taf_cuda(events_, shape, memory, event_volume_bins)
                 iter = event_volume_bins
             else:
