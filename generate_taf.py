@@ -167,6 +167,7 @@ for mode in ["train","val","test"]:
 
             volume_save_path = os.path.join(target_root, file_name+"_"+str(unique_time)+".npz")
             if not (os.path.exists(volume_save_path)):
+                print("generate")
                 dat_event = f_event
                 dat_event.seek_event(start_count)
                 events = dat_event.load_n_events(int(end_count - start_count))
