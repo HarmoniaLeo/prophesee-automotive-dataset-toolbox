@@ -73,7 +73,6 @@ def generate_taf_cuda(events, shape, past_volume = None, volume_bins=5):
         for bin in range(volume_bins):
             x_, y_, t_, p_ = x[z == bin], y[z == bin], t[z == bin], p[z == bin]
             histogram, ecd, past_volume = taf_cuda(x_, y_, t_, p_, shape, volume_bins, past_volume)
-            denseToSparse(histogram)
     else:
         histogram, ecd, past_volume = taf_cuda(x, y, t, p, shape, volume_bins, past_volume)
 
@@ -186,12 +185,18 @@ for mode in ["train","val","test"]:
             if start_time > time_upperbound:
                 memory = None
                 events_ = events[events[...,4] < event_volume_bins]
+                t_max = start_time + event_volume_bins * events_window_abin
+                t_min = start_time
+                events_[:,3] = (events_[:, 3] - t_min)/(t_max - t_min + 1e-8)
                 volume, memory = generate_taf_cuda(events_, shape, memory, event_volume_bins)
                 iter = event_volume_bins
             else:
                 iter = 0
             while(iter < bins):
                 events_ = events[events[...,4] == iter]
+                t_max = start_time + iter * events_window_abin
+                t_min = start_time + (iter -1) * events_window_abin
+                events_[:,3] = (events_[:, 3] - t_min)/(t_max - t_min + 1e-8)
                 volume, memory = generate_taf_cuda(events_, shape, memory, event_volume_bins)
                 iter += 1
             #h5.create_dataset(file_name+"/"+str(unique_time), shape = volume.shape, data = volume)
