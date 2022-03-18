@@ -6,69 +6,68 @@ import tqdm
 import os
 from numpy.lib import recfunctions as rfn
 import h5py
-import torch
 
 def taf_cuda(x, y, t, p, shape, volume_bins, past_volume):
     H, W = shape
 
-    t_star = t.float()[:,None]
+    t_star = t.astype(float)[:,None]
         
     xpos = x[p == 1]
     ypos = y[p == 1]
-    adderpos = torch.arange(2).to(x.device)[None,:]
-    adderpos = 1 - torch.abs(adderpos-t_star[p == 1])
-    adderpos = torch.where(adderpos>=0,adderpos,torch.tensor([0.0]).to(x.device))
+    adderpos = np.arange(2)[None,:]
+    adderpos = 1 - np.abs(adderpos-t_star[p == 1])
+    adderpos = np.where(adderpos>=0,adderpos,0)
 
     xneg = x[p == 0]
     yneg = y[p == 0]
-    adderneg = torch.arange(2).to(x.device)[None,:]
-    adderneg = 1 - torch.abs(adderneg-t_star[p == 0])
-    adderneg = torch.where(adderneg>=0,adderneg,torch.tensor([0.0]).to(x.device))
+    adderneg = np.arange(2)[None,:]
+    adderneg = 1 - np.abs(adderneg-t_star[p == 0])
+    adderneg = np.where(adderneg>=0,adderneg,0)
 
 
-    img_pos = torch.zeros((H * W, 2)).float().to(x.device)
-    img_pos.index_add_(0, xpos + W * ypos, adderpos)
-    img_neg = torch.zeros((H * W, 2)).float().to(x.device)
-    img_neg.index_add_(0, xneg + W * yneg, adderneg)
+    img_pos = np.zeros((H * W, 2)).astype(float)
+    np.add.at(img_pos, W * ypos + xpos, adderpos)
+    img_neg = np.zeros((H * W, 2)).astype(float)
+    np.add.at(img_neg, W * yneg + xneg, adderneg)
 
     forward_pos = (img_pos[:,-1]==0)
     forward_neg = (img_neg[:,-1]==0)
     if not (past_volume is None):
         img_pos_old, img_neg_old, pos_ecd, neg_ecd = past_volume
-        img_pos_old[:,-1] = torch.where(pos_ecd[:,-1] == 0,img_pos_old[:,-1] + img_pos[:,0],img_pos_old[:,-1])
-        img_neg_old[:,-1] = torch.where(neg_ecd[:,-1] == 0,img_neg_old[:,-1] + img_neg[:,0],img_neg_old[:,-1])
-        img_pos = torch.cat([img_pos_old,img_pos[:,1:]],dim=1)
-        pos_ecd = torch.cat([pos_ecd,torch.zeros_like(pos_ecd[:,-1:])],dim=1)
-        img_neg = torch.cat([img_neg_old,img_neg[:,1:]],dim=1)
-        neg_ecd = torch.cat([neg_ecd,torch.zeros_like(neg_ecd[:,-1:])],dim=1)
+        img_pos_old[:,-1] = np.where(pos_ecd[:,-1] == 0,img_pos_old[:,-1] + img_pos[:,0],img_pos_old[:,-1])
+        img_neg_old[:,-1] = np.where(neg_ecd[:,-1] == 0,img_neg_old[:,-1] + img_neg[:,0],img_neg_old[:,-1])
+        img_pos = np.concatenate([img_pos_old,img_pos[:,1:]],axis=1)
+        pos_ecd = np.concatenate([pos_ecd,np.zeros_like(pos_ecd[:,-1:])],axis=1)
+        img_neg = np.concatenate([img_neg_old,img_neg[:,1:]],axis=1)
+        neg_ecd = np.concatenate([neg_ecd,np.zeros_like(neg_ecd[:,-1:])],axis=1)
         for i in range(1,img_pos.shape[1])[::-1]:
-            img_pos[:,i] = torch.where(forward_pos, img_pos[:,i-1],img_pos[:,i])
+            img_pos[:,i] = np.where(forward_pos, img_pos[:,i-1],img_pos[:,i])
             pos_ecd[:,i-1] = pos_ecd[:,i-1] - 1
-            pos_ecd[:,i] = torch.where(forward_pos, pos_ecd[:,i-1],pos_ecd[:,i])
-            img_neg[:,i] = torch.where(forward_neg, img_neg[:,i-1],img_neg[:,i])
+            pos_ecd[:,i] = np.where(forward_pos, pos_ecd[:,i-1],pos_ecd[:,i])
+            img_neg[:,i] = np.where(forward_neg, img_neg[:,i-1],img_neg[:,i])
             neg_ecd[:,i-1] = neg_ecd[:,i-1] - 1
-            neg_ecd[:,i] = torch.where(forward_neg, neg_ecd[:,i-1],neg_ecd[:,i])
-        img_pos[:,0] = torch.where(forward_pos, torch.zeros_like(forward_pos).float(), img_pos[:,0])
-        pos_ecd[:,0] = torch.where(forward_pos, torch.zeros_like(forward_pos).float() -1e6, pos_ecd[:,0])
-        img_neg[:,0] = torch.where(forward_neg, torch.zeros_like(forward_neg).float(), img_neg[:,0])
-        neg_ecd[:,0] = torch.where(forward_neg, torch.zeros_like(forward_neg).float() -1e6, neg_ecd[:,0])
+            neg_ecd[:,i] = np.where(forward_neg, neg_ecd[:,i-1],neg_ecd[:,i])
+        img_pos[:,0] = np.where(forward_pos, np.zeros_like(forward_pos).astype(float), img_pos[:,0])
+        pos_ecd[:,0] = np.where(forward_pos, np.zeros_like(forward_pos).astype(float) -1e6, pos_ecd[:,0])
+        img_neg[:,0] = np.where(forward_neg, np.zeros_like(forward_neg).astype(float), img_neg[:,0])
+        neg_ecd[:,0] = np.where(forward_neg, np.zeros_like(forward_neg).astype(float) -1e6, neg_ecd[:,0])
     else:
-        pos_ecd = torch.where(forward_pos, torch.zeros_like(forward_pos).float() -1e6, torch.zeros_like(forward_pos).float())
-        pos_ecd = torch.stack([pos_ecd,pos_ecd],dim=1)
-        neg_ecd = torch.where(forward_neg, torch.zeros_like(forward_neg).float() -1e6, torch.zeros_like(forward_neg).float())
-        neg_ecd = torch.stack([neg_ecd,neg_ecd],dim=1)
+        pos_ecd = np.where(forward_pos, np.zeros_like(forward_pos).astype(float) -1e6, np.zeros_like(forward_pos).astype(float))
+        pos_ecd = np.stack([pos_ecd,pos_ecd],axis=1)
+        neg_ecd = np.where(forward_neg, np.zeros_like(forward_neg).astype(float) -1e6, np.zeros_like(forward_neg).astype(float))
+        neg_ecd = np.stack([neg_ecd,neg_ecd],axis=1)
     if img_pos.shape[1] > volume_bins:
         img_pos, img_neg, pos_ecd, neg_ecd = img_pos[:,1:], img_neg[:,1:], pos_ecd[:,1:], neg_ecd[:,1:]
 
-    histogram = torch.cat([img_neg, img_pos], -1).view((H, W, img_neg.shape[1] * 2)).permute(2, 0, 1)
-    ecd = torch.cat([neg_ecd, pos_ecd], -1).view((H, W, img_neg.shape[1] * 2)).permute(2, 0, 1)
+    histogram = np.concatenate([img_neg, img_pos], -1).reshape((H, W, img_neg.shape[1] * 2)).transpose(2, 0, 1)
+    ecd = np.concatenate([neg_ecd, pos_ecd], -1).reshape((H, W, img_neg.shape[1] * 2)).transpose(2, 0, 1)
     past_volume = (img_pos, img_neg, pos_ecd, neg_ecd)
     return histogram, ecd, past_volume
 
 def generate_taf_cuda(events, shape, past_volume = None, volume_bins=5):
-    x, y, t, p, z = events.unbind(-1)
+    x, y, t, p, z = events.T
 
-    x, y, p = x.long(), y.long(), p.long()
+    x, y, p = x.astype(int), y.astype(int), p.astype(int)
     
     if past_volume is None:
         for bin in range(volume_bins):
@@ -77,7 +76,7 @@ def generate_taf_cuda(events, shape, past_volume = None, volume_bins=5):
     else:
         histogram, ecd, past_volume = taf_cuda(x, y, t, p, shape, volume_bins, past_volume)
 
-    return torch.stack([histogram, ecd], dim = -1), past_volume
+    return np.stack([histogram, ecd], -1), past_volume
 
 def denseToSparse(dense_tensor):
     """
@@ -169,17 +168,17 @@ for mode in ["train","val","test"]:
             dat_event.seek_event(start_count)
             events = dat_event.load_n_events(int(end_count - start_count))
             del dat_event
-            events = torch.from_numpy(rfn.structured_to_unstructured(events)[:, [1, 2, 0, 3]].astype(float)).cuda()
+            events = rfn.structured_to_unstructured(events)[:, [1, 2, 0, 3]].astype(float)
 
-            z = torch.zeros_like(events[:,0])
+            z = np.zeros_like(events[:,0])
 
             bins = int((end_time - start_time) / events_window_abin)
             assert bins == (end_time - start_time) / events_window_abin
             
             for i in range(bins):
-                z = torch.where((events[:,2] >= start_time + i * events_window_abin)&(events[:,2] <= start_time + (i + 1) * events_window_abin), torch.zeros_like(events[:,2])+i, torch.zeros_like(events[:,2])+z)
+                z = np.where((events[:,2] >= start_time + i * events_window_abin)&(events[:,2] <= start_time + (i + 1) * events_window_abin), i, z)
                 #events_timestamps.append(start_time + (i + 1) * self.events_window_abin)
-            events = torch.cat([events,z[:,None]], dim=1)
+            events = np.concatenate([events,z[:,None]], axis=1)
 
             if start_time > time_upperbound:
                 memory = None
@@ -199,10 +198,11 @@ for mode in ["train","val","test"]:
                 volume, memory = generate_taf_cuda(events_, shape, memory, event_volume_bins)
                 iter += 1
             #h5.create_dataset(file_name+"/"+str(unique_time), shape = volume.shape, data = volume)
-            volume_ = volume.cpu().numpy().copy()
+            volume_ = volume.copy()
             volume_[...,1] = np.where(volume_[...,1]>-1e6, volume_[...,1] - 1, 0)
             locations, features = denseToSparse(volume_)
             volume_save_path = os.path.join(target_root, file_name+"_"+str(unique_time)+".npz")
+            print(locations.shape[1])
             np.savez(volume_save_path, locations = locations, features = features)
 
             time_upperbound = end_time
