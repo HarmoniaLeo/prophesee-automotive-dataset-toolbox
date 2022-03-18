@@ -88,11 +88,10 @@ def denseToSparse(dense_tensor):
     """
     non_zero_indices = np.nonzero(np.abs(dense_tensor))
 
-    print(non_zero_indices)
-    select_indices = non_zero_indices.split(1, axis=1)
-    features = np.squeeze(dense_tensor[select_indices], axis=-2)
+    features = dense_tensor[non_zero_indices[0],non_zero_indices[1],non_zero_indices[2],non_zero_indices[3]]
+    print(features)
 
-    return non_zero_indices, features
+    return np.stack(non_zero_indices), features
 
 min_event_count = 200000
 events_window = 50000
