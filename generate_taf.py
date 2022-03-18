@@ -89,7 +89,6 @@ def denseToSparse(dense_tensor):
     non_zero_indices = np.nonzero(np.abs(dense_tensor))
 
     features = dense_tensor[non_zero_indices[0],non_zero_indices[1],non_zero_indices[2],non_zero_indices[3]]
-    print(features)
 
     return np.stack(non_zero_indices), features
 
@@ -203,7 +202,7 @@ for mode in ["train","val","test"]:
             volume_[...,1] = np.where(volume_[...,1]>-1e6, volume_[...,1] - 1, 0)
             locations, features = denseToSparse(volume_)
             volume_save_path = os.path.join(target_root, file_name+"_"+str(unique_time)+".npz")
-            np.save(volume_save_path, locations = locations, features = features)
+            np.savez(volume_save_path, locations = locations, features = features)
 
             time_upperbound = end_time
             count_upperbound = end_count
