@@ -203,7 +203,6 @@ for mode in ["train","val","test"]:
             volume_[...,1] = np.where(volume_[...,1]>-1e6, volume_[...,1] - 1, 0)
             locations, features = denseToSparse(volume_)
             volume_save_path = os.path.join(target_root, file_name+"_"+str(unique_time)+".npz")
-            print(locations.shape[1])
             np.savez(volume_save_path, locations = locations, features = features)
 
             time_upperbound = end_time
