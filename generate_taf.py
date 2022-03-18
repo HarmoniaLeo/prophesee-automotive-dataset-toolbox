@@ -73,6 +73,7 @@ def generate_taf_cuda(events, shape, past_volume = None, volume_bins=5):
         for bin in range(volume_bins):
             x_, y_, t_, p_ = x[z == bin], y[z == bin], t[z == bin], p[z == bin]
             histogram, ecd, past_volume = taf_cuda(x_, y_, t_, p_, shape, volume_bins, past_volume)
+            denseToSparse(histogram)
     else:
         histogram, ecd, past_volume = taf_cuda(x, y, t, p, shape, volume_bins, past_volume)
 
@@ -186,7 +187,6 @@ for mode in ["train","val","test"]:
                 memory = None
                 events_ = events[events[...,4] < event_volume_bins]
                 volume, memory = generate_taf_cuda(events_, shape, memory, event_volume_bins)
-                locations, features = denseToSparse(volume)
                 iter = event_volume_bins
             else:
                 iter = 0
