@@ -155,6 +155,7 @@ for mode in ["train","val","test"]:
                 memory = None
             else:
                 start_count = count_upperbound
+                assert bbox_count > 0
 
             volume_save_path = os.path.join(target_root, file_name+"_"+str(unique_time)+".npz")
             #if not (os.path.exists(volume_save_path)):
