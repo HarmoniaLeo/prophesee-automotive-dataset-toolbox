@@ -99,6 +99,9 @@ events_window = 50000
 events_window_abin = 10000
 event_volume_bins = 5
 shape = [240,304]
+target_shape = [256, 320]
+rh = target_shape[0] / shape[0]
+rw = target_shape[1] / shape[1]
 raw_dir = "/data/ATIS_Automotive_Detection_Dataset/detection_dataset_duration_60s_ratio_1.0"
 
 for mode in ["train","val","test"]:
@@ -164,6 +167,8 @@ for mode in ["train","val","test"]:
             events = dat_event.load_n_events(int(end_count - start_count))
             del dat_event
             events = torch.from_numpy(rfn.structured_to_unstructured(events)[:, [1, 2, 0, 3]].astype(float)).cuda()
+            events[:,0] = events[:,0] * rw
+            events[:,1] = events[:,1] * rh
 
             z = torch.zeros_like(events[:,0])
 
@@ -190,7 +195,7 @@ for mode in ["train","val","test"]:
                 t_max = start_time + iter * events_window_abin
                 t_min = start_time + (iter -1) * events_window_abin
                 events_[:,2] = (events_[:, 2] - t_min)/(t_max - t_min + 1e-8)
-                volume, memory = generate_taf_cuda(events_, shape, memory, event_volume_bins)
+                volume, memory = generate_taf_cuda(events_, target_shape, memory, event_volume_bins)
                 iter += 1
             #h5.create_dataset(file_name+"/"+str(unique_time), shape = volume.shape, data = volume)
             volume_ = volume.cpu().numpy().copy()
