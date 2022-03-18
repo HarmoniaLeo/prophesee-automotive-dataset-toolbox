@@ -70,7 +70,6 @@ def generate_taf_cuda(events, shape, past_volume = None, volume_bins=5):
     x, y, t, p, z = events.unbind(-1)
 
     x, y, p = x.long(), y.long(), p.long()
-    print(x.max(),y.max())
     
     if past_volume is None:
         for bin in range(volume_bins):
@@ -170,7 +169,6 @@ for mode in ["train","val","test"]:
             events = torch.from_numpy(rfn.structured_to_unstructured(events)[:, [1, 2, 0, 3]].astype(float)).cuda()
             events[:,0] = events[:,0] * rw
             events[:,1] = events[:,1] * rh
-            print(events[:,0].max(),events[:,1].max())
 
             z = torch.zeros_like(events[:,0])
 
@@ -188,7 +186,7 @@ for mode in ["train","val","test"]:
                 t_max = start_time + event_volume_bins * events_window_abin
                 t_min = start_time
                 events_[:,2] = (events_[:, 2] - t_min)/(t_max - t_min + 1e-8)
-                volume, memory = generate_taf_cuda(events_, shape, memory, event_volume_bins)
+                volume, memory = generate_taf_cuda(events_, target_shape, memory, event_volume_bins)
                 iter = event_volume_bins
             else:
                 iter = 0
