@@ -165,45 +165,46 @@ for mode in ["train","val","test"]:
                     sequence_end_t.append(time_upperbound)
                 already = True
 
-            dat_event = f_event
-            dat_event.seek_event(start_count)
-            events = dat_event.load_n_events(int(end_count - start_count))
-            del dat_event
-            events = torch.from_numpy(rfn.structured_to_unstructured(events)[:, [1, 2, 0, 3]].astype(float)).cuda()
-
-            z = torch.zeros_like(events[:,0])
-
-            bins = int((end_time - start_time) / events_window_abin)
-            assert bins == (end_time - start_time) / events_window_abin
-            
-            for i in range(bins):
-                z = torch.where((events[:,2] >= start_time + i * events_window_abin)&(events[:,2] <= start_time + (i + 1) * events_window_abin), torch.zeros_like(events[:,2])+i, torch.zeros_like(events[:,2])+z)
-                #events_timestamps.append(start_time + (i + 1) * self.events_window_abin)
-            events = torch.cat([events,z[:,None]], dim=1)
-
-            if start_time > time_upperbound:
-                memory = None
-                events_ = events[events[...,4] < event_volume_bins]
-                t_max = start_time + event_volume_bins * events_window_abin
-                t_min = start_time
-                events_[:,2] = (events_[:, 2] - t_min)/(t_max - t_min + 1e-8)
-                volume, memory = generate_taf_cuda(events_, shape, memory, event_volume_bins)
-                iter = event_volume_bins
-            else:
-                iter = 0
-            while(iter < bins):
-                events_ = events[events[...,4] == iter]
-                t_max = start_time + iter * events_window_abin
-                t_min = start_time + (iter -1) * events_window_abin
-                events_[:,2] = (events_[:, 2] - t_min)/(t_max - t_min + 1e-8)
-                volume, memory = generate_taf_cuda(events_, shape, memory, event_volume_bins)
-                iter += 1
-            #h5.create_dataset(file_name+"/"+str(unique_time), shape = volume.shape, data = volume)
-            volume_ = volume.cpu().numpy().copy()
-            volume_[...,1] = np.where(volume_[...,1]>-1e6, volume_[...,1] - 1, 0)
-            locations, features = denseToSparse(volume_)
             volume_save_path = os.path.join(target_root, file_name+"_"+str(unique_time)+".npz")
-            np.savez(volume_save_path, locations = locations, features = features)
+            if not (os.path.exists(volume_save_path)):
+                dat_event = f_event
+                dat_event.seek_event(start_count)
+                events = dat_event.load_n_events(int(end_count - start_count))
+                del dat_event
+                events = torch.from_numpy(rfn.structured_to_unstructured(events)[:, [1, 2, 0, 3]].astype(float)).cuda()
+
+                z = torch.zeros_like(events[:,0])
+
+                bins = int((end_time - start_time) / events_window_abin)
+                assert bins == (end_time - start_time) / events_window_abin
+                
+                for i in range(bins):
+                    z = torch.where((events[:,2] >= start_time + i * events_window_abin)&(events[:,2] <= start_time + (i + 1) * events_window_abin), torch.zeros_like(events[:,2])+i, torch.zeros_like(events[:,2])+z)
+                    #events_timestamps.append(start_time + (i + 1) * self.events_window_abin)
+                events = torch.cat([events,z[:,None]], dim=1)
+
+                if start_time > time_upperbound:
+                    memory = None
+                    events_ = events[events[...,4] < event_volume_bins]
+                    t_max = start_time + event_volume_bins * events_window_abin
+                    t_min = start_time
+                    events_[:,2] = (events_[:, 2] - t_min)/(t_max - t_min + 1e-8)
+                    volume, memory = generate_taf_cuda(events_, shape, memory, event_volume_bins)
+                    iter = event_volume_bins
+                else:
+                    iter = 0
+                while(iter < bins):
+                    events_ = events[events[...,4] == iter]
+                    t_max = start_time + iter * events_window_abin
+                    t_min = start_time + (iter -1) * events_window_abin
+                    events_[:,2] = (events_[:, 2] - t_min)/(t_max - t_min + 1e-8)
+                    volume, memory = generate_taf_cuda(events_, shape, memory, event_volume_bins)
+                    iter += 1
+                #h5.create_dataset(file_name+"/"+str(unique_time), shape = volume.shape, data = volume)
+                volume_ = volume.cpu().numpy().copy()
+                volume_[...,1] = np.where(volume_[...,1]>-1e6, volume_[...,1] - 1, 0)
+                locations, features = denseToSparse(volume_)
+                np.savez(volume_save_path, locations = locations, features = features)
 
             time_upperbound = end_time
             count_upperbound = end_count
@@ -214,7 +215,6 @@ for mode in ["train","val","test"]:
             sequence_end_n.append(count_upperbound)
             sequence_end_t.append(time_upperbound)
         #print("end_append_last")
-
 
         assert len(sequence_end_n) == len(sequence_end_t) == len(sequence_start_n) == len(sequence_start_t) == len(file_names)
     
