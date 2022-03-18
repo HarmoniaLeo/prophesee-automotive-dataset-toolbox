@@ -134,6 +134,7 @@ for mode in ["train","val","test"]:
         f_event = psee_loader.PSEELoader(event_file)
 
         time_upperbound = -1e16
+        count_upperbound = -1
         already = False
         for bbox_count,unique_time in enumerate(unique_ts):
             if unique_time <= 500000:
@@ -158,13 +159,13 @@ for mode in ["train","val","test"]:
                     start_count = 0
                 sequence_start_t.append(start_time)
                 sequence_start_n.append(start_count)
-                print("start append", len(sequence_end_n), len(sequence_end_t), len(sequence_start_n), len(sequence_start_t), len(file_names))
+                #print("start append", len(sequence_end_n), len(sequence_end_t), len(sequence_start_n), len(sequence_start_t), len(file_names))
                 file_names.append(file_name)
                 #print("start_append")
                 if already:
                     sequence_end_n.append(count_upperbound)
                     sequence_end_t.append(time_upperbound)
-                    print("end append", len(sequence_end_n), len(sequence_end_t), len(sequence_start_n), len(sequence_start_t), len(file_names))
+                    #print("end append", len(sequence_end_n), len(sequence_end_t), len(sequence_start_n), len(sequence_start_t), len(file_names))
                 already = True
 
             volume_save_path = os.path.join(target_root, file_name+"_"+str(unique_time)+".npz")
@@ -216,7 +217,7 @@ for mode in ["train","val","test"]:
         if count_upperbound > 0:
             sequence_end_n.append(count_upperbound)
             sequence_end_t.append(time_upperbound)
-            print("end append a file", len(sequence_end_n), len(sequence_end_t), len(sequence_start_n), len(sequence_start_t), len(file_names))
+            #print("end append a file", len(sequence_end_n), len(sequence_end_t), len(sequence_start_n), len(sequence_start_t), len(file_names))
         #print("end_append_last")
 
         assert len(sequence_end_n) == len(sequence_end_t) == len(sequence_start_n) == len(sequence_start_t) == len(file_names)
