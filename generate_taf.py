@@ -70,6 +70,7 @@ def generate_taf_cuda(events, shape, past_volume = None, volume_bins=5):
     x, y, t, p, z = events.unbind(-1)
 
     x, y, p = x.long(), y.long(), p.long()
+    print(x.max(),y.max())
     
     if past_volume is None:
         for bin in range(volume_bins):
