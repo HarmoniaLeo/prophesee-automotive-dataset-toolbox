@@ -95,6 +95,7 @@ if __name__ == '__main__':
     #print(target)
     buffer = np.load(event_file,allow_pickle=True)
     locations = buffer["locations"]
+    print(locations.shape)
     features = buffer["features"]
     c, y, x, p = locations.T
     z = np.zeros_like(c)
