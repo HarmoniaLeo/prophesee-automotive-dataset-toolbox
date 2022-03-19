@@ -18,8 +18,8 @@ def generate_event_volume(events,shape):
     H, W = shape
     C = c.max()
 
-    feature_map = np.zeros((H * W * 2, C),dtype=float)
-    np.add.at(feature_map, W * 2 * y + 2 * x + p, features)
+    feature_map = np.zeros((C * H * W * 2),dtype=float)
+    np.add.at(feature_map, c * H * W * 2 + y * W * 2 + x * 2 + p, features)
 
     volume = feature_map.reshape(H, W, 2, C).transpose(3, 0, 1, 2)
     volume[...,1] = np.where(volume[...,1] ==0, -1e6, volume[...,1] + 1)
