@@ -206,7 +206,7 @@ for mode in ["train","val","test"]:
             locations, features = denseToSparse(volume_)
             c, y, x, p = locations
             volume_save_path = os.path.join(target_root, file_name+"_"+str(unique_time)+"_c.npy")
-            print(c.dtype)
+            print(c.shape)
             c.tofile(volume_save_path)
             volume_save_path = os.path.join(target_root, file_name+"_"+str(unique_time)+"_y.npy")
             y.tofile(volume_save_path)
@@ -216,6 +216,7 @@ for mode in ["train","val","test"]:
             p.tofile(volume_save_path)
             volume_save_path = os.path.join(target_root, file_name+"_"+str(unique_time)+"_f.npy")
             features.tofile(volume_save_path)
+            print(features.shape)
             
             #np.savez(volume_save_path, locations = locations, features = features)
             #h5.create_dataset(str(unique_time)+"/locations", data=locations)
