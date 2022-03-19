@@ -57,7 +57,7 @@ def visualizeVolume(volume,ecd,gt_i,filename,path,time_stamp_end):
     for j in range(len(ecd)):
         img_s = 255 * np.ones((volume.shape[1], volume.shape[2], 3), dtype=np.uint8)
         ecd_view = ecd[j][ecd[j]>-1e6]
-        print(j)
+        sns.distplot(ecd_view)
         for i in range(0,100,10):
             print(np.percentile(ecd_view,i))
         tar = ecd[j] - ecd[j][ecd[j]>-1e6].min(axis=0).min(axis=0)
@@ -76,6 +76,8 @@ def visualizeVolume(volume,ecd,gt_i,filename,path,time_stamp_end):
         if not(os.path.exists(path_t)):
             os.mkdir(path_t)
         cv2.imwrite(os.path.join(path_t,'{0}.png'.format(j)),img_s)
+        plt.savefig(os.path.join(path_t,'{0}_kde.png'.format(j)),dpi=100, bbox_inches = 'tight')
+        plt.clf()
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(
