@@ -91,7 +91,7 @@ if __name__ == '__main__':
     f_bbox.close()
 
     final_path = os.path.join(data_path,data_folder)
-    event_file = os.path.join(final_path, item+"_"+time_stamp_end+".npz")
+    event_file = os.path.join(final_path, item+"_"+str(time_stamp_end)+".npz")
     #print(target)
     buffer = np.load(event_file,allow_pickle=True)
     locations = buffer["locations"]
