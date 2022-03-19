@@ -123,10 +123,9 @@ for mode in ["train","val","test"]:
     for i_file, file_name in enumerate(files):
         event_file = os.path.join(root, file_name + '_td.dat')
         bbox_file = os.path.join(root, file_name + '_bbox.npy')
-        volume_save_path = os.path.join(target_root, file_name+".h5")
         if os.path.exists(volume_save_path):
             continue
-        h5 = h5py.File(volume_save_path, "w")
+        #h5 = h5py.File(volume_save_path, "w")
         f_bbox = open(bbox_file, "rb")
         start, v_type, ev_size, size = npy_events_tools.parse_header(f_bbox)
         dat_bbox = np.fromfile(f_bbox, dtype=v_type, count=-1)
@@ -205,15 +204,24 @@ for mode in ["train","val","test"]:
             volume_ = volume.cpu().numpy().copy()
             volume_[...,1] = np.where(volume_[...,1]>-1e6, volume_[...,1] - 1, 0)
             locations, features = denseToSparse(volume_)
-            #np.concatenate([locations, features[None,:]],axis=0).tofile(volume_save_path)
-            #np.concatenate([locations, features[None,:]],axis=0).tofile(volume_save_path)
+            c, y, x, p = locations
+            volume_save_path = os.path.join(target_root, file_name+"_"+str(unique_time)+"_c.npy")
+            c.tofile(volume_save_path)
+            volume_save_path = os.path.join(target_root, file_name+"_"+str(unique_time)+"_y.npy")
+            y.tofile(volume_save_path)
+            volume_save_path = os.path.join(target_root, file_name+"_"+str(unique_time)+"_x.npy")
+            x.tofile(volume_save_path)
+            volume_save_path = os.path.join(target_root, file_name+"_"+str(unique_time)+"_p.npy")
+            p.tofile(volume_save_path)
+            volume_save_path = os.path.join(target_root, file_name+"_"+str(unique_time)+"_f.npy")
+            features.tofile(volume_save_path)
             
             #np.savez(volume_save_path, locations = locations, features = features)
-            h5.create_dataset(str(unique_time)+"/locations", data=locations)
-            h5.create_dataset(str(unique_time)+"/features", data=features)
+            #h5.create_dataset(str(unique_time)+"/locations", data=locations)
+            #h5.create_dataset(str(unique_time)+"/features", data=features)
             time_upperbound = end_time
             count_upperbound = end_count
-        h5.close()
+        #h5.close()
         pbar.update(1)
     pbar.close()
     #h5.close()
