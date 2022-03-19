@@ -65,7 +65,7 @@ def visualizeVolume(volume,ecd,gt_i,filename,path,time_stamp_end):
         path_t = os.path.join(path,filename+"_end{1}".format(int(time_stamp_end)))
         if not(os.path.exists(path_t)):
             os.mkdir(path_t)
-        cv2.imwrite(os.path.join(path_t,'{1}.png'.format(j)),img_s)
+        cv2.imwrite(os.path.join(path_t,'{0}.png'.format(j)),img_s)
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(
