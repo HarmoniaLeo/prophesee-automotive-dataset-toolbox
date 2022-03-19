@@ -18,7 +18,7 @@ def generate_event_volume(events,shape,ori_shape):
     x = x * rw
     y = y * rh
 
-    x, y, p, c = x.astype(np.long), y.astype(np.long), p.astype(np.long), c.astype(np.long)
+    x, y, p, c = x.astype(int), y.astype(int), p.astype(int), c.astype(int)
     
     H, W = shape
     C = c.max() + 1
