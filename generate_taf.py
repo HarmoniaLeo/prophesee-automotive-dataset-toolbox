@@ -160,7 +160,7 @@ for mode in ["train","val","test"]:
                 start_count = count_upperbound
                 assert bbox_count > 0
 
-            volume_save_path = os.path.join(target_root, file_name+"_"+str(unique_time)+".npy")
+            volume_save_path = os.path.join(target_root, file_name+"_"+str(unique_time)+".h5")
             #if not (os.path.exists(volume_save_path)):
             dat_event = f_event
             dat_event.seek_event(start_count)
@@ -197,13 +197,17 @@ for mode in ["train","val","test"]:
                 events_[:,2] = (events_[:, 2] - t_min)/(t_max - t_min + 1e-8)
                 volume, memory = generate_taf_cuda(events_, target_shape, memory, event_volume_bins)
                 iter += 1
-            #h5.create_dataset(file_name+"/"+str(unique_time), shape = volume.shape, data = volume)
+            h5 = h5py.File(volume_save_path, 'w')
             volume_ = volume.cpu().numpy().copy()
             volume_[...,1] = np.where(volume_[...,1]>-1e6, volume_[...,1] - 1, 0)
             locations, features = denseToSparse(volume_)
-            np.concatenate([locations, features[None,:]],axis=0).tofile(volume_save_path)
-            events = np.fromfile(volume_save_path)
-            events = events.reshape(5,-1)
+            #np.concatenate([locations, features[None,:]],axis=0).tofile(volume_save_path)
+            #np.concatenate([locations, features[None,:]],axis=0).tofile(volume_save_path)
+            h5.create_dataset("features", data = features)
+            h5.create_dataset("locations", data = locations)
+            h5.close()
+            # events = np.fromfile(volume_save_path)
+            # events = events.reshape(5,-1)
             #np.savez(volume_save_path, locations = locations, features = features)
 
             time_upperbound = end_time
