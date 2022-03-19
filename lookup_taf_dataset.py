@@ -10,8 +10,13 @@ import matplotlib.pyplot as plt
 import pandas as pd
 sns.set_style("darkgrid")
 
-def generate_event_volume(events,shape):
+def generate_event_volume(events,shape,ori_shape):
+    rh = ori_shape[0]/shape[0]
+    rw = ori_shape[1]/shape[1]
+
     x, y, t, c, z, p, features = events.T
+    x = x * rw
+    y = y * rh
 
     x, y, p, c = x.astype(int), y.astype(int), p.astype(int), c.astype(int)
     
@@ -101,6 +106,6 @@ if __name__ == '__main__':
     t = np.zeros_like(c) + time_stamp_end
     events = np.stack([x, y, t, c, z, p, features], axis=1)
 
-    volume, ecd = generate_event_volume(events,(256,320))
+    volume, ecd = generate_event_volume(events,(256,320),(240,304))
     gt_i = dat_bbox[dat_bbox['t']==time_stamp_end]
     visualizeVolume(volume,ecd,gt_i,item,result_path,time_stamp_end)
