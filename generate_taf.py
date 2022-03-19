@@ -124,6 +124,8 @@ for mode in ["train","val","test"]:
         event_file = os.path.join(root, file_name + '_td.dat')
         bbox_file = os.path.join(root, file_name + '_bbox.npy')
         volume_save_path = os.path.join(target_root, file_name+".h5")
+        if os.path.exists(volume_save_path):
+            continue
         h5 = h5py.File(volume_save_path, "w")
         f_bbox = open(bbox_file, "rb")
         start, v_type, ev_size, size = npy_events_tools.parse_header(f_bbox)
