@@ -202,10 +202,6 @@ for mode in ["train","val","test"]:
             volume_[...,1] = np.where(volume_[...,1]>-1e6, volume_[...,1] - 1, 0)
             locations, features = denseToSparse(volume_)
             np.concatenate([locations, features[None,:]],axis=0).tofile(volume_save_path)
-            events = np.fromfile(volume_save_path)
-            events = events.reshape(5,-1)
-            print(events[0].max(),events[1].max(),events[2].max(),events[3].max(),events[4].max())
-            raise Exception("break")
             #np.savez(volume_save_path, locations = locations, features = features)
 
             time_upperbound = end_time
