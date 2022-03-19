@@ -219,8 +219,7 @@ for mode in ["train","val","test"]:
             p = np.fromfile(volume_save_path, dtype=np.bool_)
             volume_save_path = os.path.join(target_root, file_name+"_"+str(unique_time)+"_f.npy")
             features.tofile(volume_save_path)
-            print(features.dtype)
-            features = np.fromfile(volume_save_path, dtype=float)
+            features = np.fromfile(volume_save_path, dtype=np.float32)
 
             print(c.shape,y.shape,x.shape,p.shape,features.shape)
             
