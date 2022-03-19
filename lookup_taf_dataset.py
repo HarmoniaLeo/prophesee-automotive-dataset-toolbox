@@ -62,7 +62,7 @@ def visualizeVolume(volume,ecd,gt_i,filename,path,time_stamp_end):
         #img_s[:,:,2] = img_2
         img_s = cv2.cvtColor(img_s, cv2.COLOR_HSV2BGR)
         draw_bboxes(img_s,gt_i)
-        path_t = os.path.join(path,filename+"_end{1}".format(int(time_stamp_end)))
+        path_t = os.path.join(path,filename+"_end{0}".format(int(time_stamp_end)))
         if not(os.path.exists(path_t)):
             os.mkdir(path_t)
         cv2.imwrite(os.path.join(path_t,'{0}.png'.format(j)),img_s)
