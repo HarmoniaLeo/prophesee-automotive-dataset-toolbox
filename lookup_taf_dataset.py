@@ -59,7 +59,7 @@ def visualizeVolume(volume,ecd,gt_i,filename,path,time_stamp_end):
         ecd_view = ecd[j][ecd[j]>-1e6]
         print(j)
         for i in range(0,100,10):
-            print(np.percentile(ecd_view,))
+            print(np.percentile(ecd_view,i))
         tar = ecd[j] - ecd[j][ecd[j]>-1e6].min(axis=0).min(axis=0)
         tar = tar / tar.max(axis=0).max(axis=0)
         tar = np.where(tar<0,0,tar)
