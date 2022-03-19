@@ -160,7 +160,7 @@ for mode in ["train","val","test"]:
                 start_count = count_upperbound
                 assert bbox_count > 0
 
-            volume_save_path = os.path.join(target_root, file_name+"_"+str(unique_time)+".npz")
+            volume_save_path = os.path.join(target_root, file_name+"_"+str(unique_time)+".npy")
             #if not (os.path.exists(volume_save_path)):
             dat_event = f_event
             dat_event.seek_event(start_count)
@@ -201,7 +201,11 @@ for mode in ["train","val","test"]:
             volume_ = volume.cpu().numpy().copy()
             volume_[...,1] = np.where(volume_[...,1]>-1e6, volume_[...,1] - 1, 0)
             locations, features = denseToSparse(volume_)
-            np.savez(volume_save_path, locations = locations, features = features)
+            np.stack([locations, features],axis=1).tofile(volume_save_path)
+            events = np.fromfile(volume_save_path)
+            print(events.shape)
+            raise Exception("break")
+            #np.savez(volume_save_path, locations = locations, features = features)
 
             time_upperbound = end_time
             count_upperbound = end_count
