@@ -95,9 +95,8 @@ if __name__ == '__main__':
     #print(target)
     buffer = np.load(event_file,allow_pickle=True)
     locations = buffer["locations"]
-    print(locations.shape)
     features = buffer["features"]
-    c, y, x, p = locations.T
+    c, y, x, p = locations
     z = np.zeros_like(c)
     t = np.zeros_like(c) + time_stamp_end
     events = np.stack([x, y, t, c, z, p, features], axis=1)
