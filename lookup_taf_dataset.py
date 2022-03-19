@@ -28,6 +28,12 @@ def generate_event_volume(events,shape,ori_shape):
 
     volume = feature_map.reshape(C, H, W, 2)
     volume[...,1] = np.where(volume[...,1] ==0, -1e6, volume[...,1] + 1)
+    ecd_view = volume[...,1][volume[...,1]>-1e6]
+    median = np.median(ecd_view)
+    q75 = np.percentile(ecd_view, 75)
+    q25 = np.percentile(ecd_view, 25)
+    volume[...,1] = np.where(volume[...,1] >-1e6, (volume[...,1] - median)/(q75 - q25 + 1e-8), volume[...,1])
+    volume[...,1] = volume[...,1] - volume[...,1].max(axis= 0).max(axis = 0).max(axis = 0)
 
     return volume[...,0], volume[...,1]
 
