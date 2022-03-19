@@ -108,7 +108,7 @@ for mode in ["train","val","test"]:
     
     file_dir = os.path.join(raw_dir, mode)
     root = file_dir
-    target_root = os.path.join("/data/ATIS_taf", mode)
+    target_root = os.path.join("/data/lbd/ATIS_taf", mode)
     #h5 = h5py.File(raw_dir + '/ATIS_taf_'+mode+'.h5', 'w')
     files = os.listdir(file_dir)
     # Remove duplicates (.npy and .dat)
