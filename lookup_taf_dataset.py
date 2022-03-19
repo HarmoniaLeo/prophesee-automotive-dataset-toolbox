@@ -12,7 +12,6 @@ sns.set_style("darkgrid")
 
 def generate_event_volume(events,shape):
     x, y, t, c, z, p, features = events.T
-    print(x.max(),y.max(),c.max(),p.max())
 
     x, y, p, c = x.astype(int), y.astype(int), p.astype(int), c.astype(int)
     
@@ -22,7 +21,7 @@ def generate_event_volume(events,shape):
     feature_map = np.zeros((C * H * W * 2),dtype=float)
     np.add.at(feature_map, c * H * W * 2 + y * W * 2 + x * 2 + p, features)
 
-    volume = feature_map.reshape(H, W, 2, C).transpose(3, 0, 1, 2)
+    volume = feature_map.reshape(C, H, W, 2)
     volume[...,1] = np.where(volume[...,1] ==0, -1e6, volume[...,1] + 1)
 
     return volume[...,0], volume[...,1]
