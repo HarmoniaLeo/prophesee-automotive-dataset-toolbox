@@ -207,21 +207,14 @@ for mode in ["train","val","test"]:
             c, y, x, p = locations
             volume_save_path = os.path.join(target_root, file_name+"_"+str(unique_time)+"_c.npy")
             c.astype(np.int8).tofile(volume_save_path)
-            c = np.fromfile(volume_save_path, dtype=np.int8)
             volume_save_path = os.path.join(target_root, file_name+"_"+str(unique_time)+"_y.npy")
             y.astype(np.int16).tofile(volume_save_path)
-            y = np.fromfile(volume_save_path, dtype=np.int16)
             volume_save_path = os.path.join(target_root, file_name+"_"+str(unique_time)+"_x.npy")
             x.astype(np.int16).tofile(volume_save_path)
-            x = np.fromfile(volume_save_path, dtype=np.int16)
             volume_save_path = os.path.join(target_root, file_name+"_"+str(unique_time)+"_p.npy")
             p.astype(np.bool_).tofile(volume_save_path)
-            p = np.fromfile(volume_save_path, dtype=np.bool_)
             volume_save_path = os.path.join(target_root, file_name+"_"+str(unique_time)+"_f.npy")
             features.tofile(volume_save_path)
-            features = np.fromfile(volume_save_path, dtype=np.float32)
-
-            print(c.shape,y.shape,x.shape,p.shape,features.shape)
             
             #np.savez(volume_save_path, locations = locations, features = features)
             #h5.create_dataset(str(unique_time)+"/locations", data=locations)
