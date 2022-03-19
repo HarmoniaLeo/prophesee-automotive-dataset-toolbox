@@ -12,6 +12,7 @@ sns.set_style("darkgrid")
 
 def generate_event_volume(events,shape):
     x, y, t, c, z, p, features = events.T
+    print(x.max(),y.max(),c.max(),p.max())
 
     x, y, p, c = x.astype(int), y.astype(int), p.astype(int), c.astype(int)
     
