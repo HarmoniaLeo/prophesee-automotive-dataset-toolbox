@@ -16,7 +16,7 @@ def generate_event_volume(events,shape):
     x, y, p, c = x.astype(int), y.astype(int), p.astype(int), c.astype(int)
     
     H, W = shape
-    C = c.max()
+    C = c.max() + 1
 
     feature_map = np.zeros((C * H * W * 2),dtype=float)
     np.add.at(feature_map, c * H * W * 2 + y * W * 2 + x * 2 + p, features)
