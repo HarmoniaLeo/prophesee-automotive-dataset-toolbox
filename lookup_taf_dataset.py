@@ -57,7 +57,7 @@ def visualizeVolume(volume,ecd,gt_i,filename,path,time_stamp_end):
     for j in range(len(ecd)):
         img_s = 255 * np.ones((volume.shape[1], volume.shape[2], 3), dtype=np.uint8)
         ecd_view = ecd[j][ecd[j]>-1e6]
-        sns.distplot(ecd_view)
+        sns.histplot(ecd_view)
         tar = ecd[j] - ecd[j][ecd[j]>-1e6].min(axis=0).min(axis=0)
         tar = tar / tar.max(axis=0).max(axis=0)
         tar = np.where(tar<0,0,tar)
