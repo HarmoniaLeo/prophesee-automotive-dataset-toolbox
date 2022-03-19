@@ -7,6 +7,7 @@ import tqdm
 import os
 from numpy.lib import recfunctions as rfn
 import h5py
+import pickle
 import torch
 
 def taf_cuda(x, y, t, p, shape, volume_bins, past_volume):
@@ -160,7 +161,7 @@ for mode in ["train","val","test"]:
                 start_count = count_upperbound
                 assert bbox_count > 0
 
-            volume_save_path = os.path.join(target_root, file_name+"_"+str(unique_time)+".h5")
+            volume_save_path = os.path.join(target_root, file_name+"_"+str(unique_time)+".pkl")
             #if not (os.path.exists(volume_save_path)):
             dat_event = f_event
             dat_event.seek_event(start_count)
@@ -197,17 +198,16 @@ for mode in ["train","val","test"]:
                 events_[:,2] = (events_[:, 2] - t_min)/(t_max - t_min + 1e-8)
                 volume, memory = generate_taf_cuda(events_, target_shape, memory, event_volume_bins)
                 iter += 1
-            h5 = h5py.File(volume_save_path, 'w')
             volume_ = volume.cpu().numpy().copy()
             volume_[...,1] = np.where(volume_[...,1]>-1e6, volume_[...,1] - 1, 0)
             locations, features = denseToSparse(volume_)
             #np.concatenate([locations, features[None,:]],axis=0).tofile(volume_save_path)
             #np.concatenate([locations, features[None,:]],axis=0).tofile(volume_save_path)
-            h5.create_dataset("features", data = features)
-            h5.create_dataset("locations", data = locations)
-            h5.close()
-            # events = np.fromfile(volume_save_path)
-            # events = events.reshape(5,-1)
+            with open(volume_save_path, 'wb') as fid:
+                pickle.dump(np.concatenate([locations, features[None,:]],axis=0), fid)
+            pkl_file = open(volume_save_path, 'rb')
+            events = pickle.load(volume_save_path)
+            print(events.shape)
             #np.savez(volume_save_path, locations = locations, features = features)
 
             time_upperbound = end_time
