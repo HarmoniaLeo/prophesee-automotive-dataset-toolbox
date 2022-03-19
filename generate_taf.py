@@ -201,7 +201,7 @@ for mode in ["train","val","test"]:
             volume_ = volume.cpu().numpy().copy()
             volume_[...,1] = np.where(volume_[...,1]>-1e6, volume_[...,1] - 1, 0)
             locations, features = denseToSparse(volume_)
-            np.concatenate([locations, features[:,None]],axis=1).tofile(volume_save_path)
+            np.concatenate([locations, features[None,:]],axis=1).tofile(volume_save_path)
             events = np.fromfile(volume_save_path)
             print(events.shape)
             raise Exception("break")
