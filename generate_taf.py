@@ -88,7 +88,7 @@ def denseToSparse(dense_tensor):
     :return locations: NumberOfActive x (SumSpatialDimensions + 1). The + 1 includes the batch index
     :return features: NumberOfActive x FeatureDimension
     """
-    non_zero_indices = np.nonzero(np.abs(dense_tensor))
+    non_zero_indices = np.nonzero(dense_tensor)
 
     features = dense_tensor[non_zero_indices[0],non_zero_indices[1],non_zero_indices[2],non_zero_indices[3]]
 
@@ -203,7 +203,8 @@ for mode in ["train","val","test"]:
             locations, features = denseToSparse(volume_)
             np.concatenate([locations, features[None,:]],axis=0).tofile(volume_save_path)
             events = np.fromfile(volume_save_path)
-            print(events.shape)
+            events = events.reshape(5,-1)
+            print(events[0].max(),events[1].max(),events[2].max(),events[3].max(),events[4].max())
             raise Exception("break")
             #np.savez(volume_save_path, locations = locations, features = features)
 
