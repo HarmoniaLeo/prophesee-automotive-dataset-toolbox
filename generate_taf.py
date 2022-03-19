@@ -102,7 +102,7 @@ shape = [240,304]
 target_shape = [256, 320]
 rh = target_shape[0] / shape[0]
 rw = target_shape[1] / shape[1]
-raw_dir = "/data/ATIS_Automotive_Detection_Dataset/detection_dataset_duration_60s_ratio_1.0"
+raw_dir = "/data/lbd/ATIS_Automotive_Detection_Dataset/detection_dataset_duration_60s_ratio_1.0"
 
 for mode in ["train","val","test"]:
     
