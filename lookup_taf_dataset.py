@@ -67,7 +67,7 @@ def visualizeVolume(volume,ecd,gt_i,filename,path,time_stamp_end):
         ecd_view = ecd[j][ecd[j]>-1e6]
         sns.histplot(ecd_view)
         plt.xlim(-5.0,0.1)
-        tar = ecd[j] - ecd[j][ecd[j]>-1e6].min(axis=0).min(axis=0)
+        tar = ecd[j] + 2.0
         tar = tar / tar.max(axis=0).max(axis=0)
         tar = np.where(tar<0,0,tar)
         #tar = np.where(tar * 10 > 1, 1, tar)
