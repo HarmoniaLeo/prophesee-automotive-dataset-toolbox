@@ -174,11 +174,10 @@ for mode in ["train","val","test"]:
             dat_event.seek_event(start_count)
             events = dat_event.load_n_events(int(end_count - start_count))
             del dat_event
-            events = rfn.structured_to_unstructured(events)[:, [1, 2, 0, 3]].astype(float)
+            events = rfn.structured_to_unstructured(events)[:, [1, 2, 0, 3]].astype(float)).cuda()
             events[:,0] = events[:,0] * rw
             events[:,1] = events[:,1] * rh
-            print(events[:,0].max(),events[:,1].max())
-            events = torch.from_numpy(events).cuda()
+        
 
             z = torch.zeros_like(events[:,0])
 
@@ -215,12 +214,6 @@ for mode in ["train","val","test"]:
             locations = x.astype(np.uint32) + np.left_shift(y.astype(np.uint32), 9) + np.left_shift(c.astype(np.uint32), 17) + np.left_shift(p.astype(np.uint32), 21)
             locations.tofile(volume_save_path_l)
             features.tofile(volume_save_path_f)
-            locations = np.fromfile(volume_save_path_l, dtype=np.uint32)
-            x = np.bitwise_and(locations, 511).astype(float)
-            y = np.right_shift(np.bitwise_and(locations, 130560), 9).astype(float)
-            c = np.right_shift(np.bitwise_and(locations, 1966080), 17).astype(float)
-            p = np.right_shift(np.bitwise_and(locations, 2097152), 21).astype(float)
-            print(x.max(),y.max(),c.max(),p.max())
             #np.savez(volume_save_path, locations = locations, features = features)
             #h5.create_dataset(str(unique_time)+"/locations", data=locations)
             #h5.create_dataset(str(unique_time)+"/features", data=features)
