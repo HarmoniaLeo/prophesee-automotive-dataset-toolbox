@@ -174,10 +174,10 @@ for mode in ["train","val","test"]:
             dat_event.seek_event(start_count)
             events = dat_event.load_n_events(int(end_count - start_count))
             del dat_event
-            events = rfn.structured_to_unstructured(events)[:, [1, 2, 0, 3]].astype(float)).cuda()
+            events = torch.from_numpy(rfn.structured_to_unstructured(events)[:, [1, 2, 0, 3]].astype(float)).cuda()
             events[:,0] = events[:,0] * rw
             events[:,1] = events[:,1] * rh
-        
+            
 
             z = torch.zeros_like(events[:,0])
 
