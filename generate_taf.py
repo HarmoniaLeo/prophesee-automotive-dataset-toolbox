@@ -139,6 +139,10 @@ for mode in ["train","val","test"]:
         count_upperbound = -1
         already = False
         for bbox_count,unique_time in enumerate(unique_ts):
+            volume_save_path_l = os.path.join(target_root, file_name+"_"+str(unique_time)+"_locations.npy")
+            volume_save_path_f = os.path.join(target_root, file_name+"_"+str(unique_time)+"_features.npy")
+            if os.path.exists(volume_save_path_f) and os.path.exists(volume_save_path_l):
+                continue
             if unique_time <= 500000:
                 continue
             end_time = int(unique_time)
@@ -205,12 +209,16 @@ for mode in ["train","val","test"]:
             volume_[...,1] = np.where(volume_[...,1]>-1e6, volume_[...,1] - 1, 0)
             locations, features = denseToSparse(volume_)
             c, y, x, p = locations
-            volume_save_path = os.path.join(target_root, file_name+"_"+str(unique_time)+"_locations.npy")
-            locations = x.astype(np.uint32) + np.left_shift(y.astype(np.uint32), 9) + np.left_shift(c.astype(np.uint32), 17) + np.left_shift(p.astype(np.uint32), 21)
-            locations.tofile(volume_save_path)
-            volume_save_path = os.path.join(target_root, file_name+"_"+str(unique_time)+"_features.npy")
-            features.tofile(volume_save_path)
             
+            locations = x.astype(np.uint32) + np.left_shift(y.astype(np.uint32), 9) + np.left_shift(c.astype(np.uint32), 17) + np.left_shift(p.astype(np.uint32), 21)
+            locations.tofile(volume_save_path_l)
+            features.tofile(volume_save_path_f)
+            locations = np.fromfile(volume_save_path_l, dtype=np.uint32)
+            x = np.bitwise_and(locations, 511).astype(float)
+            y = np.right_shift(np.bitwise_and(locations, 130560), 9).astype(float)
+            c = np.right_shift(np.bitwise_and(locations, 1966080), 17).astype(float)
+            p = np.right_shift(np.bitwise_and(locations, 2097152), 21).astype(float)
+            print(x.max(),y.max(),c.max(),p.max())
             #np.savez(volume_save_path, locations = locations, features = features)
             #h5.create_dataset(str(unique_time)+"/locations", data=locations)
             #h5.create_dataset(str(unique_time)+"/features", data=features)
