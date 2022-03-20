@@ -33,7 +33,7 @@ def generate_event_volume(events,shape,ori_shape):
     #q90 = np.quantile(ecd_view, 0.99)
     q90 = 0
     print(q90)
-    q10 = np.quantile(ecd_view, 0.10)
+    q10 = np.quantile(ecd_view, 0.90)
     print(q10)
     volume[...,1] = np.where(volume[...,1] > -1e6, (volume[...,1] - q90)/(q90 - q10) * 2, volume[...,1])
     volume[...,1] = np.where(volume[...,1] > 0, 0, volume[...,1])
