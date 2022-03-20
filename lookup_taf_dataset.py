@@ -29,6 +29,12 @@ def generate_event_volume(events,shape,ori_shape):
     volume = feature_map.reshape(C, H, W, 2)
     volume[...,1] = np.where(volume[...,1] ==0, -1e6, volume[...,1] + 1)
 
+    ecd_view = volume[...,1][volume[...,1] > -1e6]
+    q90 = np.quantile(ecd_view, 0.9)
+    q10 = np.quantile(ecd_view, 0.1)
+    volume[...,1] = np.where(volume[...,1] > -1e6, (ecd_view + q90)/(q90 - q10) * 2, volume[...,1])
+    volume[...,1] = np.where(volume[...,1] > 0, 0, volume[...,1])
+
     return volume[...,0], volume[...,1]
 
 LABELMAP = ["car", "pedestrian"]
@@ -101,12 +107,15 @@ if __name__ == '__main__':
     f_bbox.close()
 
     final_path = os.path.join(data_path,data_folder)
-    event_file = os.path.join(final_path, item+"_"+str(time_stamp_end)+".npz")
+    event_file = os.path.join(final_path, item+"_"+str(time_stamp_end))
     #print(target)
-    buffer = np.load(event_file,allow_pickle=True)
-    locations = buffer["locations"]
-    features = buffer["features"]
-    c, y, x, p = locations
+    locations = np.fromfile(event_file + "_locations.npy", dtype=np.int32)
+    x = np.bitwise_and(locations, 511).astype(np.float32)
+    y = np.right_shift(np.bitwise_and(locations, 130560), 9).astype(np.float32)
+    c = np.right_shift(np.bitwise_and(locations, 1966080), 17).astype(np.float32)
+    p = np.right_shift(np.bitwise_and(locations, 2097152), 21).astype(np.float32)
+    features = np.fromfile(event_file + "_features.npy", dtype=np.float32)
+
     z = np.zeros_like(c)
     t = np.zeros_like(c) + time_stamp_end
     events = np.stack([x, y, t, c, z, p, features], axis=1)
