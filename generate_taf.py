@@ -177,6 +177,7 @@ for mode in ["train","val","test"]:
             events = rfn.structured_to_unstructured(events)[:, [1, 2, 0, 3]].astype(float)
             events[:,0] = events[:,0] * rw
             events[:,1] = events[:,1] * rh
+            print(events[:,0].max(),events[:,1].max())
             events = torch.from_numpy(events).cuda()
 
             z = torch.zeros_like(events[:,0])
