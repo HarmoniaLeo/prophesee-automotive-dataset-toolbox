@@ -38,7 +38,7 @@ def generate_event_volume(events,shape,ori_shape):
     volume[...,1] = np.where((volume[...,1] > -1e6) & (volume[...,1] < 0), volume[...,1]/(q90 - q10 + 1e-8) * 2, volume[...,1])
     ecd_view = volume[...,1][volume[...,1] > -1e6]
     q100 = np.max(ecd_view)
-    volume[...,1] = np.where(volume[...,1] > 0, volume[...,1] / q100 * 2, volume[...,1])
+    volume[...,1] = np.where(volume[...,1] > 0, volume[...,1] / (q100 + 1e-8) * 2, volume[...,1])
 
     return volume[...,0], volume[...,1]
 
