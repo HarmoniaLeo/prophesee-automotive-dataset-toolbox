@@ -192,8 +192,6 @@ for mode in ["train","val","test"]:
 
             bins = int((end_time - start_time) / events_window_abin)
             assert bins == (end_time - start_time) / events_window_abin
-
-            print(events[:5],events[:,0].max(),events[:,1].max(),start_time,end_time,unique_time)
             
             for i in range(bins):
                 z = torch.where((events[:,2] >= start_time + i * events_window_abin)&(events[:,2] <= start_time + (i + 1) * events_window_abin), torch.zeros_like(events[:,2])+i, z)
