@@ -16,7 +16,7 @@ def taf_cuda(x, y, t, p, shape, volume_bins, past_volume):
 
     t_star = t.float()[:,None]
     
-    tick = time.time()
+    #tick = time.time()
     xpos = x[p == 1]
     ypos = y[p == 1]
     adderpos = torch.arange(2).to(x.device)[None,:]
@@ -34,7 +34,7 @@ def taf_cuda(x, y, t, p, shape, volume_bins, past_volume):
     img_pos.index_add_(0, xpos + W * ypos, adderpos)
     img_neg = torch.zeros((H * W, 2)).float().to(x.device)
     img_neg.index_add_(0, xneg + W * yneg, adderneg)
-    print(time.time() - tick)
+    #print(time.time() - tick)
 
     forward_pos = (img_pos[:,-1]==0)
     forward_neg = (img_neg[:,-1]==0)
@@ -236,7 +236,7 @@ for mode in ["train","val","test"]:
                 torch.cuda.synchronize()
                 total_time += time.time() - tick
                 generate_times += 1
-                #print(total_time/generate_times)
+                print(total_time/generate_times)
                 iter += 1
             volume_ = volume.cpu().numpy().copy()
             volume_[...,1] = np.where(volume_[...,1]>-1e6, volume_[...,1] - 1, 0)
