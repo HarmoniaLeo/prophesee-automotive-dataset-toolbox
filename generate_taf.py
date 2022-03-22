@@ -99,16 +99,16 @@ min_event_count = 400000
 events_window = 50000
 events_window_abin = 10000
 event_volume_bins = 5
-shape = [720,1280]
-target_shape = [320, 640]
-#shape = [240,304]
-#target_shape = [256, 320]
+# shape = [720,1280]
+# target_shape = [320, 640]
+shape = [240,304]
+target_shape = [256, 320]
 rh = target_shape[0] / shape[0]
 rw = target_shape[1] / shape[1]
-#raw_dir = "/data/lbd/ATIS_Automotive_Detection_Dataset/detection_dataset_duration_60s_ratio_1.0"
-#target_dir = "/data/lbd/ATIS_taf"
-raw_dir = "/data/Large_Automotive_Detection_Dataset"
-target_dir = "/data/Large_taf"
+raw_dir = "/data/lbd/ATIS_Automotive_Detection_Dataset/detection_dataset_duration_60s_ratio_1.0"
+target_dir = "/data/lbd/ATIS_taf"
+# raw_dir = "/data/Large_Automotive_Detection_Dataset"
+# target_dir = "/data/Large_taf"
 
 for mode in ["train","val","test"]:
     
