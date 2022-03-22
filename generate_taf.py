@@ -114,8 +114,6 @@ for mode in ["train","val","test"]:
     pbar = tqdm.tqdm(total=len(files), unit='File', unit_scale=True)
 
     for i_file, file_name in enumerate(files):
-        if mode == "train" and i_file < 526:
-            continue
         event_file = os.path.join(root, file_name + '_td.dat')
         bbox_file = os.path.join(root, file_name + '_bbox.npy')
         # if os.path.exists(volume_save_path):
