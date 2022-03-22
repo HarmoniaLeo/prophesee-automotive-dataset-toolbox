@@ -95,7 +95,7 @@ def denseToSparse(dense_tensor):
 
     return np.stack(non_zero_indices), features
 
-min_event_count = 400000
+min_event_count = 800000
 events_window = 50000
 events_window_abin = 10000
 event_volume_bins = 5
