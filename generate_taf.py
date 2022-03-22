@@ -95,30 +95,34 @@ def denseToSparse(dense_tensor):
 
     return np.stack(non_zero_indices), features
 
-min_event_count = 200000
+min_event_count = 400000
 events_window = 50000
 events_window_abin = 10000
 event_volume_bins = 5
-shape = [240,304]
-target_shape = [256, 320]
+shape = [720,1280]
+target_shape = [320, 640]
 rh = target_shape[0] / shape[0]
 rw = target_shape[1] / shape[1]
-raw_dir = "/data/lbd/ATIS_Automotive_Detection_Dataset/detection_dataset_duration_60s_ratio_1.0"
+#raw_dir = "/data/lbd/ATIS_Automotive_Detection_Dataset/detection_dataset_duration_60s_ratio_1.0"
+#target_dir = "/data/lbd/ATIS_taf"
+raw_dir = "/data/Large_Automotive_Detection_Dataset"
+target_dir = "/data/Large_taf"
 
 for mode in ["train","val","test"]:
     
     file_dir = os.path.join(raw_dir, mode)
     root = file_dir
-    target_root = os.path.join("/data/lbd/ATIS_taf", mode)
+    target_root = os.path.join(target_dir, mode)
     #h5 = h5py.File(raw_dir + '/ATIS_taf_'+mode+'.h5', 'w')
-    files = os.listdir(file_dir)
+    try:
+        files = os.listdir(file_dir)
+    except Exception:
+        continue
     # Remove duplicates (.npy and .dat)
     files = [time_seq_name[:-7] for time_seq_name in files
                     if time_seq_name[-3:] == 'dat']
 
     pbar = tqdm.tqdm(total=len(files), unit='File', unit_scale=True)
-
-    route = os.path.join(root, 'buffer_t{0}_n{1}.npz'.format(events_window,min_event_count))
 
     for i_file, file_name in enumerate(files):
         event_file = os.path.join(root, file_name + '_td.dat')
