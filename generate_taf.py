@@ -29,7 +29,7 @@ def taf_cuda(x, y, t, p, shape, volume_bins, past_volume):
     print("generate volume",time.time() - tick)
 
     tick = time.time()
-    forward = (img[:,-1,:]==0)[:,:,:,None]
+    forward = (img[:,-1,:]==0)[:,None,:,None]
     if not (past_volume is None):
         img_old_ecd = past_volume
         img_old_ecd[:,-1,:,0] = torch.where(img_old_ecd[:,-1,:,1] == 0,img_old_ecd[:,-1,:,0] + img[:,0,:,None],img_old_ecd[:,-1,:,0])
