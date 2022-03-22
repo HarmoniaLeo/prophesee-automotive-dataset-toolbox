@@ -230,6 +230,7 @@ for mode in ["train","val","test"]:
                 volume, memory = generate_taf_cuda(events_, target_shape, memory, event_volume_bins)
                 torch.cuda.synchronize()
                 total_time += time.time() - tick
+                generate_times += 1
                 print(total_time/generate_times)
                 iter += 1
             volume_ = volume.cpu().numpy().copy()
