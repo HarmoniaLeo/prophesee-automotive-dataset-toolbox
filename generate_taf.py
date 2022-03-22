@@ -27,7 +27,7 @@ def taf_cuda(x, y, t, p, shape, volume_bins, past_volume):
     img = img.view(H * W, 2, 2, 1) #img: hw, 2, 2, 1
     torch.cuda.synchronize()
     generate_volume_time = time.time() - tick
-    print("generate_volume_time",time.time() - tick)
+    #print("generate_volume_time",time.time() - tick)
 
     tick = time.time()
     forward = (img[:,-1]==0)[:,None]   #forward: hw, 1, 2, 1
@@ -46,10 +46,10 @@ def taf_cuda(x, y, t, p, shape, volume_bins, past_volume):
         img_ecd = img_ecd[:,1:]
     torch.cuda.synchronize()
     generate_encode_time = time.time() - tick
-    print("generate encode",time.time() - tick)
+    #print("generate encode",time.time() - tick)
 
     img_ecd_viewed = img_ecd.view((H, W, img_ecd.shape[1] * 2, 2)).permute(2, 0, 1, 3)
-    return img_ecd_viewed[...,0], img_ecd_viewed[...,1], img_ecd
+    return img_ecd_viewed[...,0], img_ecd_viewed[...,1], img_ecd, generate_volume_time, generate_encode_time
 
 def generate_taf_cuda(events, shape, past_volume = None, volume_bins=5):
     x, y, t, p, z = events.unbind(-1)
@@ -95,8 +95,8 @@ target_dir = "/data/lbd/ATIS_taf"
 # raw_dir = "/data/Large_Automotive_Detection_Dataset"
 # target_dir = "/data/Large_taf"
 
-total_time = 0
-generate_times = 0
+total_volume_time = []
+total_taf_time = []
 for mode in ["train","val","test"]:
     
     file_dir = os.path.join(raw_dir, mode)
@@ -114,7 +114,7 @@ for mode in ["train","val","test"]:
     pbar = tqdm.tqdm(total=len(files), unit='File', unit_scale=True)
 
     for i_file, file_name in enumerate(files):
-        if i_file < 526:
+        if mode == "train" and i_file < 526:
             continue
         event_file = os.path.join(root, file_name + '_td.dat')
         bbox_file = os.path.join(root, file_name + '_bbox.npy')
@@ -203,7 +203,7 @@ for mode in ["train","val","test"]:
                 t_max = start_time + event_volume_bins * events_window_abin
                 t_min = start_time
                 events_[:,2] = (events_[:, 2] - t_min)/(t_max - t_min + 1e-8)
-                volume, memory = generate_taf_cuda(events_, target_shape, memory, event_volume_bins)
+                volume, memory, generate_volume_time, generate_encode_time = generate_taf_cuda(events_, target_shape, memory, event_volume_bins)
                 iter = event_volume_bins
             else:
                 iter = 0
@@ -213,10 +213,11 @@ for mode in ["train","val","test"]:
                 t_min = start_time + iter * events_window_abin
                 events_[:,2] = (events_[:, 2] - t_min)/(t_max - t_min + 1e-8)
                 #tick = time.time()
-                volume, memory = generate_taf_cuda(events_, target_shape, memory, event_volume_bins)
+                volume, memory, generate_volume_time, generate_encode_time = generate_taf_cuda(events_, target_shape, memory, event_volume_bins)
                 #torch.cuda.synchronize()
-                #total_time += time.time() - tick
-                generate_times += 1
+                if mode == "test":
+                    total_volume_time.append(generate_volume_time)
+                    total_taf_time.append(generate_volume_time + generate_encode_time)
                 #print(total_time/generate_times)
                 iter += 1
             volume_ = volume.cpu().numpy().copy()
@@ -235,5 +236,7 @@ for mode in ["train","val","test"]:
         #h5.close()
         pbar.update(1)
     pbar.close()
-    print(total_time/generate_times)
+    if mode == "test":
+        np.save(os.path.join(root, 'total_volume_time.npy'),np.array(total_volume_time))
+        np.save(os.path.join(root, 'total_taf_time.npy'),np.array(total_taf_time))
     #h5.close()
