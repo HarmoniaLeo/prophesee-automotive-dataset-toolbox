@@ -163,7 +163,7 @@ for mode in ["train","val","test"]:
             if (end_time - start_time) < events_window:
                 start_time = end_time - events_window
             else:
-                start_time = end_time - (end_time - start_time - events_window)//events_window_abin * events_window_abin - events_window
+                start_time = end_time - round((end_time - start_time - events_window)/events_window_abin) * events_window_abin - events_window
 
             if start_time > time_upperbound:
                 start_count = f_event.seek_time(start_time)
@@ -173,7 +173,7 @@ for mode in ["train","val","test"]:
             else:
                 start_count = count_upperbound
                 start_time = time_upperbound
-                end_time = (end_time - start_time) // events_window_abin * events_window_abin + start_time
+                end_time = round((end_time - start_time) / events_window_abin) * events_window_abin + start_time
                 end_count = f_event.seek_time(end_time)
                 assert bbox_count > 0
 
@@ -193,7 +193,7 @@ for mode in ["train","val","test"]:
             bins = int((end_time - start_time) / events_window_abin)
             assert bins == (end_time - start_time) / events_window_abin
 
-            print(events[:5],start_time,end_time,unique_time)
+            print(events[:5],events[:,0].max(),events[:,1].max(),start_time,end_time,unique_time)
             
             for i in range(bins):
                 z = torch.where((events[:,2] >= start_time + i * events_window_abin)&(events[:,2] <= start_time + (i + 1) * events_window_abin), torch.zeros_like(events[:,2])+i, z)
