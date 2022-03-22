@@ -151,7 +151,7 @@ for mode in ["train","val","test"]:
             #     continue
             if unique_time <= 500000:
                 continue
-            if unique_time - time_upperbound < 800000:
+            if unique_time - time_upperbound < 200000:
                 continue
             end_time = int(unique_time)
             end_count = f_event.seek_time(end_time)
