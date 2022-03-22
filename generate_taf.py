@@ -49,21 +49,16 @@ def taf_cuda(x, y, t, p, shape, volume_bins, past_volume):
     #print("generate encode",time.time() - tick)
 
     img_ecd_viewed = img_ecd.view((H, W, img_ecd.shape[1] * 2, 2)).permute(2, 0, 1, 3)
-    return img_ecd_viewed[...,0], img_ecd_viewed[...,1], img_ecd, generate_volume_time, generate_encode_time
+    return img_ecd_viewed, img_ecd, generate_volume_time, generate_encode_time
 
 def generate_taf_cuda(events, shape, past_volume = None, volume_bins=5):
     x, y, t, p, z = events.unbind(-1)
 
     x, y, p = x.long(), y.long(), p.long()
     
-    if past_volume is None:
-        for bin in range(volume_bins):
-            x_, y_, t_, p_ = x[z == bin], y[z == bin], t[z == bin], p[z == bin]
-            histogram, ecd, past_volume, generate_volume_time, generate_encode_time = taf_cuda(x_, y_, t_, p_, shape, volume_bins, past_volume)
-    else:
-        histogram, ecd, past_volume, generate_volume_time, generate_encode_time = taf_cuda(x, y, t, p, shape, volume_bins, past_volume)
+    histogram_ecd, past_volume, generate_volume_time, generate_encode_time = taf_cuda(x, y, t, p, shape, volume_bins, past_volume)
 
-    return torch.stack([histogram, ecd], dim = -1), past_volume, generate_volume_time, generate_encode_time
+    return histogram_ecd, past_volume, generate_volume_time, generate_encode_time
 
 def denseToSparse(dense_tensor):
     """
@@ -81,9 +76,9 @@ def denseToSparse(dense_tensor):
 
 min_event_count = 200000
 #min_event_count = 800000
-events_window = 50000
 events_window_abin = 10000
 event_volume_bins = 5
+events_window = events_window_abin * event_volume_bins
 # shape = [720,1280]
 # target_shape = [320, 640]
 shape = [240,304]
@@ -197,15 +192,14 @@ for mode in ["train","val","test"]:
 
             if start_time > time_upperbound:
                 memory = None
-                events_ = events[events[...,4] < event_volume_bins]
-                t_max = start_time + event_volume_bins * events_window_abin
-                t_min = start_time
-                events_[:,2] = (events_[:, 2] - t_min)/(t_max - t_min + 1e-8)
-                volume, memory, generate_volume_time, generate_encode_time = generate_taf_cuda(events_, target_shape, memory, event_volume_bins)
-                iter = event_volume_bins
-            else:
-                iter = 0
-            while(iter < bins):
+            #     events_ = events[events[...,4] < event_volume_bins]
+            #     t_max = start_time + event_volume_bins * events_window_abin
+            #     t_min = start_time
+            #     events_[:,2] = (events_[:, 2] - t_min)/(t_max - t_min + 1e-8)
+            #     volume, memory, generate_volume_time, generate_encode_time = generate_taf_cuda(events_, target_shape, memory, event_volume_bins)
+            #     iter = event_volume_bins
+            # else:
+            for iter in range(bins):
                 events_ = events[events[...,4] == iter]
                 t_max = start_time + (iter + 1) * events_window_abin
                 t_min = start_time + iter * events_window_abin
@@ -217,7 +211,6 @@ for mode in ["train","val","test"]:
                     total_volume_time.append(generate_volume_time)
                     total_taf_time.append(generate_volume_time + generate_encode_time)
                 #print(total_time/generate_times)
-                iter += 1
             volume_ = volume.cpu().numpy().copy()
             volume_[...,1] = np.where(volume_[...,1]>-1e6, volume_[...,1] - 1, 0)
             locations, features = denseToSparse(volume_)
