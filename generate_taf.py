@@ -25,8 +25,9 @@ def taf_cuda(x, y, t, p, shape, volume_bins, past_volume):
     img.index_add_(0, x + W * y, adder)
 
     img = img.view(H * W, 2, 2, 1) #img: hw, 2, 2, 1
-
-    print("generate volume",time.time() - tick)
+    torch.cuda.synchronize()
+    generate_volume_time = time.time() - tick
+    print("generate_volume_time",time.time() - tick)
 
     tick = time.time()
     forward = (img[:,-1]==0)[:,None]   #forward: hw, 1, 2, 1
@@ -44,12 +45,10 @@ def taf_cuda(x, y, t, p, shape, volume_bins, past_volume):
     if img_ecd.shape[1] > volume_bins:
         img_ecd = img_ecd[:,1:]
     torch.cuda.synchronize()
+    generate_encode_time = time.time() - tick
     print("generate encode",time.time() - tick)
 
-    tick = time.time()
     img_ecd_viewed = img_ecd.view((H, W, img_ecd.shape[1] * 2, 2)).permute(2, 0, 1, 3)
-    torch.cuda.synchronize()
-    print("view",time.time() - tick)
     return img_ecd_viewed[...,0], img_ecd_viewed[...,1], img_ecd
 
 def generate_taf_cuda(events, shape, past_volume = None, volume_bins=5):
