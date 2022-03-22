@@ -144,6 +144,7 @@ for mode in ["train","val","test"]:
         time_upperbound = -1e16
         count_upperbound = -1
         already = False
+        sampling = False
         for bbox_count,unique_time in enumerate(unique_ts):
             volume_save_path_l = os.path.join(target_root, file_name+"_"+str(unique_time)+"_locations.npy")
             volume_save_path_f = os.path.join(target_root, file_name+"_"+str(unique_time)+"_features.npy")
@@ -151,8 +152,15 @@ for mode in ["train","val","test"]:
             #     continue
             if unique_time <= 500000:
                 continue
-            if unique_time - time_upperbound < 200000:
+            if (not sampling) and (unique_time - time_upperbound < 900000):
                 continue
+            else:
+                if not sampling:
+                    sampling_start_time = unique_time
+                    sampling = True
+                if unique_time - sampling_start_time > 100000:
+                    sampling = False
+                    continue
             end_time = int(unique_time)
             end_count = f_event.seek_time(end_time)
             if end_count is None:
