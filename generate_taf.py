@@ -23,44 +23,34 @@ def taf_cuda(x, y, t, p, shape, volume_bins, past_volume):
     
     img = torch.zeros((H * W, 4)).float().to(x.device)
     img.index_add_(0, x + W * y, adder)
-    print(time.time() - tick)
 
-    img_pos = img[...,:2]
-    img_neg = img[...,2:]
+    img = img.view(H * W, 2, 2)
 
-    forward_pos = (img_pos[:,-1]==0)
-    forward_neg = (img_neg[:,-1]==0)
+    print("generate volume",time.time() - tick)
+
+    tick = time.time()
+    forward = (img[:,-1,:]==0)[:,:,:,None]
     if not (past_volume is None):
-        img_pos_old, img_neg_old, pos_ecd, neg_ecd = past_volume
-        img_pos_old[:,-1] = torch.where(pos_ecd[:,-1] == 0,img_pos_old[:,-1] + img_pos[:,0],img_pos_old[:,-1])
-        img_neg_old[:,-1] = torch.where(neg_ecd[:,-1] == 0,img_neg_old[:,-1] + img_neg[:,0],img_neg_old[:,-1])
-        img_pos = torch.cat([img_pos_old,img_pos[:,1:]],dim=1)
-        pos_ecd = torch.cat([pos_ecd,torch.zeros_like(pos_ecd[:,-1:])],dim=1)
-        img_neg = torch.cat([img_neg_old,img_neg[:,1:]],dim=1)
-        neg_ecd = torch.cat([neg_ecd,torch.zeros_like(neg_ecd[:,-1:])],dim=1)
-        for i in range(1,img_pos.shape[1])[::-1]:
-            img_pos[:,i] = torch.where(forward_pos, img_pos[:,i-1],img_pos[:,i])
-            pos_ecd[:,i-1] = pos_ecd[:,i-1] - 1
-            pos_ecd[:,i] = torch.where(forward_pos, pos_ecd[:,i-1],pos_ecd[:,i])
-            img_neg[:,i] = torch.where(forward_neg, img_neg[:,i-1],img_neg[:,i])
-            neg_ecd[:,i-1] = neg_ecd[:,i-1] - 1
-            neg_ecd[:,i] = torch.where(forward_neg, neg_ecd[:,i-1],neg_ecd[:,i])
-        img_pos[:,0] = torch.where(forward_pos, torch.zeros_like(forward_pos).float(), img_pos[:,0])
-        pos_ecd[:,0] = torch.where(forward_pos, torch.zeros_like(forward_pos).float() -1e6, pos_ecd[:,0])
-        img_neg[:,0] = torch.where(forward_neg, torch.zeros_like(forward_neg).float(), img_neg[:,0])
-        neg_ecd[:,0] = torch.where(forward_neg, torch.zeros_like(forward_neg).float() -1e6, neg_ecd[:,0])
+        img_old_ecd = past_volume
+        img_old_ecd[:,-1,:,0] = torch.where(img_old_ecd[:,-1,:,1] == 0,img_old_ecd[:,-1,:,0] + img[:,0,:,None],img_old_ecd[:,-1,:,0])
+        img_ecd = torch.cat([img_old_ecd,torch.stack([img[:,1:,:],torch.zeros_like(img[:,1:,:])],dim=3)],dim=1)
+        for i in range(1,img_ecd.shape[1])[::-1]:
+            img_ecd[:,i-1,:,1] = img_ecd[:,i-1,:,1] - 1
+            img_ecd[:,i] = torch.where(forward, img_ecd[:,i-1],img_ecd[:,i])
+        img_ecd[:,0] = torch.where(forward, torch.stack([torch.zeros_like(forward).float(),torch.zeros_like(forward).float() -1e6],dim=3), img_ecd[:,0])
     else:
-        pos_ecd = torch.where(forward_pos, torch.zeros_like(forward_pos).float() -1e6, torch.zeros_like(forward_pos).float())
-        pos_ecd = torch.stack([pos_ecd,pos_ecd],dim=1)
-        neg_ecd = torch.where(forward_neg, torch.zeros_like(forward_neg).float() -1e6, torch.zeros_like(forward_neg).float())
-        neg_ecd = torch.stack([neg_ecd,neg_ecd],dim=1)
-    if img_pos.shape[1] > volume_bins:
-        img_pos, img_neg, pos_ecd, neg_ecd = img_pos[:,1:], img_neg[:,1:], pos_ecd[:,1:], neg_ecd[:,1:]
+        ecd = torch.where(forward, torch.zeros_like(forward).float() -1e6, torch.zeros_like(forward).float())
+        img_ecd = torch.stack([img, ecd],dim=3)
+    if img_ecd.shape[1] > volume_bins:
+        img_ecd = img_ecd[:,1:]
+    torch.cuda.synchronize()
+    print("generate encode",time.time() - tick)
 
-    histogram = torch.cat([img_neg, img_pos], -1).view((H, W, img_neg.shape[1] * 2)).permute(2, 0, 1)
-    ecd = torch.cat([neg_ecd, pos_ecd], -1).view((H, W, img_neg.shape[1] * 2)).permute(2, 0, 1)
-    past_volume = (img_pos, img_neg, pos_ecd, neg_ecd)
-    return histogram, ecd, past_volume
+    tick = time.time()
+    img_ecd_viewed = img_ecd.view((H, W, img_ecd.shape[1] * 2, 2)).permute(2, 0, 1, 3)
+    torch.cuda.synchronize()
+    print("view",time.time() - tick)
+    return img_ecd_viewed[...,0], img_ecd_viewed[...,1], img_ecd
 
 def generate_taf_cuda(events, shape, past_volume = None, volume_bins=5):
     x, y, t, p, z = events.unbind(-1)
@@ -223,12 +213,12 @@ for mode in ["train","val","test"]:
                 t_max = start_time + (iter + 1) * events_window_abin
                 t_min = start_time + iter * events_window_abin
                 events_[:,2] = (events_[:, 2] - t_min)/(t_max - t_min + 1e-8)
-                tick = time.time()
+                #tick = time.time()
                 volume, memory = generate_taf_cuda(events_, target_shape, memory, event_volume_bins)
-                torch.cuda.synchronize()
-                total_time += time.time() - tick
+                #torch.cuda.synchronize()
+                #total_time += time.time() - tick
                 generate_times += 1
-                print(total_time/generate_times)
+                #print(total_time/generate_times)
                 iter += 1
             volume_ = volume.cpu().numpy().copy()
             volume_[...,1] = np.where(volume_[...,1]>-1e6, volume_[...,1] - 1, 0)
