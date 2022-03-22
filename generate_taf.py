@@ -102,16 +102,16 @@ min_event_count = 800000
 events_window = 50000
 events_window_abin = 10000
 event_volume_bins = 5
-shape = [720,1280]
-target_shape = [320, 640]
-# shape = [240,304]
-# target_shape = [256, 320]
+# shape = [720,1280]
+# target_shape = [320, 640]
+shape = [240,304]
+target_shape = [256, 320]
 rh = target_shape[0] / shape[0]
 rw = target_shape[1] / shape[1]
-# raw_dir = "/data/lbd/ATIS_Automotive_Detection_Dataset/detection_dataset_duration_60s_ratio_1.0"
-# target_dir = "/data/lbd/ATIS_taf"
-raw_dir = "/data/Large_Automotive_Detection_Dataset"
-target_dir = "/data/Large_taf"
+raw_dir = "/data/lbd/ATIS_Automotive_Detection_Dataset/detection_dataset_duration_60s_ratio_1.0"
+target_dir = "/data/lbd/ATIS_taf"
+# raw_dir = "/data/Large_Automotive_Detection_Dataset"
+# target_dir = "/data/Large_taf"
 
 total_time = 0
 generate_times = 0
@@ -132,6 +132,8 @@ for mode in ["train","val","test"]:
     pbar = tqdm.tqdm(total=len(files), unit='File', unit_scale=True)
 
     for i_file, file_name in enumerate(files):
+        if i_file < 526:
+            continue
         event_file = os.path.join(root, file_name + '_td.dat')
         bbox_file = os.path.join(root, file_name + '_bbox.npy')
         # if os.path.exists(volume_save_path):
@@ -157,15 +159,15 @@ for mode in ["train","val","test"]:
             #     continue
             if unique_time <= 500000:
                 continue
-            if (not sampling) and (unique_time - time_upperbound < 900000):
-                continue
-            else:
-                if not sampling:
-                    sampling_start_time = unique_time
-                    sampling = True
-                if unique_time - sampling_start_time > 100000:
-                    sampling = False
-                    continue
+            # if (not sampling) and (unique_time - time_upperbound < 900000):
+            #     continue
+            # else:
+            #     if not sampling:
+            #         sampling_start_time = unique_time
+            #         sampling = True
+            #     if unique_time - sampling_start_time > 100000:
+            #         sampling = False
+            #         continue
             end_time = int(unique_time)
             end_count = f_event.seek_time(end_time)
             if end_count is None:
