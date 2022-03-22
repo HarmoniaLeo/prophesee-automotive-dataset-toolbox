@@ -37,10 +37,10 @@ def taf_cuda(x, y, t, p, shape, volume_bins, past_volume):
         for i in range(1,img_ecd.shape[1])[::-1]:
             img_ecd[:,i-1,:,1] = img_ecd[:,i-1,:,1] - 1
             img_ecd[:,i] = torch.where(forward, img_ecd[:,i-1],img_ecd[:,i])
-        img_ecd[:,0] = torch.where(forward, torch.stack([torch.zeros_like(forward).float(),torch.zeros_like(forward).float() -1e6],dim=3), img_ecd[:,0])
+        img_ecd[:,0] = torch.where(forward, torch.cat([torch.zeros_like(forward).float(),torch.zeros_like(forward).float() -1e6],dim=3), img_ecd[:,0])
     else:
         ecd = torch.where(forward, torch.zeros_like(forward).float() -1e6, torch.zeros_like(forward).float())
-        img_ecd = torch.stack([img, torch.stack([ecd,ecd],dim=1)],dim=3)
+        img_ecd = torch.cat([img, torch.cat([ecd,ecd],dim=1)],dim=3)
     if img_ecd.shape[1] > volume_bins:
         img_ecd = img_ecd[:,1:]
     torch.cuda.synchronize()
