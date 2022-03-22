@@ -9,6 +9,7 @@ from numpy.lib import recfunctions as rfn
 import h5py
 import pickle
 import torch
+import time
 
 def taf_cuda(x, y, t, p, shape, volume_bins, past_volume):
     H, W = shape
@@ -110,6 +111,8 @@ rw = target_shape[1] / shape[1]
 raw_dir = "/data/Large_Automotive_Detection_Dataset"
 target_dir = "/data/Large_taf"
 
+total_time = 0
+generate_times = 0
 for mode in ["train","val","test"]:
     
     file_dir = os.path.join(raw_dir, mode)
@@ -148,8 +151,8 @@ for mode in ["train","val","test"]:
         for bbox_count,unique_time in enumerate(unique_ts):
             volume_save_path_l = os.path.join(target_root, file_name+"_"+str(unique_time)+"_locations.npy")
             volume_save_path_f = os.path.join(target_root, file_name+"_"+str(unique_time)+"_features.npy")
-            # if os.path.exists(volume_save_path_f) and os.path.exists(volume_save_path_l):
-            #     continue
+            if os.path.exists(volume_save_path_f) and os.path.exists(volume_save_path_l):
+                continue
             if unique_time <= 500000:
                 continue
             if (not sampling) and (unique_time - time_upperbound < 900000):
@@ -223,7 +226,11 @@ for mode in ["train","val","test"]:
                 t_max = start_time + (iter + 1) * events_window_abin
                 t_min = start_time + iter * events_window_abin
                 events_[:,2] = (events_[:, 2] - t_min)/(t_max - t_min + 1e-8)
+                tick = time.time()
                 volume, memory = generate_taf_cuda(events_, target_shape, memory, event_volume_bins)
+                torch.cuda.synchronize()
+                total_time += time.time() - tick
+                print(total_time/generate_times)
                 iter += 1
             volume_ = volume.cpu().numpy().copy()
             volume_[...,1] = np.where(volume_[...,1]>-1e6, volume_[...,1] - 1, 0)
@@ -241,4 +248,5 @@ for mode in ["train","val","test"]:
         #h5.close()
         pbar.update(1)
     pbar.close()
+    print(total_time/generate_times)
     #h5.close()
