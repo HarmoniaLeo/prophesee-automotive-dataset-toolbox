@@ -15,7 +15,7 @@ def taf_cuda(x, y, t, p, shape, volume_bins, past_volume):
     tick = time.time()
     H, W = shape
 
-    t_star = t.float()[:,None]
+    t_star = t.float()[:,None,None]
     
     adder = torch.stack([torch.arange(2),torch.arange(2)],dim = 1).to(x.device)[None,:,:]   #1, 2, 2
     adder = (1 - torch.abs(adder-t_star)) * torch.stack([p,1 - p],dim=1)[:,None,:]  #n, 2, 2
