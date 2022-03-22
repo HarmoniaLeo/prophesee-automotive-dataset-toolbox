@@ -24,23 +24,23 @@ def taf_cuda(x, y, t, p, shape, volume_bins, past_volume):
     img = torch.zeros((H * W, 4)).float().to(x.device)
     img.index_add_(0, x + W * y, adder)
 
-    img = img.view(H * W, 2, 2)
+    img = img.view(H * W, 2, 2, 1) #img: hw, 2, 2, 1
 
     print("generate volume",time.time() - tick)
 
     tick = time.time()
-    forward = (img[:,-1,:]==0)[:,None,:,None]
+    forward = (img[:,-1]==0)[:,None]   #forward: hw, 1, 2, 1
     if not (past_volume is None):
-        img_old_ecd = past_volume
-        img_old_ecd[:,-1,:,0] = torch.where(img_old_ecd[:,-1,:,1] == 0,img_old_ecd[:,-1,:,0] + img[:,0,:,None],img_old_ecd[:,-1,:,0])
-        img_ecd = torch.cat([img_old_ecd,torch.stack([img[:,1:,:],torch.zeros_like(img[:,1:,:])],dim=3)],dim=1)
+        img_old_ecd = past_volume    #img_ecd: hw, 2, 2, 2
+        img_old_ecd[:,-1,:,0] = torch.where(img_old_ecd[:,-1,:,1] == 0,img_old_ecd[:,-1,:,0] + img[:,0,:,0],img_old_ecd[:,-1,:,0])
+        img_ecd = torch.cat([img_old_ecd,torch.cat([img[:,1:],torch.zeros_like(img[:,1:])],dim=3)],dim=1)
         for i in range(1,img_ecd.shape[1])[::-1]:
             img_ecd[:,i-1,:,1] = img_ecd[:,i-1,:,1] - 1
             img_ecd[:,i] = torch.where(forward, img_ecd[:,i-1],img_ecd[:,i])
-        img_ecd[:,0] = torch.where(forward, torch.cat([torch.zeros_like(forward).float(),torch.zeros_like(forward).float() -1e6],dim=3), img_ecd[:,0])
+        img_ecd[:,:1] = torch.where(forward, torch.cat([torch.zeros_like(forward).float(),torch.zeros_like(forward).float() -1e6],dim=3), img_ecd[:,:1])
     else:
-        ecd = torch.where(forward, torch.zeros_like(forward).float() -1e6, torch.zeros_like(forward).float())
-        img_ecd = torch.cat([img[:,:,:,None], torch.cat([ecd,ecd],dim=1)],dim=3)
+        ecd = torch.where(forward, torch.zeros_like(forward).float() -1e6, torch.zeros_like(forward).float())   #ecd: hw, 1, 2, 1
+        img_ecd = torch.cat([img, torch.cat([ecd,ecd],dim=1)],dim=3)    #img_ecd: hw, 2, 2, 2
     if img_ecd.shape[1] > volume_bins:
         img_ecd = img_ecd[:,1:]
     torch.cuda.synchronize()
