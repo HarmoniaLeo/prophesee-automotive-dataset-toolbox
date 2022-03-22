@@ -59,11 +59,11 @@ def generate_taf_cuda(events, shape, past_volume = None, volume_bins=5):
     if past_volume is None:
         for bin in range(volume_bins):
             x_, y_, t_, p_ = x[z == bin], y[z == bin], t[z == bin], p[z == bin]
-            histogram, ecd, past_volume, img_ecd, generate_volume_time, generate_encode_time = taf_cuda(x_, y_, t_, p_, shape, volume_bins, past_volume)
+            histogram, ecd, past_volume, generate_volume_time, generate_encode_time = taf_cuda(x_, y_, t_, p_, shape, volume_bins, past_volume)
     else:
-        histogram, ecd, past_volume, img_ecd, generate_volume_time, generate_encode_time = taf_cuda(x, y, t, p, shape, volume_bins, past_volume)
+        histogram, ecd, past_volume, generate_volume_time, generate_encode_time = taf_cuda(x, y, t, p, shape, volume_bins, past_volume)
 
-    return torch.stack([histogram, ecd], dim = -1), past_volume
+    return torch.stack([histogram, ecd], dim = -1), past_volume, generate_volume_time, generate_encode_time
 
 def denseToSparse(dense_tensor):
     """
