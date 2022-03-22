@@ -99,14 +99,16 @@ min_event_count = 400000
 events_window = 50000
 events_window_abin = 10000
 event_volume_bins = 5
-shape = [720,1280]
-target_shape = [320, 640]
+#shape = [720,1280]
+#target_shape = [320, 640]
+shape = [240,304]
+target_shape = [256, 320]
 rh = target_shape[0] / shape[0]
 rw = target_shape[1] / shape[1]
-#raw_dir = "/data/lbd/ATIS_Automotive_Detection_Dataset/detection_dataset_duration_60s_ratio_1.0"
-#target_dir = "/data/lbd/ATIS_taf"
-raw_dir = "/data/Large_Automotive_Detection_Dataset"
-target_dir = "/data/Large_taf"
+raw_dir = "/data/lbd/ATIS_Automotive_Detection_Dataset/detection_dataset_duration_60s_ratio_1.0"
+target_dir = "/data/lbd/ATIS_taf"
+#raw_dir = "/data/Large_Automotive_Detection_Dataset"
+#target_dir = "/data/Large_taf"
 
 for mode in ["train","val","test"]:
     
@@ -145,8 +147,8 @@ for mode in ["train","val","test"]:
         for bbox_count,unique_time in enumerate(unique_ts):
             volume_save_path_l = os.path.join(target_root, file_name+"_"+str(unique_time)+"_locations.npy")
             volume_save_path_f = os.path.join(target_root, file_name+"_"+str(unique_time)+"_features.npy")
-            if os.path.exists(volume_save_path_f) and os.path.exists(volume_save_path_l):
-                continue
+            # if os.path.exists(volume_save_path_f) and os.path.exists(volume_save_path_l):
+            #     continue
             if unique_time <= 500000:
                 continue
             end_time = int(unique_time)
@@ -161,7 +163,7 @@ for mode in ["train","val","test"]:
             if (end_time - start_time) < events_window:
                 start_time = end_time - events_window
             else:
-                start_time = end_time - (int((end_time - start_time - events_window)/events_window_abin) + 1) * events_window_abin - events_window
+                start_time = end_time - (end_time - start_time - events_window)//events_window_abin * events_window_abin - events_window
 
             if start_time > time_upperbound:
                 start_count = f_event.seek_time(start_time)
@@ -170,6 +172,9 @@ for mode in ["train","val","test"]:
                 memory = None
             else:
                 start_count = count_upperbound
+                start_time = time_upperbound
+                end_time = (end_time - start_time) // events_window_abin * events_window_abin + start_time
+                end_count = f_event.seek_time(end_time)
                 assert bbox_count > 0
 
             
@@ -189,7 +194,7 @@ for mode in ["train","val","test"]:
             assert bins == (end_time - start_time) / events_window_abin
             
             for i in range(bins):
-                z = torch.where((events[:,2] >= start_time + i * events_window_abin)&(events[:,2] <= start_time + (i + 1) * events_window_abin), torch.zeros_like(events[:,2])+i, torch.zeros_like(events[:,2])+z)
+                z = torch.where((events[:,2] >= start_time + i * events_window_abin)&(events[:,2] <= start_time + (i + 1) * events_window_abin), torch.zeros_like(events[:,2])+i, z)
                 #events_timestamps.append(start_time + (i + 1) * self.events_window_abin)
             events = torch.cat([events,z[:,None]], dim=1)
 
@@ -205,8 +210,8 @@ for mode in ["train","val","test"]:
                 iter = 0
             while(iter < bins):
                 events_ = events[events[...,4] == iter]
-                t_max = start_time + iter * events_window_abin
-                t_min = start_time + (iter -1) * events_window_abin
+                t_max = start_time + (iter + 1) * events_window_abin
+                t_min = start_time + iter * events_window_abin
                 events_[:,2] = (events_[:, 2] - t_min)/(t_max - t_min + 1e-8)
                 volume, memory = generate_taf_cuda(events_, target_shape, memory, event_volume_bins)
                 iter += 1
