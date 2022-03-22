@@ -12,29 +12,21 @@ import torch
 import time
 
 def taf_cuda(x, y, t, p, shape, volume_bins, past_volume):
+    tick = time.time()
     H, W = shape
 
     t_star = t.float()[:,None]
     
-    #tick = time.time()
-    xpos = x[p == 1]
-    ypos = y[p == 1]
-    adderpos = torch.arange(2).to(x.device)[None,:]
-    adderpos = 1 - torch.abs(adderpos-t_star[p == 1])
-    adderpos = torch.where(adderpos>=0,adderpos,torch.tensor([0.0]).to(x.device))
-
-    xneg = x[p == 0]
-    yneg = y[p == 0]
-    adderneg = torch.arange(2).to(x.device)[None,:]
-    adderneg = 1 - torch.abs(adderneg-t_star[p == 0])
-    adderneg = torch.where(adderneg>=0,adderneg,torch.tensor([0.0]).to(x.device))
-
+    adder = torch.stack([torch.arange(2),torch.arange(2)],dim = 1).to(x.device)[None,:,:]   #1, 2, 2
+    adder = (1 - torch.abs(adder-t_star)) * torch.stack([p,1 - p],dim=1)[:,None,:]  #n, 2, 2
+    adder = torch.where(adder>=0,adder,torch.zeros_like(adder)).view(adder.shape[0], 4) #n, 4
     
-    img_pos = torch.zeros((H * W, 2)).float().to(x.device)
-    img_pos.index_add_(0, xpos + W * ypos, adderpos)
-    img_neg = torch.zeros((H * W, 2)).float().to(x.device)
-    img_neg.index_add_(0, xneg + W * yneg, adderneg)
-    #print(time.time() - tick)
+    img = torch.zeros((H * W, 4)).float().to(x.device)
+    img.index_add_(0, x + W * y, adder)
+    print(time.time() - tick)
+
+    img_pos = img[...,:2]
+    img_neg = img[...,2:]
 
     forward_pos = (img_pos[:,-1]==0)
     forward_neg = (img_neg[:,-1]==0)
