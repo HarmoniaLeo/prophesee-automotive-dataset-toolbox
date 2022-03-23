@@ -206,7 +206,7 @@ for mode in ["train","val","test"]:
                 events_[:,2] = (events_[:, 2] - t_min)/(t_max - t_min + 1e-8)
                 #tick = time.time()
                 volume, memory, generate_volume_time, generate_encode_time = generate_taf_cuda(events_, target_shape, memory, event_volume_bins)
-                print(generate_volume_time, generate_encode_time)
+                #print(generate_volume_time, generate_encode_time)
                 #torch.cuda.synchronize()
                 if mode == "test":
                     total_volume_time.append(generate_volume_time)
