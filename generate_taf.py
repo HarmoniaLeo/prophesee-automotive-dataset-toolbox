@@ -74,21 +74,21 @@ def denseToSparse(dense_tensor):
 
     return np.stack(non_zero_indices), features
 
-min_event_count = 200000
-#min_event_count = 800000
+#min_event_count = 200000
+min_event_count = 800000
 events_window_abin = 10000
 event_volume_bins = 5
 events_window = events_window_abin * event_volume_bins
-# shape = [720,1280]
-# target_shape = [320, 640]
-shape = [240,304]
-target_shape = [256, 320]
+shape = [720,1280]
+target_shape = [320, 640]
+# shape = [240,304]
+# target_shape = [256, 320]
 rh = target_shape[0] / shape[0]
 rw = target_shape[1] / shape[1]
-raw_dir = "/data/lbd/ATIS_Automotive_Detection_Dataset/detection_dataset_duration_60s_ratio_1.0"
-target_dir = "/data/lbd/ATIS_taf"
-# raw_dir = "/data/Large_Automotive_Detection_Dataset"
-# target_dir = "/data/Large_taf"
+#raw_dir = "/data/lbd/ATIS_Automotive_Detection_Dataset/detection_dataset_duration_60s_ratio_1.0"
+#target_dir = "/data/lbd/ATIS_taf"
+raw_dir = "/data/Large_Automotive_Detection_Dataset"
+target_dir = "/data/Large_taf"
 
 total_volume_time = []
 total_taf_time = []
@@ -134,15 +134,15 @@ for mode in ["train","val","test"]:
             #     continue
             if unique_time <= 500000:
                 continue
-            # if (not sampling) and (unique_time - time_upperbound < 900000):
-            #     continue
-            # else:
-            #     if not sampling:
-            #         sampling_start_time = unique_time
-            #         sampling = True
-            #     if unique_time - sampling_start_time > 100000:
-            #         sampling = False
-            #         continue
+            if (not sampling) and (unique_time - time_upperbound < 900000):
+                continue
+            else:
+                if not sampling:
+                    sampling_start_time = unique_time
+                    sampling = True
+                if unique_time - sampling_start_time > 100000:
+                    sampling = False
+                    continue
             end_time = int(unique_time)
             end_count = f_event.seek_time(end_time)
             if end_count is None:
@@ -206,6 +206,7 @@ for mode in ["train","val","test"]:
                 events_[:,2] = (events_[:, 2] - t_min)/(t_max - t_min + 1e-8)
                 #tick = time.time()
                 volume, memory, generate_volume_time, generate_encode_time = generate_taf_cuda(events_, target_shape, memory, event_volume_bins)
+                print(generate_volume_time, generate_encode_time)
                 #torch.cuda.synchronize()
                 if mode == "test":
                     total_volume_time.append(generate_volume_time)
