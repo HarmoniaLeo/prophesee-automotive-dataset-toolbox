@@ -167,8 +167,8 @@ for mode in ["train","val","test"]:
                 start_count = count_upperbound
                 start_time = time_upperbound
                 end_time = round((end_time - start_time) / events_window_abin) * events_window_abin + start_time
-                if end_time > f_event.total_time:
-                    end_time = f_event.total_time
+                if end_time > f_event.total_time():
+                    end_time = f_event.total_time()
                 end_count = f_event.seek_time(end_time)
                 assert bbox_count > 0
 
