@@ -44,16 +44,18 @@ for mode in ["train","val","test"]:
         # if os.path.exists(volume_save_path):
         #     continue
         #h5 = h5py.File(volume_save_path, "w")
-        f_bbox = open(new_bbox_file, "rb")
+        #f_bbox = open(new_bbox_file, "rb")
+        f_bbox = open(bbox_file, "rb")
         start, v_type, ev_size, size = npy_events_tools.parse_header(f_bbox)
         dat_bbox = np.fromfile(f_bbox, dtype=v_type, count=-1)
         f_bbox.close()
 
         unique_ts, unique_indices = np.unique(dat_bbox['t'], return_index=True)
 
-        f_event = psee_loader.PSEELoader(new_event_file)
+        #f_event = psee_loader.PSEELoader(new_event_file)
+        f_event = psee_loader.PSEELoader(event_file)
 
-        raise Exception("break")
+        #raise Exception("break")
 
         f_bbox_new = open(new_bbox_file, "wb")
         f_event_new = open(new_event_file, "wb")
@@ -116,8 +118,7 @@ for mode in ["train","val","test"]:
             time_upperbound = end_time
             count_upperbound = end_count
         #h5.close()
+        sampled_events = dat_events_tools.write_event_buffer(f_event_new, np.concatenate(sampled_events))
+        sampled_bboxes = np.concatenate(sampled_bboxes).tofile(f_bbox_new)
         pbar.update(1)
     pbar.close()
-    
-    sampled_events = dat_events_tools.write_event_buffer(f_event_new, np.concatenate(sampled_events))
-    sampled_bboxes = np.concatenate(sampled_bboxes).tofile(f_bbox_new)
