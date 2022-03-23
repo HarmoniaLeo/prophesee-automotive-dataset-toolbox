@@ -10,6 +10,7 @@ import h5py
 import pickle
 import torch
 import time
+import math
 
 def taf_cuda(x, y, t, p, shape, volume_bins, past_volume):
     tick = time.time()
@@ -130,8 +131,8 @@ for mode in ["train","val","test"]:
         for bbox_count,unique_time in enumerate(unique_ts):
             volume_save_path_l = os.path.join(target_root, file_name+"_"+str(unique_time)+"_locations.npy")
             volume_save_path_f = os.path.join(target_root, file_name+"_"+str(unique_time)+"_features.npy")
-            # if os.path.exists(volume_save_path_f) and os.path.exists(volume_save_path_l):
-            #     continue
+            if os.path.exists(volume_save_path_f) and os.path.exists(volume_save_path_l):
+                continue
             if unique_time <= 500000:
                 continue
             if (not sampling) and (unique_time - time_upperbound < 450000):
@@ -166,6 +167,8 @@ for mode in ["train","val","test"]:
                 start_count = count_upperbound
                 start_time = time_upperbound
                 end_time = round((end_time - start_time) / events_window_abin) * events_window_abin + start_time
+                if end_time > f_event.total_time:
+                    end_time = f_event.total_time
                 end_count = f_event.seek_time(end_time)
                 assert bbox_count > 0
 
@@ -182,8 +185,7 @@ for mode in ["train","val","test"]:
 
             z = torch.zeros_like(events[:,0])
 
-            bins = int((end_time - start_time) / events_window_abin)
-            assert bins == (end_time - start_time) / events_window_abin
+            bins = math.ceil((end_time - start_time) / events_window_abin)
             
             for i in range(bins):
                 z = torch.where((events[:,2] >= start_time + i * events_window_abin)&(events[:,2] <= start_time + (i + 1) * events_window_abin), torch.zeros_like(events[:,2])+i, z)
