@@ -134,13 +134,13 @@ for mode in ["train","val","test"]:
             #     continue
             if unique_time <= 500000:
                 continue
-            if (not sampling) and (unique_time - time_upperbound < 900000):
+            if (not sampling) and (unique_time - time_upperbound < 450000):
                 continue
             else:
                 if not sampling:
                     sampling_start_time = unique_time
                     sampling = True
-                if unique_time - sampling_start_time > 100000:
+                if unique_time - sampling_start_time > 50000:
                     sampling = False
                     continue
             end_time = int(unique_time)
