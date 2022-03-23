@@ -119,7 +119,7 @@ for mode in ["train","val","test"]:
         #h5.close()
         dat_events_tools.write_event_buffer(f_event_new, np.concatenate(sampled_events))
         sampled_bboxes = np.concatenate(sampled_bboxes)
-        mmp = np.lib.format.open_memmap(new_event_file, v_type, "w+", shape = sampled_bboxes.shape)
+        mmp = np.lib.format.open_memmap(new_bbox_file, v_type, "w+", shape = sampled_bboxes.shape)
         mmp[:] = sampled_bboxes[:]
         mmp.flush()
         pbar.update(1)
