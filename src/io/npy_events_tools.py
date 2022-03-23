@@ -58,4 +58,4 @@ def parse_header(fhandle):
     size = (None, None)
     size = (None, None)
 
-    return start, ev_type, ev_size, size
+    return start, ev_type, ev_size, size, dtype
