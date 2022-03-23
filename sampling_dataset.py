@@ -56,7 +56,7 @@ for mode in ["train","val","test"]:
         #f_event = psee_loader.PSEELoader(event_file)
 
         events = f_event.load_n_events(20)
-        print(events, dat_bbox[:10])
+        print(unique_ts)
         raise Exception("break")
 
         f_event_new = open(new_event_file, "wb")
