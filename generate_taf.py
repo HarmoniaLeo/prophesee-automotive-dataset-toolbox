@@ -116,7 +116,7 @@ for mode in ["train","val","test"]:
         #     continue
         #h5 = h5py.File(volume_save_path, "w")
         f_bbox = open(bbox_file, "rb")
-        start, v_type, ev_size, size = npy_events_tools.parse_header(f_bbox)
+        start, v_type, ev_size, size, dtype = npy_events_tools.parse_header(f_bbox)
         dat_bbox = np.fromfile(f_bbox, dtype=v_type, count=-1)
         f_bbox.close()
 
