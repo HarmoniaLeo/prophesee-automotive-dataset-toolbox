@@ -88,7 +88,7 @@ rh = target_shape[0] / shape[0]
 rw = target_shape[1] / shape[1]
 #raw_dir = "/data/lbd/ATIS_Automotive_Detection_Dataset/detection_dataset_duration_60s_ratio_1.0"
 #target_dir = "/data/lbd/ATIS_taf"
-raw_dir = "/data/Large_Automotive_Detection_Dataset"
+raw_dir = "/data/Large_Automotive_Detection_Dataset_sampling"
 target_dir = "/data/Large_taf"
 
 total_volume_time = []
