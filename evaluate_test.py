@@ -48,8 +48,24 @@ pred3=np.array([
 gt_boxes_list=[gts1,gts2,gts3]
 result_boxes_list=[pred1,pred2,pred3]
 
-# For fair comparison with paper results
-gt_boxes_list = map(filter_boxes, gt_boxes_list)
-result_boxes_list = map(filter_boxes, result_boxes_list)
+evaluate_detection(gt_boxes_list, result_boxes_list)
+
+gt_boxes_list=[gts1]
+result_boxes_list=[pred1]
 
 evaluate_detection(gt_boxes_list, result_boxes_list)
+
+gt_boxes_list=[gts2]
+result_boxes_list=[pred2]
+
+evaluate_detection(gt_boxes_list, result_boxes_list)
+
+gt_boxes_list=[gts3]
+result_boxes_list=[pred3]
+
+evaluate_detection(gt_boxes_list, result_boxes_list)
+
+# For fair comparison with paper results
+#gt_boxes_list = map(filter_boxes, gt_boxes_list)
+#result_boxes_list = map(filter_boxes, result_boxes_list)
+
