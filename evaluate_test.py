@@ -45,8 +45,8 @@ pred3=np.array([
 #result_boxes_list = [reformat_boxes(p) for p in result_boxes_list]
 #gt_boxes_list = [reformat_boxes(p) for p in gt_boxes_list]
 
-gt_boxes_list=[gts1,gts2,gts3]
-result_boxes_list=[pred1,pred2,pred3]
+gt_boxes_list=[gts3,gts3,gts3]
+result_boxes_list=[pred3,pred3,pred3]
 
 evaluate_detection(gt_boxes_list, result_boxes_list)
 
