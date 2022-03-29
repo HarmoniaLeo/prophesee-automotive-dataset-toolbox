@@ -93,7 +93,7 @@ target_dir = "/data/Large_taf"
 
 total_volume_time = []
 total_taf_time = []
-for mode in ["train","val","test"]:
+for mode in ["train","test"]:
     
     file_dir = os.path.join(raw_dir, mode)
     root = file_dir
@@ -133,17 +133,17 @@ for mode in ["train","val","test"]:
             volume_save_path_f = os.path.join(target_root, file_name+"_"+str(unique_time)+"_features.npy")
             if os.path.exists(volume_save_path_f) and os.path.exists(volume_save_path_l):
                 continue
-            if unique_time <= 500000:
-                continue
-            if (not sampling) and (unique_time - time_upperbound < 450000):
-                continue
-            else:
-                if not sampling:
-                    sampling_start_time = unique_time
-                    sampling = True
-                if unique_time - sampling_start_time > 50000:
-                    sampling = False
-                    continue
+            # if unique_time <= 500000:
+            #     continue
+            # if (not sampling) and (unique_time - time_upperbound < 450000):
+            #     continue
+            # else:
+            #     if not sampling:
+            #         sampling_start_time = unique_time
+            #         sampling = True
+            #     if unique_time - sampling_start_time > 50000:
+            #         sampling = False
+            #         continue
             end_time = int(unique_time)
             end_count = f_event.seek_time(end_time)
             if end_count is None:
