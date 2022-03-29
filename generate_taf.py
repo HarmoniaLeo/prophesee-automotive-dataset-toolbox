@@ -104,7 +104,7 @@ for mode in ["train","test"]:
     except Exception:
         continue
     # Remove duplicates (.npy and .dat)
-    files = files[:len(files)/3]
+    files = files[:int(len(files)/3)]
     files = [time_seq_name[:-7] for time_seq_name in files
                     if time_seq_name[-3:] == 'dat']
 
