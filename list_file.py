@@ -1,7 +1,7 @@
 import os
 
 files = os.listdir("/datassd4t/lbd/Large_taf/train")
-files = [file+"\n" for file in files]
+files = [(file+"\n").encode("utf-8") for file in files]
 f = open("already_exist.txt", mode='wb')
 f.writelines(files)
 f.close()
