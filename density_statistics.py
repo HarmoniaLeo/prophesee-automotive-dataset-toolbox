@@ -175,7 +175,7 @@ for mode in ["train","val","test"]:
             total_points = 0
             gt_trans = dat_bbox[dat_bbox['t'] == unique_time]
             for j in range(len(gt_trans)):
-                x, y, w, h = gt_trans['x'], gt_trans['y'], gt_trans['w'], gt_trans['h']
+                x, y, w, h = gt_trans['x'][j], gt_trans['y'][j], gt_trans['w'][j], gt_trans['h'][j]
                 total_area += w * h
                 total_points += torch.sum(torch.sum(torch.sum(torch.sum(volume[int(y):int(y+h),int(x):int(x+w)],dim=3),dim=2)>0,dim=0),dim=0).cpu().item()
             file_names.append(file_name)
