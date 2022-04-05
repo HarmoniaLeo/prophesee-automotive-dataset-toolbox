@@ -93,7 +93,7 @@ target_dir = "/data/Large_taf"
 
 total_volume_time = []
 total_taf_time = []
-for mode in ["train","test"]:
+for mode in ["train"]:
     
     file_dir = os.path.join(raw_dir, mode)
     root = file_dir
@@ -104,7 +104,7 @@ for mode in ["train","test"]:
     except Exception:
         continue
     # Remove duplicates (.npy and .dat)
-    files = files[int(len(files)/3):int(2*len(files)/3)]
+    files = files[int(2*len(files)/3):]
     files = [time_seq_name[:-7] for time_seq_name in files
                     if time_seq_name[-3:] == 'dat']
 
