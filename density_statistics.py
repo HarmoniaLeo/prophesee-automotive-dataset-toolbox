@@ -122,6 +122,7 @@ for mode in ["train","val","test"]:
     densitys_n = []
     densitys_p = []
     densitys_eff = []
+    densitys_eff_diff = []
 
     for i_file, file_name in enumerate(files):
         event_file = os.path.join(root, file_name + '_td.dat')
@@ -137,6 +138,8 @@ for mode in ["train","val","test"]:
         unique_ts, unique_indices = np.unique(dat_bbox['t'], return_index=True)
 
         f_event = psee_loader.PSEELoader(event_file)
+
+        history_density = -1
 
         for bbox_count,unique_time in enumerate(unique_ts):
             end_time = int(unique_time)
@@ -184,6 +187,11 @@ for mode in ["train","val","test"]:
             densitys_n.append(density_n)
             densitys_p.append(density_p)
             densitys_eff.append(total_points/total_area)
+            if history_density >= 0:
+                densitys_eff_diff.append(total_points/total_area - history_density)
+            else:
+                densitys_eff_diff.append(-1)
+            history_density = total_points/total_area
 
         #h5.close()
         pbar.update(1)
@@ -195,4 +203,5 @@ for mode in ["train","val","test"]:
         "Density":densitys,
         "Density negative":densitys_n,
         "Density positive":densitys_p,
-        "Density effective":densitys_eff}).to_csv(csv_path)
+        "Density effective":densitys_eff,
+        "Density effective difference":densitys_eff_diff}).to_csv(csv_path)
