@@ -4,7 +4,6 @@ from src.io import npy_events_tools
 import os
 import cv2
 import argparse
-from poisson import poissoned_events
 import seaborn as sns
 import matplotlib.pyplot as plt
 import pandas as pd
