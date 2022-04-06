@@ -122,7 +122,6 @@ for mode in ["train","val","test"]:
     densitys_n = []
     densitys_p = []
     densitys_eff = []
-    densitys_eff_diff = []
 
     for i_file, file_name in enumerate(files):
         event_file = os.path.join(root, file_name + '_td.dat')
@@ -198,5 +197,4 @@ for mode in ["train","val","test"]:
         "Density":densitys,
         "Density negative":densitys_n,
         "Density positive":densitys_p,
-        "Density effective":densitys_eff,
-        "Density effective difference":densitys_eff_diff}).to_csv(csv_path)
+        "Density effective":densitys_eff}).to_csv(csv_path)
