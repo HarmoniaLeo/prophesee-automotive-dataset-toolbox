@@ -58,42 +58,9 @@ def generate_taf_cuda(events, shape, past_volume = None, volume_bins=5):
 
     return histogram_ecd, past_volume, generate_volume_time, generate_encode_time
 
-def generate_event_volume_cuda(events, shape, past_volume = None, volume_bins=5):
-    H, W = shape
-
-    x, y, t, p, z = events.unbind(-1)
-
-    x, y, p = x.long(), y.long(), p.long()
-
-    if past_volume is None:
-        t_star = volume_bins * t.float()[:,None,None]
-        channels = volume_bins
-    else:
-        t_star = t.float()[:,None,None]
-        channels = 2
-    adder = torch.stack([torch.arange(channels),torch.arange(channels)],dim = 1).to(x.device)[None,:,:]   #1, 2, 2
-    adder = (1 - torch.abs(adder-t_star)) * torch.stack([p,1 - p],dim=1)[:,None,:]  #n, 2, 2
-    adder = torch.where(adder>=0,adder,torch.zeros_like(adder)).view(adder.shape[0], channels * 2) #n, 4
-
-    if past_volume is None:
-        img = torch.zeros((H * W, volume_bins * 2)).float().to(x.device)
-        img.index_add_(0, x + W * y, adder)
-        img = img.view(H * W, volume_bins, 2)
-    else:
-        img_new = torch.zeros((H * W, 4)).float().to(x.device)
-        img_new.index_add_(0, x + W * y, adder)
-        img_new = img_new.view(H * W, 2, 2)
-        img_old = past_volume
-        img_old = img_old[:,1:]
-        img_old[:,-1] = img_old[:,-1] + img_new[:,0]
-        img = torch.cat([img_old,img_new[:,1:]],dim=1)
-
-    img_viewed = img.view((H, W, img.shape[1], 2))
-    return img_viewed, img
-
 events_window_abin = 10000
 event_volume_bins = 5
-events_window = events_window_abin * event_volume_bins
+events_window = events_window_abin * (event_volume_bins + 1)
 # shape = [720,1280]
 # target_shape = [320, 640]
 shape = [240,304]
@@ -101,7 +68,7 @@ raw_dir = "/data/lbd/ATIS_Automotive_Detection_Dataset/detection_dataset_duratio
 # raw_dir = "/data/Large_Automotive_Detection_Dataset_sampling"
 # target_dir = "/data/Large_taf"
 
-for mode in ["train","val","test"]:
+for mode in ["test"]:
     
     file_dir = os.path.join(raw_dir, mode)
     root = file_dir
@@ -118,11 +85,8 @@ for mode in ["train","val","test"]:
 
     file_names = []
     time_stamps = []
-    densitys = []
-    densitys_n = []
-    densitys_p = []
-    densitys_eff = []
-    densitys_eff_diff = []
+    generate_volume_times = []
+    generate_taf_times = []
 
     for i_file, file_name in enumerate(files):
         event_file = os.path.join(root, file_name + '_td.dat')
@@ -139,6 +103,7 @@ for mode in ["train","val","test"]:
 
         f_event = psee_loader.PSEELoader(event_file)
 
+        history_density = -1
 
         for bbox_count,unique_time in enumerate(unique_ts):
             end_time = int(unique_time)
@@ -169,34 +134,19 @@ for mode in ["train","val","test"]:
                 t_max = start_time + (iter + 1) * events_window_abin
                 t_min = start_time + iter * events_window_abin
                 events_[:,2] = (events_[:, 2] - t_min)/(t_max - t_min + 1e-8)
-                volume, memory = generate_event_volume_cuda(events_, shape, memory, event_volume_bins)
+                volume, memory, generate_volume_time, generate_encode_time = generate_taf_cuda(events_, shape, memory, event_volume_bins)
             
-            density = (torch.sum(torch.sum(torch.sum(torch.sum(volume,dim=3),dim=2)>0,dim=0),dim=0)/(volume.shape[0]*volume.shape[1])).cpu().item()
-            density_p = (torch.sum(torch.sum(torch.sum(volume[...,1],dim=2)>0,dim=0),dim=0)/(volume.shape[0]*volume.shape[1])).cpu().item()
-            density_n = (torch.sum(torch.sum(torch.sum(volume[...,0],dim=2)>0,dim=0),dim=0)/(volume.shape[0]*volume.shape[1])).cpu().item()
-            total_area = 0
-            total_points = 0
-            gt_trans = dat_bbox[dat_bbox['t'] == unique_time]
-            for j in range(len(gt_trans)):
-                x, y, w, h = gt_trans['x'][j], gt_trans['y'][j], gt_trans['w'][j], gt_trans['h'][j]
-                total_area += w * h
-                total_points += torch.sum(torch.sum(torch.sum(torch.sum(volume[int(y):int(y+h),int(x):int(x+w)],dim=3),dim=2)>0,dim=0),dim=0).cpu().item()
             file_names.append(file_name)
             time_stamps.append(unique_time)
-            densitys.append(density)
-            densitys_n.append(density_n)
-            densitys_p.append(density_p)
-            densitys_eff.append(total_points/total_area)
+            generate_volume_times.append(generate_volume_time)
+            generate_taf_times.append(generate_volume_time + generate_encode_time)
 
         #h5.close()
         pbar.update(1)
     pbar.close()
-    csv_path = os.path.join(file_dir,"density.csv")
+    csv_path = os.path.join(file_dir,"generate_time.csv")
     pd.DataFrame({
         "File name":file_names,
         "Time stamp":time_stamps,
-        "Density":densitys,
-        "Density negative":densitys_n,
-        "Density positive":densitys_p,
-        "Density effective":densitys_eff,
-        "Density effective difference":densitys_eff_diff}).to_csv(csv_path)
+        "Generate volume time":generate_volume_times,
+        "Generate taf time":generate_taf_times}).to_csv(csv_path)
