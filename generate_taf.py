@@ -81,7 +81,7 @@ events_window_abin = 10000
 event_volume_bins = 5
 events_window = events_window_abin * event_volume_bins
 shape = [720,1280]
-target_shape = [320, 640]
+target_shape = [512, 640]
 # shape = [240,304]
 # target_shape = [256, 320]
 rh = target_shape[0] / shape[0]
@@ -93,7 +93,7 @@ target_dir = "/data/Large_taf"
 
 total_volume_time = []
 total_taf_time = []
-for mode in ["train"]:
+for mode in ["val"]:
     
     file_dir = os.path.join(raw_dir, mode)
     root = file_dir
@@ -104,7 +104,7 @@ for mode in ["train"]:
     except Exception:
         continue
     # Remove duplicates (.npy and .dat)
-    files = files[int(2*len(files)/3):]
+    #files = files[int(2*len(files)/3):]
     files = [time_seq_name[:-7] for time_seq_name in files
                     if time_seq_name[-3:] == 'dat']
 
