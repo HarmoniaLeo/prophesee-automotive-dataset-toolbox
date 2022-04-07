@@ -97,14 +97,14 @@ for mode in ["train"]:
     
     file_dir = os.path.join(raw_dir, mode)
     root = file_dir
-    target_root = os.path.join(target_dir, mode)
+    target_root = os.path.join(target_dir, mode+"2")
     #h5 = h5py.File(raw_dir + '/ATIS_taf_'+mode+'.h5', 'w')
     try:
         files = os.listdir(file_dir)
     except Exception:
         continue
     # Remove duplicates (.npy and .dat)
-    files = files[:int(len(files)/3)]
+    files = files[int(len(files)/3):int(len(files)/2)]
     files = [time_seq_name[:-7] for time_seq_name in files
                     if time_seq_name[-3:] == 'dat']
 
