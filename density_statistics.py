@@ -94,11 +94,11 @@ def generate_event_volume_cuda(events, shape, past_volume = None, volume_bins=5)
 events_window_abin = 10000
 event_volume_bins = 5
 events_window = events_window_abin * event_volume_bins
-shape = [720,1280]
+#shape = [720,1280]
 # target_shape = [320, 640]
-#shape = [240,304]
-#raw_dir = "/data/lbd/ATIS_Automotive_Detection_Dataset/detection_dataset_duration_60s_ratio_1.0"
-raw_dir = "/data/Large_Automotive_Detection_Dataset_sampling"
+shape = [240,304]
+raw_dir = "/data/lbd/ATIS_Automotive_Detection_Dataset/detection_dataset_duration_60s_ratio_1.0"
+#raw_dir = "/data/Large_Automotive_Detection_Dataset_sampling"
 # target_dir = "/data/Large_taf"
 
 for mode in ["train","val","test"]:
@@ -122,6 +122,7 @@ for mode in ["train","val","test"]:
     densitys_n = []
     densitys_p = []
     densitys_eff = []
+    densitys_eff_max = []
 
     for i_file, file_name in enumerate(files):
         event_file = os.path.join(root, file_name + '_td.dat')
@@ -176,16 +177,22 @@ for mode in ["train","val","test"]:
             total_area = 0
             total_points = 0
             gt_trans = dat_bbox[dat_bbox['t'] == unique_time]
+            max_density = 0
             for j in range(len(gt_trans)):
                 x, y, w, h = gt_trans['x'][j], gt_trans['y'][j], gt_trans['w'][j], gt_trans['h'][j]
-                total_area += w * h
-                total_points += torch.sum(torch.sum(torch.sum(torch.sum(volume[int(y):int(y+h),int(x):int(x+w)],dim=3),dim=2)>0,dim=0),dim=0).cpu().item()
+                area = w * h
+                points = torch.sum(torch.sum(torch.sum(torch.sum(volume[int(y):int(y+h),int(x):int(x+w)],dim=3),dim=2)>0,dim=0),dim=0).cpu().item()
+                total_area += area
+                total_points += points
+                if points / area > max_density:
+                    max_density = points / area
             file_names.append(file_name)
             time_stamps.append(unique_time)
             densitys.append(density)
             densitys_n.append(density_n)
             densitys_p.append(density_p)
             densitys_eff.append(total_points/total_area)
+            densitys_eff_max.append(max_density)
 
         #h5.close()
         pbar.update(1)
@@ -197,4 +204,5 @@ for mode in ["train","val","test"]:
         "Density":densitys,
         "Density negative":densitys_n,
         "Density positive":densitys_p,
-        "Density effective":densitys_eff}).to_csv(csv_path)
+        "Density effective":densitys_eff,
+        "Density effective max":densitys_eff_max}).to_csv(csv_path)
