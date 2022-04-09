@@ -155,54 +155,54 @@ for mode in ["train","val","test"]:
             events = torch.from_numpy(rfn.structured_to_unstructured(events)[:, [1, 2, 0, 3]].astype(float)).cuda()
             #events = rfn.structured_to_unstructured(events)[:, [1, 2, 0, 3]].astype(float)
 
-            density = len(events)
-            density_p = len(events[events[:,3]==1])
-            density_n = len(events[events[:,3]==0])
-            max_density = 0
-            gt_trans = dat_bbox[dat_bbox['t'] == unique_time]
-            total_area = 0
-            total_points = 0
-            for j in range(len(gt_trans)):
-                x, y, w, h = gt_trans['x'][j], gt_trans['y'][j], gt_trans['w'][j], gt_trans['h'][j]
-                area = w * h
-                points = len(events[(events[:,0]>x)&(events[:,0]<x+w)&(events[:,1]>y)&(events[:,1]<y+h)])
-                total_area += area
-                total_points += points
-                if points / area > max_density:
-                    max_density = points / area
-
-            # z = torch.zeros_like(events[:,0])
-
-            # bins = math.ceil((end_time - start_time) / events_window_abin)
-            
-            # for i in range(bins):
-            #     z = torch.where((events[:,2] >= start_time + i * events_window_abin)&(events[:,2] <= start_time + (i + 1) * events_window_abin), torch.zeros_like(events[:,2])+i, z)
-            #     #events_timestamps.append(start_time + (i + 1) * self.events_window_abin)
-            # events = torch.cat([events,z[:,None]], dim=1)
-
-            # memory = None
-            # for iter in range(bins):
-            #     events_ = events[events[...,4] == iter]
-            #     t_max = start_time + (iter + 1) * events_window_abin
-            #     t_min = start_time + iter * events_window_abin
-            #     events_[:,2] = (events_[:, 2] - t_min)/(t_max - t_min + 1e-8)
-            #     volume, memory = generate_event_volume_cuda(events_, shape, memory, event_volume_bins)
-            
-            # density = (torch.sum(torch.sum(torch.sum(torch.sum(volume,dim=3),dim=2)>0,dim=0),dim=0)/(volume.shape[0]*volume.shape[1])).cpu().item()
-            # density_p = (torch.sum(torch.sum(torch.sum(volume[...,1],dim=2)>0,dim=0),dim=0)/(volume.shape[0]*volume.shape[1])).cpu().item()
-            # density_n = (torch.sum(torch.sum(torch.sum(volume[...,0],dim=2)>0,dim=0),dim=0)/(volume.shape[0]*volume.shape[1])).cpu().item()
+            # density = len(events)
+            # density_p = len(events[events[:,3]==1])
+            # density_n = len(events[events[:,3]==0])
+            # max_density = 0
+            # gt_trans = dat_bbox[dat_bbox['t'] == unique_time]
             # total_area = 0
             # total_points = 0
-            # gt_trans = dat_bbox[dat_bbox['t'] == unique_time]
-            # max_density = 0
             # for j in range(len(gt_trans)):
             #     x, y, w, h = gt_trans['x'][j], gt_trans['y'][j], gt_trans['w'][j], gt_trans['h'][j]
             #     area = w * h
-            #     points = torch.sum(torch.sum(torch.sum(torch.sum(volume[int(y):int(y+h),int(x):int(x+w)],dim=3),dim=2)>0,dim=0),dim=0).cpu().item()
+            #     points = len(events[(events[:,0]>x)&(events[:,0]<x+w)&(events[:,1]>y)&(events[:,1]<y+h)])
             #     total_area += area
             #     total_points += points
             #     if points / area > max_density:
             #         max_density = points / area
+
+            z = torch.zeros_like(events[:,0])
+
+            bins = math.ceil((end_time - start_time) / events_window_abin)
+            
+            for i in range(bins):
+                z = torch.where((events[:,2] >= start_time + i * events_window_abin)&(events[:,2] <= start_time + (i + 1) * events_window_abin), torch.zeros_like(events[:,2])+i, z)
+                #events_timestamps.append(start_time + (i + 1) * self.events_window_abin)
+            events = torch.cat([events,z[:,None]], dim=1)
+
+            memory = None
+            for iter in range(bins):
+                events_ = events[events[...,4] == iter]
+                t_max = start_time + (iter + 1) * events_window_abin
+                t_min = start_time + iter * events_window_abin
+                events_[:,2] = (events_[:, 2] - t_min)/(t_max - t_min + 1e-8)
+                volume, memory = generate_event_volume_cuda(events_, shape, memory, event_volume_bins)
+            
+            density = (torch.sum(torch.sum(torch.sum(torch.sum(volume,dim=3),dim=2)>0,dim=0),dim=0)/(volume.shape[0]*volume.shape[1])).cpu().item()
+            density_p = (torch.sum(torch.sum(torch.sum(volume[...,1],dim=2)>0,dim=0),dim=0)/(volume.shape[0]*volume.shape[1])).cpu().item()
+            density_n = (torch.sum(torch.sum(torch.sum(volume[...,0],dim=2)>0,dim=0),dim=0)/(volume.shape[0]*volume.shape[1])).cpu().item()
+            total_area = 0
+            total_points = 0
+            gt_trans = dat_bbox[dat_bbox['t'] == unique_time]
+            max_density = 0
+            for j in range(len(gt_trans)):
+                x, y, w, h = gt_trans['x'][j], gt_trans['y'][j], gt_trans['w'][j], gt_trans['h'][j]
+                area = w * h
+                points = torch.sum(torch.sum(torch.sum(torch.sum(volume[int(y):int(y+h),int(x):int(x+w)],dim=3),dim=2)>0,dim=0),dim=0).cpu().item()
+                total_area += area
+                total_points += points
+                if points / area > max_density:
+                    max_density = points / area
             file_names.append(file_name)
             time_stamps.append(unique_time)
             densitys.append(density)

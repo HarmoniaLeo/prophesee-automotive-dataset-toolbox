@@ -69,59 +69,48 @@ def draw_bboxes(img, boxes, dt = 0, labelmap=LABELMAP):
         cv2.putText(img, class_name, (center[0], pt2[1] - 1), cv2.FONT_HERSHEY_SIMPLEX, 0.5, color)
         cv2.putText(img, str(score), (center[0], pt1[1] - 1), cv2.FONT_HERSHEY_SIMPLEX, 0.5, color)
 
-def visualizeVolume(volume,gt,filename,path,pct,time_stamp_start,time_stamp_end,per_time_bbox=False):
-    step = (time_stamp_end - time_stamp_start)/(volume.shape[0]//2)
+def visualizeVolume(volume,gt,filename,path,time_stamp_start,time_stamp_end):
     img = 127 * np.ones((volume.shape[1], volume.shape[2], 3), dtype=np.uint8)
-    for i in range(0,volume.shape[0]//2):
-        if per_time_bbox:
-            gt_i = gt[(dat_bbox['t']>=time_stamp_start + i * step)&(dat_bbox['t']<=time_stamp_start + (i + 1) * step)]
-        else:
-            gt_i = gt[(dat_bbox['t']>=time_stamp_start)&(dat_bbox['t']<=time_stamp_end)]
-        c_p = volume[i+volume.shape[0]//2]
-        c_p_ravel = c_p.reshape(c_p.shape[0]*c_p.shape[1])
-        #c_p = 127 * c_p / np.max(c_p)#np.percentile(c_p,pct)
-        c_p = np.where(c_p>0, 127, c_p)
+    gt = gt[(gt['t']>=time_stamp_start)&(gt['t']<=time_stamp_end)]
+    for i in range(0,volume.shape[0],2):
+        c_p = volume[i+1]
+        c_p = 127 * c_p / (np.percentile(c_p,0.99)+1e-8)
+        c_p = np.where(c_p>127, 127, c_p)
         c_n = volume[i]
-        c_n_ravel = c_n.reshape(c_n.shape[0]*c_n.shape[1])
-        #c_n = 127 * c_n / np.max(c_n)#np.percentile(c_n,pct)
-        c_n = np.where(c_n>0, 127, c_n)
+        c_n = 127 * c_n / (np.percentile(c_p,0.99)+1e-8)
+        c_n = np.where(c_n>127, 127, c_n)
         img_s = img + c_p[:,:,None].astype(np.uint8) - c_n[:,:,None].astype(np.uint8)
-        draw_bboxes(img_s,gt_i)
-        path_t = os.path.join(path,filename+"_start{0}_end{1}".format(int(time_stamp_start),int(time_stamp_end)))
+        draw_bboxes(img_s,gt,0,LABELMAP)
+        path_t = os.path.join(path,filename+"_{0}".format(int(gt[0,0])))
         if not(os.path.exists(path_t)):
             os.mkdir(path_t)
         cv2.imwrite(os.path.join(path_t,'{0}.png'.format(i)),img_s)
-        sns.distplot(pd.DataFrame({"Negative":c_n_ravel[c_n_ravel>0]}).Negative,label="Negative")
-        sns.distplot(pd.DataFrame({"Positive":c_p_ravel[c_p_ravel>0]}).Positive,label="Positive")
-        #sns.distplot(pd.DataFrame({"Either":(c_n_ravel+c_p_ravel)[(c_n_ravel>0)|(c_p_ravel>0)]}).Either,label="Either")
-        #plt.xlim(-0.3,1.0)
-        plt.xlabel("Value")
-        plt.legend()
-        plt.savefig(os.path.join(path_t,'{0}_kde_overzero.png'.format(i)),dpi=100, bbox_inches = 'tight')
-        plt.clf()
-        sns.distplot(pd.DataFrame({"Negative":c_n_ravel[c_n_ravel>=0]}).Negative,label="Negative")
-        sns.distplot(pd.DataFrame({"Positive":c_p_ravel[c_p_ravel>=0]}).Positive,label="Positive")
-        #sns.distplot(pd.DataFrame({"Either":(c_n_ravel+c_p_ravel)[(c_n_ravel>=0)|(c_p_ravel>=0)]}).Either,label="Either")
-        plt.xlim(-0.1,1.0)
-        plt.xlabel("Value")
-        plt.legend()
-        plt.savefig(os.path.join(path_t,'{0}_kde.png'.format(i)),dpi=100, bbox_inches = 'tight')
-        plt.clf()
-    volume = volume.reshape(2,volume.shape[0]//2,volume.shape[1]*volume.shape[2],1).transpose(0,2,1,3)
-    img = 127 * np.ones((volume.shape[1], volume.shape[2], 3), dtype=np.uint8)
-    img = np.where(volume[0]>0, 0, img)
-    img = np.where(volume[1]>0, 255, img)
-    cv2.imwrite(os.path.join(path_t,'time_view.png'.format(i)),img[:200,:200])
+    density = (np.sum(np.sum(np.sum(np.sum(volume,axis=3),axis=2)>0,axis=0),axis=0)/(volume.shape[0]*volume.shape[1]))
+    density_p = (np.sum(np.sum(np.sum(volume[...,1],axis=2)>0,axis=0),axis=0)/(volume.shape[0]*volume.shape[1]))
+    density_n = (np.sum(np.sum(np.sum(volume[...,0],axis=2)>0,axis=0),axis=0)/(volume.shape[0]*volume.shape[1]))
+    total_area = 0
+    total_points = 0
+    gt_trans = gt
+    max_density = 0
+    for j in range(len(gt_trans)):
+        x, y, w, h = gt_trans['x'][j], gt_trans['y'][j], gt_trans['w'][j], gt_trans['h'][j]
+        area = w * h
+        points = np.sum(np.sum(np.sum(np.sum(volume[int(y):int(y+h),int(x):int(x+w)],axis=3),axis=2)>0,axis=0),axis=0).cpu().item()
+        total_area += area
+        total_points += points
+        if points / area > max_density:
+            max_density = points / area
+    print("density",density)
+    print("density_p",density_n)
+    print("density_n",density_p)
+    print("density_eff",total_points/total_area)
+    print("density_eff_max",max_density)
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(
         description='visualize one or several event files along with their boxes')
     parser.add_argument('-item', type=str)
-    parser.add_argument('-start', type=int)
     parser.add_argument('-end', type=int)
-    parser.add_argument('-bins', type=int, default=5)
-    parser.add_argument('-upper_thr', type=float, default=90)
-    parser.add_argument('-per_time_bbox', type=bool, default=False)
 
     args = parser.parse_args()
 
@@ -130,7 +119,7 @@ if __name__ == '__main__':
         os.mkdir(result_path)
     data_folder = 'test'
     item = args.item
-    time_stamp_start = args.start
+    time_stamp_start = args.end - 50000
     time_stamp_end = args.end
     data_path = "/data/ATIS_Automotive_Detection_Dataset/detection_dataset_duration_60s_ratio_1.0"
     final_path = os.path.join(data_path,data_folder)
@@ -147,5 +136,5 @@ if __name__ == '__main__':
     x,y,t,p = events['x'], events['y'], events['t'], events['p']
     events = np.stack([x.astype(int), y.astype(int), t, p], axis=-1)
     print(len(events))
-    volume = generate_event_volume(events,(240,304),args.bins)
-    visualizeVolume(volume,dat_bbox,item,result_path,args.upper_thr,time_stamp_start,time_stamp_end,args.per_time_bbox)
+    volume = generate_event_volume(events,(240,304),5)
+    visualizeVolume(volume,dat_bbox,item,result_path,time_stamp_start,time_stamp_end)

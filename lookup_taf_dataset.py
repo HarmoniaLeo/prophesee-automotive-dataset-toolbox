@@ -7,15 +7,39 @@ import argparse
 import seaborn as sns
 import matplotlib.pyplot as plt
 import pandas as pd
+import torch
 sns.set_style("darkgrid")
 
+def no_transform(volume):
+    return volume
+
+def minmax_transform(volume):
+    volume = volume.copy()
+    ecd_view = volume[...,1][volume[...,1] > -1e6]
+    #q10, q90 = torch.quantile(ecd_view, torch.tensor([0.1,0.9]).to(x.device))
+    q100 = np.max(ecd_view)
+    q0 = np.min(ecd_view)
+    volume[...,1] = np.where(volume[...,1] > -1e6, (volume[...,1] - q100) / (q100 - q0 + 1e-8) * 6, x[...,1])
+    return volume
+
+def quantile_transform(volume):
+    volume = volume.copy()
+    ecd_view = volume[...,1][volume[...,1] > -1e6]
+    q90 = np.quantile(ecd_view, 0.90)
+    q10 = np.quantile(ecd_view, 0.10)
+    volume[...,1] = np.where(volume[...,1] > -1e6, volume[...,1] - q90, volume[...,1])
+    volume[...,1] = np.where((volume[...,1] > -1e6) & (volume[...,1] < 0), volume[...,1]/(q90 - q10 + 1e-8) * 2, volume[...,1])
+    ecd_view = volume[...,1][volume[...,1] > -1e6]
+    q100 = np.max(ecd_view)
+    volume[...,1] = np.where(volume[...,1] > 0, volume[...,1] / (q100 + 1e-8) * 2, volume[...,1])
+    return volume
+
 def generate_event_volume(events,shape,ori_shape):
-    rh = ori_shape[0]/shape[0]
-    rw = ori_shape[1]/shape[1]
+
+    volumes = []
+    transforms = [no_transform,quantile_transform,minmax_transform]
 
     x, y, t, c, z, p, features = events.T
-    x = x * rw
-    y = y * rh
 
     x, y, p, c = x.astype(int), y.astype(int), p.astype(int), c.astype(int)
     
@@ -28,18 +52,14 @@ def generate_event_volume(events,shape,ori_shape):
     volume = feature_map.reshape(C, H, W, 2)
     volume[...,1] = np.where(volume[...,1] ==0, -1e6, volume[...,1] + 1)
 
-    ecd_view = volume[...,1][volume[...,1] > -1e6]
-    q90 = np.quantile(ecd_view, 0.90)
-    print(q90)
-    q10 = np.quantile(ecd_view, 0.10)
-    print(q10)
-    volume[...,1] = np.where(volume[...,1] > -1e6, volume[...,1] - q90, volume[...,1])
-    volume[...,1] = np.where((volume[...,1] > -1e6) & (volume[...,1] < 0), volume[...,1]/(q90 - q10 + 1e-8) * 2, volume[...,1])
-    ecd_view = volume[...,1][volume[...,1] > -1e6]
-    q100 = np.max(ecd_view)
-    volume[...,1] = np.where(volume[...,1] > 0, volume[...,1] / (q100 + 1e-8) * 2, volume[...,1])
+    for transform in transforms:    
+        volume_t = transform(volume)
+        volume_t = torch.from_numpy(volume_t).permute(0,3,1,2).contiguous().view(volume_t.shape[0] * volume_t.shape[3], volume_t.shape[1], volume_t.shape[2])
+        volume_t = torch.nn.functional.interpolate(volume_t[None,:],torch.Size(ori_shape))[0]
+        volume_t = volume_t.cpu().numpy()
+        volumes.append(volume_t)
 
-    return volume[...,0], volume[...,1]
+    return volumes
 
 LABELMAP = ["car", "pedestrian"]
 
@@ -63,7 +83,9 @@ def draw_bboxes(img, boxes, dt = 0, labelmap=LABELMAP):
         cv2.putText(img, class_name, (center[0], pt2[1] - 1), cv2.FONT_HERSHEY_SIMPLEX, 0.5, color)
         cv2.putText(img, str(score), (center[0], pt1[1] - 1), cv2.FONT_HERSHEY_SIMPLEX, 0.5, color)
 
-def visualizeVolume(volume,ecd,gt_i,filename,path,time_stamp_end):
+def visualizeVolume(volume,gt_i,filename,path,time_stamp_end,typ):
+    ecd = volume[1:volume.shape[0]:2]
+    volume = volume[:volume.shape[0]:2]
     for j in range(len(ecd)):
         img_s = 255 * np.ones((volume.shape[1], volume.shape[2], 3), dtype=np.uint8)
         ecd_view = ecd[j][ecd[j]>-1e6]
@@ -84,9 +106,7 @@ def visualizeVolume(volume,ecd,gt_i,filename,path,time_stamp_end):
         path_t = os.path.join(path,filename+"_end{0}".format(int(time_stamp_end)))
         if not(os.path.exists(path_t)):
             os.mkdir(path_t)
-        cv2.imwrite(os.path.join(path_t,'{0}.png'.format(j)),img_s)
-        plt.savefig(os.path.join(path_t,'{0}_kde.png'.format(j)),dpi=100, bbox_inches = 'tight')
-        plt.clf()
+        cv2.imwrite(os.path.join(path_t,typ+'_{0}.png'.format(j)),img_s)
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(
@@ -125,6 +145,7 @@ if __name__ == '__main__':
     t = np.zeros_like(c) + time_stamp_end
     events = np.stack([x, y, t, c, z, p, features], axis=1)
 
-    volume, ecd = generate_event_volume(events,(256,320),(240,304))
+    volumes = generate_event_volume(events,(256,320),(240,304))
     gt_i = dat_bbox[dat_bbox['t']==time_stamp_end]
-    visualizeVolume(volume,ecd,gt_i,item,result_path,time_stamp_end)
+    for volume,typ in zip(volumes,["no_transform","quantile_transform","minmax_transform"]):
+        visualizeVolume(volumes,gt_i,item,result_path,time_stamp_end,typ)
