@@ -156,8 +156,8 @@ for mode in ["train","val","test"]:
             events = rfn.structured_to_unstructured(events)[:, [1, 2, 0, 3]].astype(float)
 
             density = len(events)
-            density_p = len(events[events[3]==1])
-            density_n = len(events[events[3]==0])
+            density_p = len(events[events[:,3]==1])
+            density_n = len(events[events[:,3]==0])
             max_density = 0
             gt_trans = dat_bbox[dat_bbox['t'] == unique_time]
             total_area = 0
@@ -165,7 +165,7 @@ for mode in ["train","val","test"]:
             for j in range(len(gt_trans)):
                 x, y, w, h = gt_trans['x'][j], gt_trans['y'][j], gt_trans['w'][j], gt_trans['h'][j]
                 area = w * h
-                points = len(events[(events[0]>x)&(events[0]<x+w)&(events[1]>y)&(events[1]<y+h)])
+                points = len(events[(events[:,0]>x)&(events[:,0]<x+w)&(events[:,1]>y)&(events[:,1]<y+h)])
                 total_area += area
                 total_points += points
                 if points / area > max_density:
