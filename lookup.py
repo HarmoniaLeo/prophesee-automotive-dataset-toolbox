@@ -113,6 +113,7 @@ def visualizeVolume(volume,gt,filename,path,time_stamp_start,time_stamp_end):
     print("density_p",density_n)
     print("density_n",density_p)
     print("density_eff",total_points/total_area)
+    print("density_uneff",(np.sum(np.sum(np.sum(volume,axis=0)>0,axis=0),axis=0)-total_points)/(volume.shape[1]*volume.shape[2]-total_area))
     print("density_eff_max",max_density)
     print("density_eff_min",min_density)
 
