@@ -97,7 +97,7 @@ for mode in ["train"]:
     
     file_dir = os.path.join(raw_dir, mode)
     root = file_dir
-    target_root = os.path.join(target_dir, mode+"2")
+    target_root = os.path.join(target_dir, mode)
     #h5 = h5py.File(raw_dir + '/ATIS_taf_'+mode+'.h5', 'w')
     try:
         files = os.listdir(file_dir)
