@@ -85,9 +85,9 @@ def visualizeVolume(volume,gt,filename,path,time_stamp_start,time_stamp_end):
         if not(os.path.exists(path_t)):
             os.mkdir(path_t)
         cv2.imwrite(os.path.join(path_t,'{0}.png'.format(i)),img_s)
-    density = (np.sum(np.sum(np.sum(volume,axis=0)>0,axis=0),axis=0)/(volume.shape[1]*volume.shape[2]))
-    density_p = (np.sum(np.sum(np.sum(volume[1::2]>0,axis=0),axis=0))/(volume.shape[1]*volume.shape[2]))
-    density_n = (np.sum(np.sum(np.sum(volume[0::2]>0,axis=0),axis=0))/(volume.shape[1]*volume.shape[2]))
+    density = np.sum(np.sum(np.sum(volume,axis=0)>0,axis=0),axis=0)/(volume.shape[1]*volume.shape[2])
+    density_p = np.sum(np.sum(np.sum(volume[1::2],axis=0)>0,axis=0),axis=0)/(volume.shape[1]*volume.shape[2])
+    density_n = np.sum(np.sum(np.sum(volume[0::2],axis=0)>0,axis=0),axis=0)/(volume.shape[1]*volume.shape[2])
     total_area = 0
     total_points = 0
     gt_trans = gt
@@ -95,8 +95,8 @@ def visualizeVolume(volume,gt,filename,path,time_stamp_start,time_stamp_end):
     for j in range(len(gt_trans)):
         x, y, w, h = gt_trans['x'][j], gt_trans['y'][j], gt_trans['w'][j], gt_trans['h'][j]
         area = w * h
-        points = np.sum(np.sum(np.sum(volume[:,int(y):int(y+h),int(x):int(x+w)],axis=0),axis=0),axis=0)
-        print(area,points)
+        points = np.sum(np.sum(np.sum(volume[:,int(y):int(y+h),int(x):int(x+w)],axis=0)>0,axis=0),axis=0)
+        print(volume[:,int(y):int(y+h),int(x):int(x+w)].max())
         total_area += area
         total_points += points
         if points / area > max_density:
