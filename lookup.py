@@ -92,6 +92,7 @@ def visualizeVolume(volume,gt,filename,path,time_stamp_start,time_stamp_end):
     total_points = 0
     gt_trans = gt
     max_density = 0
+    min_density = 1.0
     for j in range(len(gt_trans)):
         x, y, w, h = gt_trans['x'][j], gt_trans['y'][j], gt_trans['w'][j], gt_trans['h'][j]
         x = np.where(x<0, 0, x)
@@ -106,11 +107,14 @@ def visualizeVolume(volume,gt,filename,path,time_stamp_start,time_stamp_end):
         total_points += points
         if points / area > max_density:
             max_density = points / area
+        if points / area < min_density:
+            max_density = points / area
     print("density",density)
     print("density_p",density_n)
     print("density_n",density_p)
     print("density_eff",total_points/total_area)
     print("density_eff_max",max_density)
+    print("density_eff_min",min_density)
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(
