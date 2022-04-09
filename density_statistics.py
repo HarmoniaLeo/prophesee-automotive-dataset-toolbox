@@ -94,11 +94,11 @@ def generate_event_volume_cuda(events, shape, past_volume = None, volume_bins=5)
 events_window_abin = 10000
 event_volume_bins = 5
 events_window = events_window_abin * event_volume_bins
-shape = [720,1280]
+#shape = [720,1280]
 # target_shape = [320, 640]
-#shape = [240,304]
-#raw_dir = "/data/lbd/ATIS_Automotive_Detection_Dataset/detection_dataset_duration_60s_ratio_1.0"
-raw_dir = "/data/Large_Automotive_Detection_Dataset_sampling"
+shape = [240,304]
+raw_dir = "/data/lbd/ATIS_Automotive_Detection_Dataset/detection_dataset_duration_60s_ratio_1.0"
+#raw_dir = "/data/Large_Automotive_Detection_Dataset_sampling"
 # target_dir = "/data/Large_taf"
 
 for mode in ["train","val","test"]:
