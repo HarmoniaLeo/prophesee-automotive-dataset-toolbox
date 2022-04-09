@@ -126,7 +126,7 @@ if __name__ == '__main__':
     event_file = os.path.join(final_path, item+"_td.dat")
     bbox_file = os.path.join(final_path, item+"_bbox.npy")
     f_bbox = open(bbox_file, "rb")
-    start, v_type, ev_size, size = npy_events_tools.parse_header(f_bbox)
+    start, v_type, ev_size, size, _ = npy_events_tools.parse_header(f_bbox)
     dat_bbox = np.fromfile(f_bbox, dtype=v_type, count=-1)
     f_bbox.close()
     #print(target)
