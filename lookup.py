@@ -85,7 +85,8 @@ def visualizeVolume(volume,gt,filename,path,time_stamp_start,time_stamp_end):
         if not(os.path.exists(path_t)):
             os.mkdir(path_t)
         cv2.imwrite(os.path.join(path_t,'{0}.png'.format(i)),img_s)
-    density = np.sum(np.sum(np.sum(volume,axis=0)>0,axis=0),axis=0)/(volume.shape[1]*volume.shape[2])
+    points_in_view = np.sum(np.sum(np.sum(volume,axis=0)>0,axis=0),axis=0)
+    density = points_in_view/(volume.shape[1]*volume.shape[2])
     density_p = np.sum(np.sum(np.sum(volume[1::2],axis=0)>0,axis=0),axis=0)/(volume.shape[1]*volume.shape[2])
     density_n = np.sum(np.sum(np.sum(volume[0::2],axis=0)>0,axis=0),axis=0)/(volume.shape[1]*volume.shape[2])
     total_area = 0
@@ -108,12 +109,12 @@ def visualizeVolume(volume,gt,filename,path,time_stamp_start,time_stamp_end):
         if points / area > max_density:
             max_density = points / area
         if points / area < min_density:
-            max_density = points / area
+            min_density = points / area
     print("density",density)
     print("density_p",density_n)
     print("density_n",density_p)
     print("density_eff",total_points/total_area)
-    print("density_uneff",(np.sum(np.sum(np.sum(volume,axis=0)>0,axis=0),axis=0)-total_points)/(volume.shape[1]*volume.shape[2]-total_area))
+    print("density_uneff",(points_in_view-total_points)/(volume.shape[1]*volume.shape[2]-total_area))
     print("density_eff_max",max_density)
     print("density_eff_min",min_density)
 

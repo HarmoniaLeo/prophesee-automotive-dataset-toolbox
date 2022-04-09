@@ -122,7 +122,9 @@ for mode in ["train","val","test"]:
     densitys_n = []
     densitys_p = []
     densitys_eff = []
+    densitys_uneff = []
     densitys_eff_max = []
+    densitys_eff_min = []
 
     for i_file, file_name in enumerate(files):
         event_file = os.path.join(root, file_name + '_td.dat')
@@ -187,14 +189,15 @@ for mode in ["train","val","test"]:
                 t_min = start_time + iter * events_window_abin
                 events_[:,2] = (events_[:, 2] - t_min)/(t_max - t_min + 1e-8)
                 volume, memory = generate_event_volume_cuda(events_, shape, memory, event_volume_bins)
-            
-            density = (torch.sum(torch.sum(torch.sum(torch.sum(volume,dim=3),dim=2)>0,dim=0),dim=0)/(volume.shape[0]*volume.shape[1])).cpu().item()
+            points_in_view = np.sum(np.sum(np.sum(volume,axis=0)>0,axis=0),axis=0)
+            density = points_in_view/(volume.shape[0]*volume.shape[1])
             density_p = (torch.sum(torch.sum(torch.sum(volume[...,1],dim=2)>0,dim=0),dim=0)/(volume.shape[0]*volume.shape[1])).cpu().item()
             density_n = (torch.sum(torch.sum(torch.sum(volume[...,0],dim=2)>0,dim=0),dim=0)/(volume.shape[0]*volume.shape[1])).cpu().item()
             total_area = 0
             total_points = 0
             gt_trans = dat_bbox[dat_bbox['t'] == unique_time]
             max_density = 0
+            min_density = 1.0
             for j in range(len(gt_trans)):
                 x, y, w, h = gt_trans['x'][j], gt_trans['y'][j], gt_trans['w'][j], gt_trans['h'][j]
                 x = np.where(x<0, 0, x)
@@ -210,6 +213,8 @@ for mode in ["train","val","test"]:
                 total_points += points
                 if points / area > max_density:
                     max_density = points / area
+                if points / area < min_density:
+                    min_density = points / area
             if total_area == 0:
                 continue
             file_names.append(file_name)
@@ -218,7 +223,9 @@ for mode in ["train","val","test"]:
             densitys_n.append(density_n)
             densitys_p.append(density_p)
             densitys_eff.append(total_points/total_area)
+            densitys_uneff.append((points_in_view-total_points)/(volume.shape[0]*volume.shape[1]-total_area))
             densitys_eff_max.append(max_density)
+            densitys_eff_min.append(min_density)
 
         #h5.close()
         pbar.update(1)
