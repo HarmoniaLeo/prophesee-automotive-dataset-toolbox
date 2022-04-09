@@ -94,11 +94,11 @@ def generate_event_volume_cuda(events, shape, past_volume = None, volume_bins=5)
 events_window_abin = 10000
 event_volume_bins = 5
 events_window = events_window_abin * event_volume_bins
-shape = [720,1280]
+#shape = [720,1280]
 # target_shape = [320, 640]
-#shape = [240,304]
-#raw_dir = "/data/lbd/ATIS_Automotive_Detection_Dataset/detection_dataset_duration_60s_ratio_1.0"
-raw_dir = "/data/Large_Automotive_Detection_Dataset_sampling"
+shape = [240,304]
+raw_dir = "/data/lbd/ATIS_Automotive_Detection_Dataset/detection_dataset_duration_60s_ratio_1.0"
+#raw_dir = "/data/Large_Automotive_Detection_Dataset_sampling"
 # target_dir = "/data/Large_taf"
 
 for mode in ["train","val","test"]:
@@ -197,6 +197,13 @@ for mode in ["train","val","test"]:
             max_density = 0
             for j in range(len(gt_trans)):
                 x, y, w, h = gt_trans['x'][j], gt_trans['y'][j], gt_trans['w'][j], gt_trans['h'][j]
+                x = np.where(x<0, 0, x)
+                y = np.where(y<0, 0, y)
+                w = np.where(x + w > volume.shape[1], volume.shape[1] - x, w)
+                h = np.where(y + h > volume.shape[0], volume.shape[0] - y, h)
+                area = w * h
+                if (area <= 0) or (w<0) or (h<0):
+                    continue
                 area = w * h
                 points = torch.sum(torch.sum(torch.sum(torch.sum(volume[int(y):int(y+h),int(x):int(x+w)],dim=3),dim=2)>0,dim=0),dim=0).cpu().item()
                 total_area += area
