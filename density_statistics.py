@@ -238,4 +238,6 @@ for mode in ["train","val","test"]:
         "Density negative":densitys_n,
         "Density positive":densitys_p,
         "Density effective":densitys_eff,
-        "Density effective max":densitys_eff_max}).to_csv(csv_path)
+        "Density ineffective":densitys_uneff,
+        "Density effective max":densitys_eff_max,
+        "Density effective min":densitys_eff_min}).to_csv(csv_path)
