@@ -210,6 +210,8 @@ for mode in ["train","val","test"]:
                 total_points += points
                 if points / area > max_density:
                     max_density = points / area
+            if total_area == 0:
+                continue
             file_names.append(file_name)
             time_stamps.append(unique_time)
             densitys.append(density)
