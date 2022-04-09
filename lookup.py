@@ -94,9 +94,14 @@ def visualizeVolume(volume,gt,filename,path,time_stamp_start,time_stamp_end):
     max_density = 0
     for j in range(len(gt_trans)):
         x, y, w, h = gt_trans['x'][j], gt_trans['y'][j], gt_trans['w'][j], gt_trans['h'][j]
+        x = np.where(x<0, 0, x)
+        y = np.where(y<0, 0, y)
+        w = np.where(x + w > volume.shape[2], volume.shape[2] - x, w)
+        h = np.where(y + h > volume.shape[1], volume.shape[1] - y, h)
         area = w * h
+        if (area <= 0) or (w<0) or (h<0):
+            continue
         points = np.sum(np.sum(np.sum(volume[:,int(y):int(y+h),int(x):int(x+w)],axis=0)>0,axis=0),axis=0)
-        print(x,y,w,h)
         total_area += area
         total_points += points
         if points / area > max_density:
