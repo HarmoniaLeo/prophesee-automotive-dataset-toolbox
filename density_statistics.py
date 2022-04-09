@@ -189,7 +189,7 @@ for mode in ["train","val","test"]:
                 t_min = start_time + iter * events_window_abin
                 events_[:,2] = (events_[:, 2] - t_min)/(t_max - t_min + 1e-8)
                 volume, memory = generate_event_volume_cuda(events_, shape, memory, event_volume_bins)
-            points_in_view = np.sum(np.sum(np.sum(volume,axis=0)>0,axis=0),axis=0)
+            points_in_view = torch.sum(torch.sum(torch.sum(torch.sum(volume,dim=3),dim=2)>0,dim=0),dim=0).cpu().item()
             density = points_in_view/(volume.shape[0]*volume.shape[1])
             density_p = (torch.sum(torch.sum(torch.sum(volume[...,1],dim=2)>0,dim=0),dim=0)/(volume.shape[0]*volume.shape[1])).cpu().item()
             density_n = (torch.sum(torch.sum(torch.sum(volume[...,0],dim=2)>0,dim=0),dim=0)/(volume.shape[0]*volume.shape[1])).cpu().item()
