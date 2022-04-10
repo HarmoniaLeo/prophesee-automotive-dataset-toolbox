@@ -72,19 +72,29 @@ def draw_bboxes(img, boxes, dt = 0, labelmap=LABELMAP):
 def visualizeVolume(volume,gt,filename,path,time_stamp_start,time_stamp_end):
     img = 127 * np.ones((volume.shape[1], volume.shape[2], 3), dtype=np.uint8)
     gt = gt[(gt['t']>=time_stamp_start)&(gt['t']<=time_stamp_end)]
-    for i in range(0,volume.shape[0],2):
-        c_p = volume[i+1]
-        c_p = 127 * c_p / (np.percentile(c_p,0.99)+1e-8)
-        c_p = np.where(c_p>127, 127, c_p)
-        c_n = volume[i]
-        c_n = 127 * c_n / (np.percentile(c_p,0.99)+1e-8)
-        c_n = np.where(c_n>127, 127, c_n)
-        img_s = img + c_p[:,:,None].astype(np.uint8) - c_n[:,:,None].astype(np.uint8)
-        draw_bboxes(img_s,gt,0,LABELMAP)
-        path_t = os.path.join(path,filename+"_{0}".format(int(time_stamp_end)))
-        if not(os.path.exists(path_t)):
-            os.mkdir(path_t)
-        cv2.imwrite(os.path.join(path_t,'{0}.png'.format(i)),img_s)
+    # for i in range(0,volume.shape[0],2):
+    #     c_p = volume[i+1]
+    #     c_p = 127 * c_p / (np.percentile(c_p,0.99)+1e-8)
+    #     c_p = np.where(c_p>127, 127, c_p)
+    #     c_n = volume[i]
+    #     c_n = 127 * c_n / (np.percentile(c_p,0.99)+1e-8)
+    #     c_n = np.where(c_n>127, 127, c_n)
+    #     img_s = img + c_p[:,:,None].astype(np.uint8) - c_n[:,:,None].astype(np.uint8)
+    #     draw_bboxes(img_s,gt,0,LABELMAP)
+    #     path_t = os.path.join(path,filename+"_{0}".format(int(time_stamp_end)))
+    #     if not(os.path.exists(path_t)):
+    #         os.mkdir(path_t)
+    #     cv2.imwrite(os.path.join(path_t,'{0}.png'.format(i)),img_s)
+    c_p = volume[::2]
+    c_p = 127 * c_p.sum(axis=0) / (np.percentile(c_p.sum(axis=0),0.99)+1e-8)
+    c_p = np.where(c_p>127, 127, c_p)
+    c_n = volume[1::2]
+    c_n = 127 * c_n.sum(axis=0) / (np.percentile(c_n.sum(axis=0),0.99)+1e-8)
+    c_n = np.where(c_n>127, 127, c_n)
+    img_s = img + c_p[:,:,None].astype(np.uint8) - c_n[:,:,None].astype(np.uint8)
+    draw_bboxes(img_s,gt,0,LABELMAP)
+    path_t = os.path.join(path,filename+"_{0}.png".format(int(time_stamp_end)))
+    cv2.imwrite(path_t,img_s)
     points_in_view = np.sum(np.sum(np.sum(volume,axis=0)>0,axis=0),axis=0)
     density = points_in_view/(volume.shape[1]*volume.shape[2])
     density_p = np.sum(np.sum(np.sum(volume[1::2],axis=0)>0,axis=0),axis=0)/(volume.shape[1]*volume.shape[2])
