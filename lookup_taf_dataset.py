@@ -16,7 +16,8 @@ def point1_transform(volume):
     return volume
 
 def point001_transform(volume):
-
+    volume = volume.copy()
+    volume[...,1] = np.where(volume[...,1] > -1e6, 0.001 * volume[...,1], volume[...,1])
     return volume
 
 def minmax_transform(volume):
@@ -43,7 +44,7 @@ def quantile_transform(volume):
 def generate_event_volume(events,shape,ori_shape):
 
     volumes = []
-    transforms = [no_transform,quantile_transform,minmax_transform]
+    transforms = [point1_transform,point001_transform,quantile_transform,minmax_transform]
 
     x, y, t, c, z, p, features = events.T
 
@@ -153,5 +154,5 @@ if __name__ == '__main__':
 
     volumes = generate_event_volume(events,(256,320),(240,304))
     gt_i = dat_bbox[dat_bbox['t']==time_stamp_end]
-    for volume,typ in zip(volumes,["no_transform","quantile_transform","minmax_transform"]):
+    for volume,typ in zip(volumes,["point1_transform","point001_transform","quantile_transform","minmax_transform"]):
         visualizeVolume(volume,gt_i,item,result_path,time_stamp_end,typ)
