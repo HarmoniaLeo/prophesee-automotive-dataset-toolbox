@@ -10,7 +10,13 @@ import pandas as pd
 import torch
 sns.set_style("darkgrid")
 
-def no_transform(volume):
+def point1_transform(volume):
+    volume = volume.copy()
+    volume[...,1] = np.where(volume[...,1] > -1e6, 0.1 * volume[...,1], volume[...,1])
+    return volume
+
+def point001_transform(volume):
+
     return volume
 
 def minmax_transform(volume):
