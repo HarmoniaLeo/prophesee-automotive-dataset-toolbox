@@ -189,7 +189,7 @@ for mode in ["train","val","test"]:
                 t_min = start_time + iter * events_window_abin
                 events_[:,2] = (events_[:, 2] - t_min)/(t_max - t_min + 1e-8)
                 volume, memory = generate_event_volume_cuda(events_, shape, memory, event_volume_bins)
-            points_in_view = torch.sum(torch.sum(torch.sum(torch.sum(volume>0,dim=3),dim=2),dim=0),dim=0).cpu().item()
+            points_in_view = (torch.sum(torch.sum(torch.sum(torch.sum(volume>0,dim=3),dim=2),dim=0),dim=0)).cpu().item()
             density = points_in_view/(volume.shape[0]*volume.shape[1]*volume.shape[2]*volume.shape[3])
             density_p = (torch.sum(torch.sum(torch.sum(volume[...,1]>0,dim=2),dim=0),dim=0)/(volume.shape[0]*volume.shape[1]*volume.shape[2])).cpu().item()
             density_n = (torch.sum(torch.sum(torch.sum(volume[...,0]>0,dim=2),dim=0),dim=0)/(volume.shape[0]*volume.shape[1]*volume.shape[2])).cpu().item()
@@ -213,8 +213,8 @@ for mode in ["train","val","test"]:
                     max_density = points / area
                 if points / area < min_density:
                     min_density = points / area
-            density_eff = torch.sum(torch.sum(torch.sum(torch.sum(volume[bbox_mask]>0,dim=0),dim=0),dim=0),dim=0)/(torch.sum(torch.sum(torch.sum(torch.sum(bbox_mask,dim=3),dim=2),dim=0),dim=0)).cpu().item()
-            density_uneff = torch.sum(torch.sum(torch.sum(torch.sum(volume[~bbox_mask]>0,dim=0),dim=0),dim=0),dim=0)/(torch.sum(torch.sum(torch.sum(torch.sum(~bbox_mask,dim=3),dim=2),dim=0),dim=0)).cpu().item()
+            density_eff = (torch.sum(torch.sum(torch.sum(torch.sum(volume[bbox_mask]>0,dim=0),dim=0),dim=0),dim=0)/(torch.sum(torch.sum(torch.sum(torch.sum(bbox_mask,dim=3),dim=2),dim=0),dim=0))).cpu().item()
+            density_uneff = (torch.sum(torch.sum(torch.sum(torch.sum(volume[~bbox_mask]>0,dim=0),dim=0),dim=0),dim=0)/(torch.sum(torch.sum(torch.sum(torch.sum(~bbox_mask,dim=3),dim=2),dim=0),dim=0))).cpu().item()
             file_names.append(file_name)
             time_stamps.append(unique_time)
             densitys.append(density)
