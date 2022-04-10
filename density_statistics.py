@@ -213,8 +213,8 @@ for mode in ["train","val","test"]:
                     max_density = points / area
                 if points / area < min_density:
                     min_density = points / area
-            density_eff = torch.sum(torch.sum(torch.sum(torch.sum(volume[bbox_mask]>0,dim=3),dim=2),dim=0),dim=0)/(torch.sum(torch.sum(torch.sum(torch.sum(bbox_mask,dim=3),dim=2),dim=0),dim=0)).cpu().item()
-            density_uneff = torch.sum(torch.sum(torch.sum(torch.sum(volume[~bbox_mask]>0,dim=3),dim=2),dim=0),dim=0)/(torch.sum(torch.sum(torch.sum(torch.sum(~bbox_mask,dim=3),dim=2),dim=0),dim=0)).cpu().item()
+            density_eff = torch.sum(torch.sum(torch.sum(torch.sum(volume[bbox_mask]>0,dim=0),dim=0),dim=0),dim=0)/(torch.sum(torch.sum(torch.sum(torch.sum(bbox_mask,dim=3),dim=2),dim=0),dim=0)).cpu().item()
+            density_uneff = torch.sum(torch.sum(torch.sum(torch.sum(volume[~bbox_mask]>0,dim=0),dim=0),dim=0),dim=0)/(torch.sum(torch.sum(torch.sum(torch.sum(~bbox_mask,dim=3),dim=2),dim=0),dim=0)).cpu().item()
             file_names.append(file_name)
             time_stamps.append(unique_time)
             densitys.append(density)
