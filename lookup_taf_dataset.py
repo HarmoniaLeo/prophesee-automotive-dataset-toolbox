@@ -26,7 +26,7 @@ def minmax_transform(volume):
     #q10, q90 = torch.quantile(ecd_view, torch.tensor([0.1,0.9]).to(x.device))
     q100 = np.max(ecd_view)
     q0 = np.min(ecd_view)
-    volume[...,1] = np.where(volume[...,1] > -1e6, (volume[...,1] - q100) / (q100 - q0 + 1e-8) * 6, x[...,1])
+    volume[...,1] = np.where(volume[...,1] > -1e6, (volume[...,1] - q100) / (q100 - q0 + 1e-8) * 6, volume[...,1])
     return volume
 
 def quantile_transform(volume):
@@ -44,7 +44,7 @@ def quantile_transform(volume):
 def generate_event_volume(events,shape,ori_shape):
 
     volumes = []
-    transforms = [minmax_transform]
+    transforms = [point1_transform,point001_transform,quantile_transform,minmax_transform]
 
     x, y, t, c, z, p, features = events.T
 
