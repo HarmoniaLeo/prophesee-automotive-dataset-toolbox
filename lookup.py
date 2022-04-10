@@ -86,10 +86,10 @@ def visualizeVolume(volume,gt,filename,path,time_stamp_start,time_stamp_end):
     #         os.mkdir(path_t)
     #     cv2.imwrite(os.path.join(path_t,'{0}.png'.format(i)),img_s)
     c_p = volume[1::2]
-    c_p = 127 * (c_p.sum(axis=0)>0)
+    c_p = 127 * c_p.sum(axis=0) / (np.percentile(c_p.sum(axis=0),99)+1e-8)
     c_p = np.where(c_p>127, 127, c_p)
-    c_n = volume[::2]
-    c_n = 127 * (c_n.sum(axis=0)>0)
+    c_n = volume[0::2]
+    c_n = 127 * c_n.sum(axis=0) / (np.percentile(c_n.sum(axis=0),99)+1e-8)
     c_n = np.where(c_n>127, 127, c_n)
     img_s = img + c_p[:,:,None].astype(np.uint8) - c_n[:,:,None].astype(np.uint8)
     draw_bboxes(img_s,gt,0,LABELMAP)
@@ -114,7 +114,6 @@ def visualizeVolume(volume,gt,filename,path,time_stamp_start,time_stamp_end):
         if (area <= 0) or (w<0) or (h<0):
             continue
         points = np.sum(np.sum(np.sum(volume[:,int(y):int(y+h),int(x):int(x+w)],axis=0)>0,axis=0),axis=0)
-        print(points,area)
         total_area += area
         total_points += points
         if points / area > max_density:
