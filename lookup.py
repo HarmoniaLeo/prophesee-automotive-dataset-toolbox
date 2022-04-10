@@ -91,7 +91,7 @@ def visualizeVolume(volume,gt,filename,path,time_stamp_start,time_stamp_end):
     c_n = volume[0::2]
     c_n = 27 * c_n.sum(axis=0) / (np.percentile(c_n.sum(axis=0),99)+1e-8) + 100
     c_n = np.where(c_n>127, 127, c_n)
-    img_s = img + c_p[:,:,None].astype(np.uint8) - c_n[:,:,None].astype(np.uint8)
+    img_s = img + c_p[:,:,None].astype(np.uint8) #- c_n[:,:,None].astype(np.uint8)
     draw_bboxes(img_s,gt,0,LABELMAP)
     path_t = os.path.join(path,filename+"_{0}.png".format(int(time_stamp_end)))
     cv2.imwrite(path_t,img_s)
