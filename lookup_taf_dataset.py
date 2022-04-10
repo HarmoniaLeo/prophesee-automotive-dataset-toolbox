@@ -148,4 +148,4 @@ if __name__ == '__main__':
     volumes = generate_event_volume(events,(256,320),(240,304))
     gt_i = dat_bbox[dat_bbox['t']==time_stamp_end]
     for volume,typ in zip(volumes,["no_transform","quantile_transform","minmax_transform"]):
-        visualizeVolume(volumes,gt_i,item,result_path,time_stamp_end,typ)
+        visualizeVolume(volume,gt_i,item,result_path,time_stamp_end,typ)
