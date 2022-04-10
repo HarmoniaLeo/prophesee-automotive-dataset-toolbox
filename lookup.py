@@ -118,7 +118,6 @@ def visualizeVolume(volume,gt,filename,path,time_stamp_start,time_stamp_end):
             max_density = points / area
         if points / area < min_density:
             min_density = points / area
-    print("mask")
     density_eff = np.sum(np.sum(np.sum(volume[bbox_mask]>0,axis=0),axis=0),axis=0)/(np.sum(np.sum(np.sum(bbox_mask,axis=0),axis=0),axis=0))
     density_uneff = np.sum(np.sum(np.sum(volume[~bbox_mask]>0,axis=0),axis=0),axis=0)/(np.sum(np.sum(np.sum(~bbox_mask,axis=0),axis=0),axis=0))
     print("density",density)
@@ -158,6 +157,5 @@ if __name__ == '__main__':
     events = f_event.load_delta_t(time_stamp_end - time_stamp_start)
     x,y,t,p = events['x'], events['y'], events['t'], events['p']
     events = np.stack([x.astype(int), y.astype(int), t, p], axis=-1)
-    print(len(events))
     volume = generate_event_volume(events,(240,304),5)
     visualizeVolume(volume,dat_bbox,item,result_path,time_stamp_start,time_stamp_end)

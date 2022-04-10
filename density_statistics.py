@@ -189,12 +189,12 @@ for mode in ["train","val","test"]:
                 t_min = start_time + iter * events_window_abin
                 events_[:,2] = (events_[:, 2] - t_min)/(t_max - t_min + 1e-8)
                 volume, memory = generate_event_volume_cuda(events_, shape, memory, event_volume_bins)
-            points_in_view = torch.sum(torch.sum(torch.sum(torch.sum(volume,dim=3),dim=2)>0,dim=0),dim=0).cpu().item()
-            density = points_in_view/(volume.shape[0]*volume.shape[1])
-            density_p = (torch.sum(torch.sum(torch.sum(volume[...,1],dim=2)>0,dim=0),dim=0)/(volume.shape[0]*volume.shape[1])).cpu().item()
-            density_n = (torch.sum(torch.sum(torch.sum(volume[...,0],dim=2)>0,dim=0),dim=0)/(volume.shape[0]*volume.shape[1])).cpu().item()
-            total_area = 0
-            total_points = 0
+            points_in_view = torch.sum(torch.sum(torch.sum(torch.sum(volume>0,dim=3),dim=2),dim=0),dim=0).cpu().item()
+            density = points_in_view/(volume.shape[0]*volume.shape[1]*volume.shape[2]*volume.shape[3])
+            density_p = (torch.sum(torch.sum(torch.sum(volume[...,1]>0,dim=2),dim=0),dim=0)/(volume.shape[0]*volume.shape[1]*volume.shape[2])).cpu().item()
+            density_n = (torch.sum(torch.sum(torch.sum(volume[...,0]>0,dim=2),dim=0),dim=0)/(volume.shape[0]*volume.shape[1]*volume.shape[2])).cpu().item()
+
+            bbox_mask = torch.zeros([volume.shape[0],volume.shape[1],volume.shape[2],volume.shape[3]]).bool()
             gt_trans = dat_bbox[dat_bbox['t'] == unique_time]
             max_density = 0
             min_density = 1.0
@@ -204,26 +204,24 @@ for mode in ["train","val","test"]:
                 y = np.where(y<0, 0, y)
                 w = np.where(x + w > volume.shape[1], volume.shape[1] - x, w)
                 h = np.where(y + h > volume.shape[0], volume.shape[0] - y, h)
-                area = w * h
+                area = w * h * volume.shape[2] * volume.shape[3]
                 if (area <= 0) or (w<0) or (h<0):
                     continue
-                area = w * h
-                points = torch.sum(torch.sum(torch.sum(torch.sum(volume[int(y):int(y+h),int(x):int(x+w)],dim=3),dim=2)>0,dim=0),dim=0).cpu().item()
-                total_area += area
-                total_points += points
+                points = torch.sum(torch.sum(torch.sum(torch.sum(volume[int(y):int(y+h),int(x):int(x+w)]>0,dim=3),dim=2),dim=0),dim=0).cpu().item()
+                bbox_mask[int(y):int(y+h),int(x):int(x+w)] = True
                 if points / area > max_density:
                     max_density = points / area
                 if points / area < min_density:
                     min_density = points / area
-            if total_area == 0:
-                continue
+            density_eff = torch.sum(torch.sum(np.sum(np.sum(volume[bbox_mask]>0,dim=3),dim=2),dim=0),dim=0)/(torch.sum(torch.sum(np.sum(np.sum(bbox_mask,dim=3),dim=2),dim=0),dim=0)).cpu().item()
+            density_uneff = torch.sum(torch.sum(np.sum(np.sum(volume[~bbox_mask]>0,dim=3),dim=2),dim=0),dim=0)/(torch.sum(torch.sum(np.sum(np.sum(~bbox_mask,dim=3),dim=2),dim=0),dim=0)).cpu().item()
             file_names.append(file_name)
             time_stamps.append(unique_time)
             densitys.append(density)
             densitys_n.append(density_n)
             densitys_p.append(density_p)
-            densitys_eff.append(total_points/total_area)
-            densitys_uneff.append((points_in_view-total_points)/(volume.shape[0]*volume.shape[1]-total_area))
+            densitys_eff.append(density_eff)
+            densitys_uneff.append(density_uneff)
             densitys_eff_max.append(max_density)
             densitys_eff_min.append(min_density)
 
