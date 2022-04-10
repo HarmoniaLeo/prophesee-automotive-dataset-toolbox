@@ -99,7 +99,7 @@ def visualizeVolume(volume,gt,filename,path,time_stamp_start,time_stamp_end):
     density = points_in_view/(volume.shape[0]*volume.shape[1]*volume.shape[2])
     density_p = 2*np.sum(np.sum(np.sum(volume[1::2]>0,axis=0),axis=0),axis=0)/(volume.shape[0]*volume.shape[1]*volume.shape[2])
     density_n = 2*np.sum(np.sum(np.sum(volume[0::2]>0,axis=0),axis=0),axis=0)/(volume.shape[0]*volume.shape[1]*volume.shape[2])
-    bbox_mask = np.zeros([1,volume.shape[1],volume.shape[2]],dtype=bool)
+    bbox_mask = np.zeros([volume.shape[0],volume.shape[1],volume.shape[2]],dtype=bool)
     gt_trans = gt
     max_density = 0
     min_density = 1.0
