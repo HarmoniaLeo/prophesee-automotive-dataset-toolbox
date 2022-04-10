@@ -199,6 +199,7 @@ for mode in ["test"]:
             max_density = 0
             min_density = 1.0
             for j in range(len(gt_trans)):
+                print(gt_trans.dtype)
                 if density > 0.3:
                     gt_trans['class'][j] == 1
                     print(file_name+"_"+str(unique_time))
