@@ -109,7 +109,7 @@ def visualizeVolume(volume,gt,filename,path,time_stamp_start,time_stamp_end):
         y = np.where(y<0, 0, y)
         w = np.where(x + w > volume.shape[2], volume.shape[2] - x, w)
         h = np.where(y + h > volume.shape[1], volume.shape[1] - y, h)
-        area = w * h
+        area = w * h * volume.shape[0]
         if (area <= 0) or (w<0) or (h<0):
             continue
         points = np.sum(np.sum(np.sum(volume[:,int(y):int(y+h),int(x):int(x+w)]>0,axis=0),axis=0),axis=0)
