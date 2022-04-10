@@ -85,10 +85,10 @@ def visualizeVolume(volume,gt,filename,path,time_stamp_start,time_stamp_end):
     #     if not(os.path.exists(path_t)):
     #         os.mkdir(path_t)
     #     cv2.imwrite(os.path.join(path_t,'{0}.png'.format(i)),img_s)
-    c_p = volume[::2]
+    c_p = volume[1::2]
     c_p = 127 * c_p.sum(axis=0) / (np.percentile(c_p.sum(axis=0),0.99)+1e-8)
     c_p = np.where(c_p>127, 127, c_p)
-    c_n = volume[1::2]
+    c_n = volume[::2]
     c_n = 127 * c_n.sum(axis=0) / (np.percentile(c_n.sum(axis=0),0.99)+1e-8)
     c_n = np.where(c_n>127, 127, c_n)
     img_s = img + c_p[:,:,None].astype(np.uint8) - c_n[:,:,None].astype(np.uint8)
