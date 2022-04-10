@@ -119,8 +119,8 @@ def visualizeVolume(volume,gt,filename,path,time_stamp_start,time_stamp_end):
         if points / area < min_density:
             min_density = points / area
     print("mask")
-    density_eff = np.sum(np.sum(np.sum(volume[bbox_mask]>0,axis=0),axis=0),axis=0)/(volume.shape[0]*np.sum(np.sum(np.sum(bbox_mask,axis=0),axis=0),axis=0))
-    density_uneff = np.sum(np.sum(np.sum(volume[~bbox_mask]>0,axis=0),axis=0),axis=0)/(volume.shape[0]*np.sum(np.sum(np.sum(~bbox_mask,axis=0),axis=0),axis=0))
+    density_eff = np.sum(np.sum(np.sum(volume[bbox_mask]>0,axis=0),axis=0),axis=0)/(np.sum(np.sum(np.sum(bbox_mask,axis=0),axis=0),axis=0))
+    density_uneff = np.sum(np.sum(np.sum(volume[~bbox_mask]>0,axis=0),axis=0),axis=0)/(np.sum(np.sum(np.sum(~bbox_mask,axis=0),axis=0),axis=0))
     print("density",density)
     print("density_p",density_n)
     print("density_n",density_p)
