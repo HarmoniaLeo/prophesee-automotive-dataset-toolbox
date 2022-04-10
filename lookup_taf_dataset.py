@@ -44,7 +44,7 @@ def quantile_transform(volume):
 def generate_event_volume(events,shape,ori_shape):
 
     volumes = []
-    transforms = [point1_transform,point001_transform,quantile_transform,minmax_transform]
+    transforms = [minmax_transform]
 
     x, y, t, c, z, p, features = events.T
 
