@@ -199,8 +199,7 @@ for mode in ["test"]:
             max_density = 0
             min_density = 1.0
             for j in range(len(gt_trans)):
-                if density > 0.3:
-                    gt_trans['class_id'][j] == 1
+                if (density > 0.3) and (gt_trans['class_id'][j] == 1):
                     print(file_name+"_"+str(unique_time))
                 x, y, w, h = gt_trans['x'][j], gt_trans['y'][j], gt_trans['w'][j], gt_trans['h'][j]
                 x = np.where(x<0, 0, x)
