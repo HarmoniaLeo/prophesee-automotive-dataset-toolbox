@@ -6,6 +6,6 @@ files = os.listdir(path)
 files = [file for file in files if "location" in file]
 for file in files:
     seed = random.random()
-    if seed<0.0667:
+    if seed<0.01:
         os.remove(os.path.join(path,file[:-13]+"features.npy"))
         os.remove(os.path.join(path,file))
