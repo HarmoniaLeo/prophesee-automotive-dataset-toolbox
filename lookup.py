@@ -114,6 +114,7 @@ def visualizeVolume(volume,gt,filename,path,time_stamp_start,time_stamp_end):
         if (area <= 0) or (w<0) or (h<0):
             continue
         points = np.sum(np.sum(np.sum(volume[:,int(y):int(y+h),int(x):int(x+w)],axis=0)>0,axis=0),axis=0)
+        print(points,area)
         total_area += area
         total_points += points
         if points / area > max_density:
