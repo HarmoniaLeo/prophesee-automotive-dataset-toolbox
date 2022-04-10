@@ -127,7 +127,7 @@ if __name__ == '__main__':
     final_path = os.path.join(bbox_path,data_folder)
     bbox_file = os.path.join(final_path, item+"_bbox.npy")
     f_bbox = open(bbox_file, "rb")
-    start, v_type, ev_size, size = npy_events_tools.parse_header(f_bbox)
+    start, v_type, ev_size, size, _ = npy_events_tools.parse_header(f_bbox)
     dat_bbox = np.fromfile(f_bbox, dtype=v_type, count=-1)
     f_bbox.close()
 
