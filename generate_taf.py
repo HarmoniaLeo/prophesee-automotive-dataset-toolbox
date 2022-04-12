@@ -220,7 +220,7 @@ for mode in ["train"]:
             locations, features = denseToSparse(volume_)
             c, y, x, p = locations
             
-            locations = x.astype(np.uint32) + np.left_shift(y.astype(np.uint32), 9) + np.left_shift(c.astype(np.uint32), 17) + np.left_shift(p.astype(np.uint32), 21)
+            locations = x.astype(np.uint32) + np.left_shift(y.astype(np.uint32), 10) + np.left_shift(c.astype(np.uint32), 19) + np.left_shift(p.astype(np.uint32), 23)
             locations.tofile(volume_save_path_l)
             features.tofile(volume_save_path_f)
             #np.savez(volume_save_path, locations = locations, features = features)

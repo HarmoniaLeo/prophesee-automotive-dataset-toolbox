@@ -61,11 +61,13 @@ def generate_taf_cuda(events, shape, past_volume = None, volume_bins=5):
 events_window_abin = 10000
 event_volume_bins = 5
 events_window = events_window_abin * (event_volume_bins + 1)
-# shape = [720,1280]
-# target_shape = [320, 640]
-shape = [240,304]
-raw_dir = "/data/lbd/ATIS_Automotive_Detection_Dataset/detection_dataset_duration_60s_ratio_1.0"
-# raw_dir = "/data/Large_Automotive_Detection_Dataset_sampling"
+shape = [720,1280]
+target_shape = [512, 640]
+rh = target_shape[0] / shape[0]
+rw = target_shape[1] / shape[1]
+#shape = [240,304]
+#raw_dir = "/data/lbd/ATIS_Automotive_Detection_Dataset/detection_dataset_duration_60s_ratio_1.0"
+raw_dir = "/datassd4t/lbd/Large_Automotive_Detection_Dataset_sampling"
 # target_dir = "/data/Large_taf"
 
 for mode in ["test"]:
@@ -119,6 +121,9 @@ for mode in ["test"]:
             del dat_event
             events = torch.from_numpy(rfn.structured_to_unstructured(events)[:, [1, 2, 0, 3]].astype(float)).cuda()
 
+            events[:,0] = events[:,0] * rw
+            events[:,1] = events[:,1] * rh
+
             z = torch.zeros_like(events[:,0])
 
             bins = math.ceil((end_time - start_time) / events_window_abin)
@@ -140,6 +145,7 @@ for mode in ["test"]:
             time_stamps.append(unique_time)
             generate_volume_times.append(generate_volume_time)
             generate_taf_times.append(generate_volume_time + generate_encode_time)
+            print(generate_taf_times.mean(),generate_volume_times.mean())
 
         #h5.close()
         pbar.update(1)
