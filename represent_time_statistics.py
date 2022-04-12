@@ -145,7 +145,6 @@ for mode in ["test"]:
             time_stamps.append(unique_time)
             generate_volume_times.append(generate_volume_time)
             generate_taf_times.append(generate_volume_time + generate_encode_time)
-            print(np.mean(generate_taf_times),np.mean(generate_volume_times))
 
         #h5.close()
         pbar.update(1)
