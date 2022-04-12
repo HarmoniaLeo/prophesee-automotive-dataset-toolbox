@@ -139,7 +139,7 @@ for mode in ["test"]:
                 t_max = start_time + (iter + 1) * events_window_abin
                 t_min = start_time + iter * events_window_abin
                 events_[:,2] = (events_[:, 2] - t_min)/(t_max - t_min + 1e-8)
-                volume, memory, generate_volume_time, generate_encode_time = generate_taf_cuda(events_, shape, memory, event_volume_bins)
+                volume, memory, generate_volume_time, generate_encode_time = generate_taf_cuda(events_, target_shape, memory, event_volume_bins)
             
             file_names.append(file_name)
             time_stamps.append(unique_time)
