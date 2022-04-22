@@ -44,7 +44,7 @@ def visualizeVolume(volume,gt,filename,path,time_stamp_end):
     # quant = np.quantile(volume, 0.95)
     # quant = 2
     min = volume.min()
-    volume = np.where(volume>5,5,volume)
+    #volume = np.where(volume>5,5,volume)
     volume = (volume-min)/volume.max()
     tar = volume / volume.max()
     #tar = np.where(tar * 10 > 1, 1, tar)
@@ -85,8 +85,8 @@ if __name__ == '__main__':
     #print(target)
     f_event = PSEELoader(event_file)
     end_count = f_event.seek_time(args.end)
-    f_event.seek_event(end_count - 200000)
-    events = f_event.load_n_events(200000)
+    f_event.seek_event(end_count - 800000)
+    events = f_event.load_n_events(800000)
     x,y,t,p = events['x'], events['y'], events['t'], events['p']
     events = np.stack([x.astype(int), y.astype(int), t, p], axis=-1)
     volume = generate_tore(events,(240,304))
