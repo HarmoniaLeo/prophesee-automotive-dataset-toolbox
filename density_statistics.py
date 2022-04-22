@@ -90,7 +90,7 @@ for mode in ["train","val","test"]:
                     max_density = points / area
                 if points / area < min_density:
                     min_density = points / area
-                if gt_trans['classes'][j] == 0:
+                if gt_trans['class'][j] == 0:
                     car_counts += 1
                 else:
                     per_counts += 1
