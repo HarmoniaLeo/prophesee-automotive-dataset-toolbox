@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 import pandas as pd
 sns.set_style("darkgrid")
 
-def generate_leakysurface(events,shape):
+def generate_tore(events,shape):
     q = np.zeros(shape), np.zeros(shape)
     for event in events:
         q[event[1]][event[0]] = event[2]
@@ -86,6 +86,6 @@ if __name__ == '__main__':
     events = f_event.load_n_events(200000)
     x,y,t,p = events['x'], events['y'], events['t'], events['p']
     events = np.stack([x.astype(int), y.astype(int), t, p], axis=-1)
-    volume = generate_leakysurface(events,(240,304),0.0001)
+    volume = generate_tore(events,(240,304))
     volume = np.log1p(time_stamp_end - volume)
     visualizeVolume(volume,dat_bbox[(dat_bbox['t']==time_stamp_end)],item,result_path,time_stamp_end)
