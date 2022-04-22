@@ -99,7 +99,7 @@ def visualizeVolume(volume,gt,filename,path,time_stamp_start,time_stamp_end):
     c_map = c_p_map #- c_n_map
     img_s = img + c_map.astype(np.uint8)[:,:,None]
     draw_bboxes(img_s,gt,0,LABELMAP)
-    path_t = os.path.join(path,filename+"_{0}.png".format(int(time_stamp_end)))
+    path_t = os.path.join(path,filename+"_{0}_window{1}.png".format(int(time_stamp_end),time_stamp_end-time_stamp_start))
     cv2.imwrite(path_t,img_s)
     points_in_view = np.sum(np.sum(np.sum(volume>0,axis=0),axis=0),axis=0)
     density = points_in_view/(volume.shape[0]*volume.shape[1]*volume.shape[2])
@@ -139,6 +139,7 @@ if __name__ == '__main__':
         description='visualize one or several event files along with their boxes')
     parser.add_argument('-item', type=str)
     parser.add_argument('-end', type=int)
+    parser.add_argument('-window', type=int, default=50000)
 
     args = parser.parse_args()
 
@@ -147,7 +148,7 @@ if __name__ == '__main__':
         os.mkdir(result_path)
     data_folder = 'test'
     item = args.item
-    time_stamp_start = args.end - 50000
+    time_stamp_start = args.end - args.window
     time_stamp_end = args.end
     data_path = "/data/lbd/ATIS_Automotive_Detection_Dataset/detection_dataset_duration_60s_ratio_1.0"
     final_path = os.path.join(data_path,data_folder)
