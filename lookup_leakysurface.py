@@ -89,5 +89,5 @@ if __name__ == '__main__':
     events = f_event.load_n_events(200000)
     x,y,t,p = events['x'], events['y'], events['t'], events['p']
     events = np.stack([x.astype(int), y.astype(int), t, p], axis=-1)
-    volume = generate_leakysurface(events,(240,304),0.1)
+    volume = generate_leakysurface(events,(240,304),0)
     visualizeVolume(volume,dat_bbox[(dat_bbox['t']==time_stamp_end)],item,result_path,time_stamp_end)
