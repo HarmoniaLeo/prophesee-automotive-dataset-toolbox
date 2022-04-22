@@ -73,8 +73,8 @@ for mode in ["train","val","test"]:
                 dat_event.seek_time(0)
                 events = dat_event.load_delta_t(int(end_time))
             del dat_event
-            #events = torch.from_numpy(rfn.structured_to_unstructured(events)[:, [1, 2, 0, 3]])
-            events = rfn.structured_to_unstructured(events)[:, [1, 2, 0, 3]].astype(float)
+            events = torch.from_numpy(rfn.structured_to_unstructured(events)[:, [1, 2, 0, 3]]).cuda()
+            #events = rfn.structured_to_unstructured(events)[:, [1, 2, 0, 3]].astype(float)
 
             density = len(events)
             density_p = len(events[events[:,3]==1])
