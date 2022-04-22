@@ -11,9 +11,15 @@ sns.set_style("darkgrid")
 
 def generate_tore(events,shape):
     q = np.zeros(shape)
+    c = np.zeros(shape)
+    K = 30
     for event in events:
         if event[3] == 1:
-            q[event[1]][event[0]] = event[2]
+            if c[event[1]][event[0]] == 0:
+                q[event[1]][event[0]] = event[2]
+            c[event[1]][event[0]] += 1
+            if c[event[1]][event[0]] == K:
+                q[event[1]][event[0]] = event[2] - q[event[1]][event[0]]
     return q
 
 LABELMAP = ["car", "pedestrian"]
@@ -92,4 +98,5 @@ if __name__ == '__main__':
     events = np.stack([x.astype(int), y.astype(int), t, p], axis=-1)
     volume = generate_tore(events,(240,304))
     volume = np.where(np.log1p(time_stamp_end - volume)>np.log1p(5000000), np.log1p(5000000), np.log1p(time_stamp_end - volume))
-    visualizeVolume(volume,dat_bbox[(dat_bbox['t']==time_stamp_end)],item,result_path,time_stamp_end)
+    print(volume.max(),volume.min(),np.quantile(volume,10),np.quantile(volume,90))
+    #visualizeVolume(volume,dat_bbox[(dat_bbox['t']==time_stamp_end)],item,result_path,time_stamp_end)
