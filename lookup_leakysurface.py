@@ -43,7 +43,7 @@ def draw_bboxes(img, boxes, dt = 0, labelmap=LABELMAP):
         cv2.putText(img, class_name, (center[0], pt2[1] - 1), cv2.FONT_HERSHEY_SIMPLEX, 0.5, color)
         cv2.putText(img, str(score), (center[0], pt1[1] - 1), cv2.FONT_HERSHEY_SIMPLEX, 0.5, color)
 
-def visualizeVolume(volume,gt,filename,path,time_stamp_end):
+def visualizeVolume(volume,gt,filename,path,time_stamp_end,lamda):
     img_s = 255 * np.ones((volume.shape[0], volume.shape[1], 3), dtype=np.uint8)
     print(volume.max(),np.quantile(volume, 0.95))
     quant = np.quantile(volume, 0.95)
@@ -59,7 +59,7 @@ def visualizeVolume(volume,gt,filename,path,time_stamp_end):
     #img_s[:,:,2] = img_2
     img_s = cv2.cvtColor(img_s, cv2.COLOR_HSV2BGR)
     draw_bboxes(img_s,gt)
-    path_t = os.path.join(path,filename+"_end{0}.png".format(int(time_stamp_end)))
+    path_t = os.path.join(path,filename+"_end{0}_lamda{1}.png".format(int(time_stamp_end),lamda))
     cv2.imwrite(path_t,img_s)
 
 if __name__ == '__main__':
@@ -67,6 +67,7 @@ if __name__ == '__main__':
         description='visualize one or several event files along with their boxes')
     parser.add_argument('-item', type=str)
     parser.add_argument('-end', type=int)
+    parser.add_argument('-lamda', type=float, default=0.0001)
 
     args = parser.parse_args()
 
@@ -92,5 +93,5 @@ if __name__ == '__main__':
     events = f_event.load_n_events(200000)
     x,y,t,p = events['x'], events['y'], events['t'], events['p']
     events = np.stack([x.astype(int), y.astype(int), t, p], axis=-1)
-    volume = generate_leakysurface(events,(240,304),0.0001)
-    visualizeVolume(volume,dat_bbox[(dat_bbox['t']==time_stamp_end)],item,result_path,time_stamp_end)
+    volume = generate_leakysurface(events,(240,304),args.lamda)
+    visualizeVolume(volume,dat_bbox[(dat_bbox['t']==time_stamp_end)],item,result_path,time_stamp_end, args.lamda)
