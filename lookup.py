@@ -85,15 +85,14 @@ def visualizeVolume(volume,gt,filename,path,time_stamp_start,time_stamp_end):
     #     if not(os.path.exists(path_t)):
     #         os.mkdir(path_t)
     #     cv2.imwrite(os.path.join(path_t,'{0}.png'.format(i)),img_s)
-    #c_p = volume[1::2]
-    c_p = volume[-1:]
+    c_p = volume[1::2]
+    #c_p = volume[-1:]
     c_p = c_p.sum(axis=0)
-    #c_n = volume[0::2]
-    c_n = volume[-2:-1]
+    c_n = volume[0::2]
     c_n = c_n.sum(axis=0)
     #c_map = np.where(c_p>c_n,127,0)
     #c_map = np.where(c_p<c_n,-127,c_map)
-    c_map = np.where(c_n>0,127,0)
+    c_map = np.where(c_n>0,-127,0)
     img_s = img + c_map.astype(np.uint8)[:,:,None]
     draw_bboxes(img_s,gt,0,LABELMAP)
     path_t = os.path.join(path,filename+"_{0}_window{1}.png".format(int(time_stamp_end),time_stamp_end-time_stamp_start))
