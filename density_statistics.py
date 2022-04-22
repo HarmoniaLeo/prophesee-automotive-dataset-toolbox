@@ -105,9 +105,6 @@ for mode in ["train","val","test"]:
             densitys_eff_max.append(max_density)
             densitys_eff_min.append(min_density)
 
-        if i_file>5:
-            break
-
         #h5.close()
         pbar.update(1)
     print(car_counts, per_counts)
