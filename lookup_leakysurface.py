@@ -42,7 +42,7 @@ def draw_bboxes(img, boxes, dt = 0, labelmap=LABELMAP):
         cv2.putText(img, str(score), (center[0], pt1[1] - 1), cv2.FONT_HERSHEY_SIMPLEX, 0.5, color)
 
 def visualizeVolume(volume,gt,filename,path,time_stamp_end):
-    img_s = 255 * np.ones((volume.shape[1], volume.shape[2], 3), dtype=np.uint8)
+    img_s = 255 * np.ones((volume.shape[0], volume.shape[1], 3), dtype=np.uint8)
     tar = volume / volume.max()
     #tar = np.where(tar * 10 > 1, 1, tar)
     img_0 = (60 * tar).astype(np.uint8) + 119
