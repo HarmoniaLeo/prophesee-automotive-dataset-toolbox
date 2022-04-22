@@ -10,7 +10,7 @@ import pandas as pd
 sns.set_style("darkgrid")
 
 def generate_tore(events,shape):
-    q = np.zeros(shape), np.zeros(shape)
+    q = np.zeros(shape)
     for event in events:
         q[event[1]][event[0]] = event[2]
     return q
