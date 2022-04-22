@@ -64,7 +64,7 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
 
-    result_path = 'leaky_lookup'
+    result_path = 'tore_lookup'
     if not os.path.exists(result_path):
         os.mkdir(result_path)
     data_folder = 'test'
