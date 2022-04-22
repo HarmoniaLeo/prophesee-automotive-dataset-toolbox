@@ -71,7 +71,7 @@ def draw_bboxes(img, boxes, dt = 0, labelmap=LABELMAP):
 
 def visualizeVolume(volume,gt,filename,path,time_stamp_start,time_stamp_end):
     img = 127 * np.ones((volume.shape[1], volume.shape[2], 3), dtype=np.uint8)
-    gt = gt[(gt['t']>=time_stamp_start)&(gt['t']<=time_stamp_end)]
+    gt = gt[gt['t']==time_stamp_end]
     # for i in range(0,volume.shape[0],2):
     #     c_p = volume[i+1]
     #     c_p = 127 * c_p / (np.percentile(c_p,0.99)+1e-8)
@@ -86,17 +86,13 @@ def visualizeVolume(volume,gt,filename,path,time_stamp_start,time_stamp_end):
     #         os.mkdir(path_t)
     #     cv2.imwrite(os.path.join(path_t,'{0}.png'.format(i)),img_s)
     #c_p = volume[1::2]
-    c_p = volume[-1]
-    #c_p = c_p.sum(axis=0)
+    #c_p = volume[-1]
+    c_p = c_p.sum(axis=0)
     #c_n = volume[0::2]
-    c_n = volume[-2]
-    #c_n = c_n.sum(axis=0)
-    #c_map = np.where(c_p>c_n,127,0)
-    #c_map = np.where(c_p<c_n,-127,c_map)
-    c_p_map = np.where(c_p/np.percentile(c_p,99) * 127 > 127, 127, c_p/np.percentile(c_p,99) * 127)
-    print(np.percentile(c_p,99))
-    c_n_map = (c_n  - c_n.min())/(c_n.max()-c_n.min()) * 127
-    c_map = c_p_map #- c_n_map
+    #c_n = volume[-2]
+    c_n = c_n.sum(axis=0)
+    c_map = np.where(c_p>c_n,127,0)
+    c_map = np.where(c_p<c_n,-127,c_map)
     img_s = img + c_map.astype(np.uint8)[:,:,None]
     draw_bboxes(img_s,gt,0,LABELMAP)
     path_t = os.path.join(path,filename+"_{0}_window{1}.png".format(int(time_stamp_end),time_stamp_end-time_stamp_start))
