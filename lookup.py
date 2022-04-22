@@ -93,7 +93,7 @@ def visualizeVolume(volume,gt,filename,path,time_stamp_start,time_stamp_end):
     #c_n = c_n.sum(axis=0)
     #c_map = np.where(c_p>c_n,127,0)
     #c_map = np.where(c_p<c_n,-127,c_map)
-    c_p_map = c_p/c_p.percentile(0.9) * 127
+    c_p_map = c_p/np.percentile(c_p,0.9) * 127
     c_n_map = (c_n  - c_n.min())/(c_n.max()-c_n.min()) * 127
     c_map = c_p_map #- c_n_map
     img_s = img + c_map.astype(np.uint8)[:,:,None]
