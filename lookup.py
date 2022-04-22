@@ -93,8 +93,8 @@ def visualizeVolume(volume,gt,filename,path,time_stamp_start,time_stamp_end):
     #c_n = c_n.sum(axis=0)
     #c_map = np.where(c_p>c_n,127,0)
     #c_map = np.where(c_p<c_n,-127,c_map)
-    c_p_map = (c_p  - c_p.min())/(c_p.max()-c_p.min()) * 63 + 64
-    c_n_map = (c_n  - c_n.min())/(c_n.max()-c_n.min()) * 63 + 64
+    c_p_map = (c_p  - c_p.min())/(c_p.max()-c_p.min()) * 32 + 95
+    c_n_map = (c_n  - c_n.min())/(c_n.max()-c_n.min()) * 32 + 95
     c_map = c_p_map# - c_n_map
     img_s = img + c_map.astype(np.uint8)[:,:,None]
     draw_bboxes(img_s,gt,0,LABELMAP)
