@@ -13,10 +13,12 @@ def generate_leakysurface(events,shape,lamda):
     q, p = np.zeros(shape), np.zeros(shape)
     t_prev = 0
     for event in events:
-        delta = event[2] - t_prev
-        q = np.where(p - lamda * delta < 0, 0, p - lamda * delta)
-        p = q
-        p[event[1]][event[0]] += 1
+        if event[3] == 1:
+            delta = event[2] - t_prev
+            q = np.where(p - lamda * delta < 0, 0, p - lamda * delta)
+            p = q
+            p[event[1]][event[0]] += 1
+        t_prev = event[2]
     return q
 
 LABELMAP = ["car", "pedestrian"]
