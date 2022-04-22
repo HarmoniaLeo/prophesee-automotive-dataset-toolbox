@@ -12,7 +12,8 @@ sns.set_style("darkgrid")
 def generate_tore(events,shape):
     q = np.zeros(shape)
     for event in events:
-        q[event[1]][event[0]] = event[2]
+        if event[3] == 1:
+            q[event[1]][event[0]] = event[2]
     return q
 
 LABELMAP = ["car", "pedestrian"]
@@ -43,7 +44,7 @@ def visualizeVolume(volume,gt,filename,path,time_stamp_end):
     # quant = np.quantile(volume, 0.95)
     # quant = 2
     min = volume.min()
-    #volume = np.where(volume>quant,quant,volume)
+    volume = np.where(volume>5,5,volume)
     volume = (volume-min)/volume.max()
     tar = volume / volume.max()
     #tar = np.where(tar * 10 > 1, 1, tar)
