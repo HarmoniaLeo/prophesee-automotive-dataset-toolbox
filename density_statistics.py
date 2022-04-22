@@ -90,8 +90,7 @@ for mode in ["train","val","test"]:
                     max_density = points / area
                 if points / area < min_density:
                     min_density = points / area
-                print(gt_trans)
-                if gt_trans[''][j] == 0:
+                if gt_trans[j][5] == 0:
                     car_counts += 1
                 else:
                     per_counts += 1
