@@ -39,10 +39,12 @@ def draw_bboxes(img, boxes, dt = 0, labelmap=LABELMAP):
 
 def visualizeVolume(volume,gt,filename,path,time_stamp_end):
     img_s = 255 * np.ones((volume.shape[0], volume.shape[1], 3), dtype=np.uint8)
-    print(volume.max(),np.quantile(volume, 0.95),volume.min())
-    quant = np.quantile(volume, 0.95)
-    quant = 2
-    volume = np.where(volume>quant,quant,volume)
+    print(volume.max(),np.quantile(volume, 0.95),volume.min(),np.quantile(volume, 0.05))
+    # quant = np.quantile(volume, 0.95)
+    # quant = 2
+    min = volume.min()
+    #volume = np.where(volume>quant,quant,volume)
+    volume = (volume-min)/volume.max()
     tar = volume / volume.max()
     #tar = np.where(tar * 10 > 1, 1, tar)
     img_0 = (60 * tar).astype(np.uint8) + 119
