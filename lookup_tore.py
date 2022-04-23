@@ -90,9 +90,9 @@ if __name__ == '__main__':
     f_bbox.close()
     #print(target)
     f_event = PSEELoader(event_file)
-    end_count = f_event.seek_time(args.end - 50000)
+    end_count = f_event.seek_time(args.end - 10000)
     #f_event.seek_event(0)
-    events = f_event.load_delta_t(50000)
+    events = f_event.load_delta_t(10000)
     x,y,t,p = events['x'], events['y'], events['t'], events['p']
     events = np.stack([x.astype(int), y.astype(int), t, p], axis=-1)
     volume = generate_tore(events,(240,304))
