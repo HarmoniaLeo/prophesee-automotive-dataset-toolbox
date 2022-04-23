@@ -101,5 +101,5 @@ if __name__ == '__main__':
     #volume = np.where(np.log1p(time_stamp_end - volume)>np.log1p(5000000), np.log1p(5000000), np.log1p(time_stamp_end - volume))
     sns.histplot(volume)
     plt.xlabel("Time elapse")
-    plt.savefig()
+    plt.savefig("ToreTimeElapse.png")
     #visualizeVolume(volume,dat_bbox[(dat_bbox['t']==time_stamp_end)],item,result_path,time_stamp_end)
