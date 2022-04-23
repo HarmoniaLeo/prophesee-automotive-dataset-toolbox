@@ -90,18 +90,19 @@ def visualizeVolume(volume,gt,filename,path,time_stamp_start,time_stamp_end):
     c_p = c_p.sum(axis=0)
     c_n = volume[:5]
     c_n = c_n.sum(axis=0)
-    c_p = np.where(c_p>c_n,c_p,0)
+    #c_p = np.where(c_p>c_n,c_p,0)
     c_p = c_p/5
     c_p = np.where(c_p>1.0,127.0,c_p*127)
-    c_n = np.where(c_n>c_p,c_n,0)
+    #c_n = np.where(c_n>c_p,c_n,0)
     c_n = c_n/5
     c_n = np.where(c_n>1.0,-127.0,-c_n*127)
-    c_map = c_p+c_n
+    #c_map = c_p+c_n
+    c_map = c_p
     #c_map = np.where(c_n>0,-127,0)
     #c_map = np.where(c_p>0,127,0)
     img_s = img + c_map.astype(np.uint8)[:,:,None]
     draw_bboxes(img_s,gt,0,LABELMAP)
-    path_t = os.path.join(path,filename+"_{0}_window{1}_neg.png".format(int(time_stamp_end),time_stamp_end-time_stamp_start))
+    path_t = os.path.join(path,filename+"_{0}_window{1}_pos.png".format(int(time_stamp_end),time_stamp_end-time_stamp_start))
     cv2.imwrite(path_t,img_s)
     points_in_view = np.sum(np.sum(np.sum(volume>0,axis=0),axis=0),axis=0)
     density = points_in_view/(volume.shape[0]*volume.shape[1]*volume.shape[2])
