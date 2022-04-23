@@ -88,7 +88,7 @@ def visualizeVolume(volume,gt,filename,path,time_stamp_start,time_stamp_end):
     c_p = volume[-1:]
     #c_p = volume[-1:]
     c_p = c_p.sum(axis=0)
-    c_n = volume[-2:-1]
+    c_n = volume[4:5]
     c_n = c_n.sum(axis=0)
     #c_map = np.where(c_p>c_n,127,0)
     #c_map = np.where(c_p<c_n,-127,0)
