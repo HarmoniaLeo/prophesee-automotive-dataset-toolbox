@@ -98,5 +98,6 @@ if __name__ == '__main__':
     events = np.stack([x.astype(int), y.astype(int), t, p], axis=-1)
     volume = generate_tore(events,(240,304))
     #volume = np.where(np.log1p(time_stamp_end - volume)>np.log1p(5000000), np.log1p(5000000), np.log1p(time_stamp_end - volume))
+    print(args.end - f_event.current_time)
     print(volume.max(),volume.min(),volume.mean())
     #visualizeVolume(volume,dat_bbox[(dat_bbox['t']==time_stamp_end)],item,result_path,time_stamp_end)
