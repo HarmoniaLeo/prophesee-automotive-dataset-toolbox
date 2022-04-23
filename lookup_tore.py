@@ -10,7 +10,6 @@ import pandas as pd
 sns.set_style("darkgrid")
 
 def generate_tore(events,shape):
-    print(events[:,2].max()-events[:,2].min())
     q = np.zeros(shape)
     c = np.zeros(shape)
     K = 10
@@ -93,9 +92,8 @@ if __name__ == '__main__':
     f_event = PSEELoader(event_file)
     end_count = f_event.seek_time(args.end)
     f_event.seek_event(end_count - 200000)
-    print(time_stamp_end - f_event.current_time)
     #f_event.seek_event(0)
-    events = f_event.load_n_events(end_count)
+    events = f_event.load_n_events(200000)
     x,y,t,p = events['x'], events['y'], events['t'], events['p']
     events = np.stack([x.astype(int), y.astype(int), t, p], axis=-1)
     volume = generate_tore(events,(240,304))
