@@ -12,7 +12,7 @@ sns.set_style("darkgrid")
 def generate_tore(events,shape):
     q = np.zeros(shape)
     c = np.zeros(shape)
-    K = 10
+    K = 5
     for event in events:
         if event[3] == 1:
             if c[event[1]][event[0]] == 0:
