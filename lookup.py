@@ -97,7 +97,6 @@ def visualizeVolume(volume,gt,filename,path,time_stamp_start,time_stamp_end):
     c_n = c_n/5
     c_n = np.where(c_n>1.0,-127.0,-c_n*127)
     c_map = c_p+c_n
-    c_map = c_n
     #c_map = np.where(c_n>0,-127,0)
     #c_map = np.where(c_p>0,127,0)
     img_s = img + c_map.astype(np.uint8)[:,:,None]
