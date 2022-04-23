@@ -93,27 +93,23 @@ def draw_bboxes(img, boxes, dt = 0, labelmap=LABELMAP):
 def visualizeVolume(volume,gt_i,filename,path,time_stamp_end,typ):
     ecd = volume[1:volume.shape[0]:2]
     volume = volume[:volume.shape[0]:2]
-    for j in range(len(ecd)):
-        img_s = 255 * np.ones((volume.shape[1], volume.shape[2], 3), dtype=np.uint8)
-        ecd_view = ecd[j][ecd[j]>-1e6]
-        sns.histplot(ecd_view)
-        plt.xlim(-5.0,0.1)
-        tar = ecd[j] + 2.0
-        tar = tar / 2.0
-        tar = np.where(tar<0,0,tar)
-        #tar = np.where(tar * 10 > 1, 1, tar)
-        img_0 = (60 * tar).astype(np.uint8) + 119
-        #img_1 = (255 * tar).astype(np.uint8)
-        #img_2 = (255 * tar).astype(np.uint8)
-        img_s[:,:,0] = img_0
-        #img_s[:,:,1] = img_1
-        #img_s[:,:,2] = img_2
-        img_s = cv2.cvtColor(img_s, cv2.COLOR_HSV2BGR)
-        draw_bboxes(img_s,gt_i)
-        path_t = os.path.join(path,filename+"_end{0}".format(int(time_stamp_end)))
-        if not(os.path.exists(path_t)):
-            os.mkdir(path_t)
-        cv2.imwrite(os.path.join(path_t,typ+'_{0}.png'.format(j)),img_s)
+    img_s = 255 * np.ones((volume.shape[1], volume.shape[2], 3), dtype=np.uint8)
+    tar = ecd[-1] + 2.0
+    tar = tar / 2.0
+    tar = np.where(tar<0,0,tar)
+    #tar = np.where(tar * 10 > 1, 1, tar)
+    img_0 = (60 * tar).astype(np.uint8) + 119
+    #img_1 = (255 * tar).astype(np.uint8)
+    #img_2 = (255 * tar).astype(np.uint8)
+    img_s[:,:,0] = img_0
+    #img_s[:,:,1] = img_1
+    #img_s[:,:,2] = img_2
+    img_s = cv2.cvtColor(img_s, cv2.COLOR_HSV2BGR)
+    draw_bboxes(img_s,gt_i)
+    path_t = os.path.join(path,filename+"_end{0}".format(int(time_stamp_end)))
+    if not(os.path.exists(path_t)):
+        os.mkdir(path_t)
+    cv2.imwrite(os.path.join(path_t,typ+'.png'),img_s)
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(
