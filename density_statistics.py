@@ -96,14 +96,14 @@ for mode in ["train","val","test"]:
                     large_counts+=1
                 points = len(events[(events[:,0]>x)&(events[:,0]<x+w)&(events[:,1]>y)&(events[:,1]<y+h)])
                 if points / (shape[0]+shape[1])/2 > max_density:
-                    max_density = points / (shape[0]+shape[1])/2
+                    max_density = points / (w+h)/2
                 if points / area < min_density:
-                    min_density = points / (shape[0]+shape[1])/2
+                    min_density = points / (w+h)/2
                 if gt_trans[j][5] == 0:
                     car_counts += 1
                 else:
                     per_counts += 1
-                densitys_bounding_boxes.append(points / (shape[0]+shape[1])/2)
+                densitys_bounding_boxes.append(points / (w+h)/2)
 
             
             file_names.append(file_name)
