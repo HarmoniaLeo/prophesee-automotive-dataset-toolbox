@@ -48,6 +48,9 @@ for mode in ["train","val","test"]:
     medium_counts = 0
     large_counts = 0
     densitys_bounding_boxes = []
+    densitys_bounding_boxes_small = []
+    densitys_bounding_boxes_medium = []
+    densitys_bounding_boxes_large = []
 
     for i_file, file_name in enumerate(files):
         event_file = os.path.join(root, file_name + '_td.dat')
@@ -88,11 +91,15 @@ for mode in ["train","val","test"]:
             for j in range(len(gt_trans)):
                 x, y, w, h = gt_trans['x'][j], gt_trans['y'][j], gt_trans['w'][j], gt_trans['h'][j]
                 area = w * h
+                densitys_bounding_boxes.append(points / (w+h)/2)
                 if area < 32*32:
                     small_counts+=1
+                    densitys_bounding_boxes_small.append(points / (w+h)/2)
                 elif area < 96*96:
                     medium_counts+=1
+                    densitys_bounding_boxes_medium.append(points / (w+h)/2)
                 else:
+                    densitys_bounding_boxes_large.append(points / (w+h)/2)
                     large_counts+=1
                 points = len(events[(events[:,0]>x)&(events[:,0]<x+w)&(events[:,1]>y)&(events[:,1]<y+h)])
                 if points / (shape[0]+shape[1])/2 > max_density:
@@ -103,7 +110,6 @@ for mode in ["train","val","test"]:
                     car_counts += 1
                 else:
                     per_counts += 1
-                densitys_bounding_boxes.append(points / (w+h)/2)
 
             
             file_names.append(file_name)
