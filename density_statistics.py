@@ -91,6 +91,7 @@ for mode in ["train","val","test"]:
             for j in range(len(gt_trans)):
                 x, y, w, h = gt_trans['x'][j], gt_trans['y'][j], gt_trans['w'][j], gt_trans['h'][j]
                 area = w * h
+                points = len(events[(events[:,0]>x)&(events[:,0]<x+w)&(events[:,1]>y)&(events[:,1]<y+h)])
                 densitys_bounding_boxes.append(points / (w+h)/2)
                 if area < 32*32:
                     small_counts+=1
@@ -101,7 +102,6 @@ for mode in ["train","val","test"]:
                 else:
                     densitys_bounding_boxes_large.append(points / (w+h)/2)
                     large_counts+=1
-                points = len(events[(events[:,0]>x)&(events[:,0]<x+w)&(events[:,1]>y)&(events[:,1]<y+h)])
                 if points / (shape[0]+shape[1])/2 > max_density:
                     max_density = points / (w+h)/2
                 if points / area < min_density:
