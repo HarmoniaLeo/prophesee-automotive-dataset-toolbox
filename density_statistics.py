@@ -118,7 +118,7 @@ for mode in ["train","val","test"]:
         pbar.update(1)
     print(car_counts, per_counts, small_counts, medium_counts, large_counts)
     pbar.close()
-    csv_path = os.path.join(file_dir,"density_+"+mode+"+.csv")
+    csv_path = os.path.join(file_dir,"density_"+mode+".csv")
     pd.DataFrame({
         "File name":file_names,
         "Time stamp":time_stamps,
@@ -127,6 +127,6 @@ for mode in ["train","val","test"]:
         "Density positive":densitys_p,
         "Density effective max":densitys_eff_max,
         "Density effective min":densitys_eff_min}).to_csv(csv_path)
-    csv_path = os.path.join(file_dir,"density_boxes_+"+mode+"+.csv")
+    csv_path = os.path.join(file_dir,"density_boxes_"+mode+".csv")
     pd.DataFrame({
         "Density":densitys_bounding_boxes}).to_csv(csv_path)
