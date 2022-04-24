@@ -69,21 +69,21 @@ for mode in ["train","val","test"]:
             end_time = int(unique_time)
             start_time = end_time - events_window
 
-            # dat_event = f_event
-            # if start_time >=0:
-            #     dat_event.seek_time(start_time)
-            #     events = dat_event.load_delta_t(int(end_time - start_time))
-            # else:
-            #     dat_event.seek_time(0)
-            #     events = dat_event.load_delta_t(int(end_time))
-            # del dat_event
-            #events = torch.from_numpy(rfn.structured_to_unstructured(events)[:, [1, 2, 0, 3]].astype(float)).cuda()
+            dat_event = f_event
+            if start_time >=0:
+                dat_event.seek_time(start_time)
+                events = dat_event.load_delta_t(int(end_time - start_time))
+            else:
+                dat_event.seek_time(0)
+                events = dat_event.load_delta_t(int(end_time))
+            del dat_event
+            events = torch.from_numpy(rfn.structured_to_unstructured(events)[:, [1, 2, 0, 3]].astype(float)).cuda()
 
-            # density = len(events)
-            # density_p = len(events[events[:,3]==1])
-            # density_n = len(events[events[:,3]==0])
-            # max_density = 0
-            # min_density = 1.0
+            density = len(events)/(shape[0]+shape[1])/2
+            density_p = len(events[events[:,3]==1])/(shape[0]+shape[1])/2
+            density_n = len(events[events[:,3]==0])/(shape[0]+shape[1])/2
+            max_density = 0
+            min_density = 1.0
             gt_trans = dat_bbox[dat_bbox['t'] == unique_time]
             for j in range(len(gt_trans)):
                 x, y, w, h = gt_trans['x'][j], gt_trans['y'][j], gt_trans['w'][j], gt_trans['h'][j]
@@ -94,39 +94,39 @@ for mode in ["train","val","test"]:
                     medium_counts+=1
                 else:
                     large_counts+=1
-                #points = len(events[(events[:,0]>x)&(events[:,0]<x+w)&(events[:,1]>y)&(events[:,1]<y+h)])
-                # if points / area > max_density:
-                #     max_density = points / area
-                # if points / area < min_density:
-                #     min_density = points / area
-                # if gt_trans[j][5] == 0:
-                #     car_counts += 1
-                # else:
-                #     per_counts += 1
-                # densitys_bounding_boxes.append(points / area)
+                points = len(events[(events[:,0]>x)&(events[:,0]<x+w)&(events[:,1]>y)&(events[:,1]<y+h)])
+                if points / (shape[0]+shape[1])/2 > max_density:
+                    max_density = points / (shape[0]+shape[1])/2
+                if points / area < min_density:
+                    min_density = points / (shape[0]+shape[1])/2
+                if gt_trans[j][5] == 0:
+                    car_counts += 1
+                else:
+                    per_counts += 1
+                densitys_bounding_boxes.append(points / (shape[0]+shape[1])/2)
 
             
-            # file_names.append(file_name)
-            # time_stamps.append(unique_time)
-            # densitys.append(density)
-            # densitys_n.append(density_n)
-            # densitys_p.append(density_p)
-            # densitys_eff_max.append(max_density)
-            # densitys_eff_min.append(min_density)
+            file_names.append(file_name)
+            time_stamps.append(unique_time)
+            densitys.append(density)
+            densitys_n.append(density_n)
+            densitys_p.append(density_p)
+            densitys_eff_max.append(max_density)
+            densitys_eff_min.append(min_density)
 
         #h5.close()
         pbar.update(1)
     print(car_counts, per_counts, small_counts, medium_counts, large_counts)
     pbar.close()
-    # csv_path = os.path.join(file_dir,"density_+"+mode+"+.csv")
-    # pd.DataFrame({
-    #     "File name":file_names,
-    #     "Time stamp":time_stamps,
-    #     "Density":densitys,
-    #     "Density negative":densitys_n,
-    #     "Density positive":densitys_p,
-    #     "Density effective max":densitys_eff_max,
-    #     "Density effective min":densitys_eff_min}).to_csv(csv_path)
-    # csv_path = os.path.join(file_dir,"density_boxes_+"+mode+"+.csv")
-    # pd.DataFrame({
-    #     "Density":densitys_bounding_boxes}).to_csv(csv_path)
+    csv_path = os.path.join(file_dir,"density_+"+mode+"+.csv")
+    pd.DataFrame({
+        "File name":file_names,
+        "Time stamp":time_stamps,
+        "Density":densitys,
+        "Density negative":densitys_n,
+        "Density positive":densitys_p,
+        "Density effective max":densitys_eff_max,
+        "Density effective min":densitys_eff_min}).to_csv(csv_path)
+    csv_path = os.path.join(file_dir,"density_boxes_+"+mode+"+.csv")
+    pd.DataFrame({
+        "Density":densitys_bounding_boxes}).to_csv(csv_path)
