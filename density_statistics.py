@@ -170,4 +170,4 @@ for mode in ["train","val","test"]:
         Density_large=densitys_bounding_boxes_large,
         Density_medium=densitys_bounding_boxes_medium,
         Density_car=densitys_bounding_boxes_cars,
-        Density_per=densitys_bounding_boxes_pers).to_csv(csv_path)
+        Density_per=densitys_bounding_boxes_pers)
