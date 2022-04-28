@@ -163,11 +163,11 @@ for mode in ["train","val","test"]:
         "Larges count":larges_count,
         "Mediums count":mediums_count,
         "Smalls count":smalls_count}).to_csv(csv_path)
-    csv_path = os.path.join(file_dir,"density_boxes_"+mode+".csv")
-    pd.DataFrame({
-        "Density":densitys_bounding_boxes,
-        "Density small":densitys_bounding_boxes_small,
-        "Density large":densitys_bounding_boxes_large,
-        "Density medium":densitys_bounding_boxes_medium,
-        "Density car":densitys_bounding_boxes_cars,
-        "Density per":densitys_bounding_boxes_pers,}).to_csv(csv_path)
+    csv_path = os.path.join(file_dir,"density_boxes_"+mode+".npz")
+    np.savez(csv_path,
+        Density=densitys_bounding_boxes,
+        Density_small=densitys_bounding_boxes_small,
+        Density_large=densitys_bounding_boxes_large,
+        Density_medium=densitys_bounding_boxes_medium,
+        Density_car=densitys_bounding_boxes_cars,
+        Density_per=densitys_bounding_boxes_pers).to_csv(csv_path)
