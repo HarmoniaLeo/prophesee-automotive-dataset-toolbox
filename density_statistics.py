@@ -51,6 +51,13 @@ for mode in ["train","val","test"]:
     densitys_bounding_boxes_small = []
     densitys_bounding_boxes_medium = []
     densitys_bounding_boxes_large = []
+    densitys_bounding_boxes_cars = []
+    densitys_bounding_boxes_pers = []
+    pers_count = []
+    cars_count = []
+    smalls_count = []
+    larges_count = []
+    mediums_count = []
 
     for i_file, file_name in enumerate(files):
         event_file = os.path.join(root, file_name + '_td.dat')
@@ -82,11 +89,16 @@ for mode in ["train","val","test"]:
             del dat_event
             events = torch.from_numpy(rfn.structured_to_unstructured(events)[:, [1, 2, 0, 3]].astype(float)).cuda()
 
-            density = len(events)/(shape[0]+shape[1])/2
-            density_p = len(events[events[:,3]==1])/(shape[0]+shape[1])/2
-            density_n = len(events[events[:,3]==0])/(shape[0]+shape[1])/2
+            density = len(events)/(shape[0]*shape[1])
+            density_p = len(events[events[:,3]==1])/(shape[0]*shape[1])
+            density_n = len(events[events[:,3]==0])/(shape[0]*shape[1])
+            car_count =0 
+            per_count = 0
+            small_count =0 
+            medium_count =0 
+            large_count = 0
             max_density = 0
-            min_density = 1.0
+            min_density = np.inf
             gt_trans = dat_bbox[dat_bbox['t'] == unique_time]
             for j in range(len(gt_trans)):
                 x, y, w, h = gt_trans['x'][j], gt_trans['y'][j], gt_trans['w'][j], gt_trans['h'][j]
@@ -95,22 +107,28 @@ for mode in ["train","val","test"]:
                 densitys_bounding_boxes.append(points / (w+h)/2)
                 if area < 32*32:
                     small_counts+=1
-                    densitys_bounding_boxes_small.append(points / (w+h)/2)
+                    small_count +=1
+                    densitys_bounding_boxes_small.append(points / (w*h))
                 elif area < 96*96:
                     medium_counts+=1
-                    densitys_bounding_boxes_medium.append(points / (w+h)/2)
+                    medium_count +=1
+                    densitys_bounding_boxes_medium.append(points / (w*h))
                 else:
-                    densitys_bounding_boxes_large.append(points / (w+h)/2)
+                    densitys_bounding_boxes_large.append(points / (w*h))
                     large_counts+=1
+                    large_count +=1
                 if points / (shape[0]+shape[1])/2 > max_density:
                     max_density = points / (w+h)/2
                 if points / area < min_density:
                     min_density = points / (w+h)/2
                 if gt_trans[j][5] == 0:
                     car_counts += 1
+                    car_count += 1
+                    densitys_bounding_boxes_cars.append(points / (w*h))
                 else:
                     per_counts += 1
-
+                    per_count += 1
+                    densitys_bounding_boxes_pers.append(points / (w*h))
             
             file_names.append(file_name)
             time_stamps.append(unique_time)
@@ -119,6 +137,11 @@ for mode in ["train","val","test"]:
             densitys_p.append(density_p)
             densitys_eff_max.append(max_density)
             densitys_eff_min.append(min_density)
+            pers_count.append(per_count)
+            cars_count.append(car_count)
+            larges_count.append(large_count)
+            mediums_count.append(medium_count)
+            smalls_count.append(small_count)
 
         #h5.close()
         pbar.update(1)
@@ -132,7 +155,17 @@ for mode in ["train","val","test"]:
         "Density negative":densitys_n,
         "Density positive":densitys_p,
         "Density effective max":densitys_eff_max,
-        "Density effective min":densitys_eff_min}).to_csv(csv_path)
+        "Density effective min":densitys_eff_min,
+        "Pers count":pers_count,
+        "Cars count":cars_count,
+        "Larges count":larges_count,
+        "Mediums count":mediums_count,
+        "Smalls count":smalls_count}).to_csv(csv_path)
     csv_path = os.path.join(file_dir,"density_boxes_"+mode+".csv")
     pd.DataFrame({
-        "Density":densitys_bounding_boxes}).to_csv(csv_path)
+        "Density":densitys_bounding_boxes,
+        "Density small":densitys_bounding_boxes_small,
+        "Density large":densitys_bounding_boxes_large,
+        "Density medium":densitys_bounding_boxes_medium,
+        "Density car":densitys_bounding_boxes_cars,
+        "Density per":densitys_bounding_boxes_pers,}).to_csv(csv_path)
