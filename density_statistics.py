@@ -60,6 +60,8 @@ for mode in ["train","val","test"]:
     mediums_count = []
 
     for i_file, file_name in enumerate(files):
+        if i_file>5:
+            break
         event_file = os.path.join(root, file_name + '_td.dat')
         bbox_file = os.path.join(root, file_name + '_bbox.npy')
         # if os.path.exists(volume_save_path):
