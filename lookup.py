@@ -223,7 +223,7 @@ if __name__ == '__main__':
     volume = torch.from_numpy(volume).cuda()
     median_filter = MedianPool2d(3,1,same=True).cuda()
     start = time.time()
-    volume = median_filter(volume)
+    volume = median_filter(volume[None,:,:,:])
     torch.cuda.synchronize()
     print("elapse",time.time()-start)
     visualizeVolume(volume,dat_bbox,item,result_path,time_stamp_start,time_stamp_end)
