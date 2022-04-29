@@ -233,6 +233,6 @@ for mode in ["train"]:
         pbar.update(1)
     pbar.close()
     if mode == "test":
-        np.save(os.path.join(root, 'total_volume_time.npy'),np.array(total_volume_time))
-        np.save(os.path.join(root, 'total_taf_time.npy'),np.array(total_taf_time))
+        np.save(os.path.join(root, 'total_volume_time_point.npy'),np.array(total_volume_time))
+        np.save(os.path.join(root, 'total_taf_time_point.npy'),np.array(total_taf_time))
     #h5.close()
