@@ -76,8 +76,8 @@ def denseToSparse(dense_tensor):
 
     return np.stack(non_zero_indices), features
 
-#min_event_count = 200000
-min_event_count = 800000
+min_event_count = 200000
+#min_event_count = 800000
 events_window_abin = 10000
 event_volume_bins = 5
 events_window = events_window_abin * event_volume_bins
@@ -88,9 +88,9 @@ target_shape = [256, 320]
 rh = target_shape[0] / shape[0]
 rw = target_shape[1] / shape[1]
 raw_dir = "/data/lbd/ATIS_Automotive_Detection_Dataset/detection_dataset_duration_60s_ratio_1.0"
-target_dir = "/data/lbd/ATIS_taf"
+target_dir = "/data/lbd/ATIS_taf_point"
 #raw_dir = "/data/Large_Automotive_Detection_Dataset_sampling"
-target_dir = "/data/Large_taf"
+#target_dir = "/data/Large_taf"
 
 total_volume_time = []
 total_taf_time = []
