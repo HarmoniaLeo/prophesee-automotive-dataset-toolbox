@@ -41,7 +41,6 @@ def taf_cuda(x, y, t, p, shape, volume_bins, past_volume):
         for i in range(1,img_ecd.shape[1])[::-1]:
             img_ecd[:,i-1,0,1] = img_ecd[:,i-1,0,1] - count_n
             img_ecd[:,i-1,1,1] = img_ecd[:,i-1,1,1] - count_p
-            print(torch.sum(forward[:,:,0,:]),torch.sum(forward[:,:,1,:]))
             img_ecd[:,i:i+1] = torch.where(forward, img_ecd[:,i-1:i],img_ecd[:,i:i+1])
         img_ecd[:,:1] = torch.where(forward, torch.cat([torch.zeros_like(forward).float(),torch.zeros_like(forward).float() -1e6],dim=3), img_ecd[:,:1])
     else:
