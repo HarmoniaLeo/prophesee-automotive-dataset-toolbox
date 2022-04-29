@@ -32,14 +32,15 @@ def taf_cuda(x, y, t, p, shape, volume_bins, past_volume):
 
     tick = time.time()
     forward = (img[:,-1]==0)[:,None]   #forward: hw, 1, 2, 1
-    count = torch.sum(~forward)
+    count_n = torch.sum(~forward[:,:,0,:])
+    count_p = torch.sum(~forward[:,:,1,:])
     if not (past_volume is None):
         img_old_ecd = past_volume    #img_ecd: hw, 2, 2, 2
         img_old_ecd[:,-1,:,0] = torch.where(img_old_ecd[:,-1,:,1] == 0,img_old_ecd[:,-1,:,0] + img[:,0,:,0],img_old_ecd[:,-1,:,0])
         img_ecd = torch.cat([img_old_ecd,torch.cat([img[:,1:],torch.zeros_like(img[:,1:])],dim=3)],dim=1)
         for i in range(1,img_ecd.shape[1])[::-1]:
-            img_ecd[:,i-1,:,1] = img_ecd[:,i-1,:,1] - count
-            print(count)
+            img_ecd[:,i-1,0,1] = img_ecd[:,i-1,0,1] - count_n
+            img_ecd[:,i-1,1,1] = img_ecd[:,i-1,1,1] - count_p
             img_ecd[:,i:i+1] = torch.where(forward, img_ecd[:,i-1:i],img_ecd[:,i:i+1])
         img_ecd[:,:1] = torch.where(forward, torch.cat([torch.zeros_like(forward).float(),torch.zeros_like(forward).float() -1e6],dim=3), img_ecd[:,:1])
     else:
