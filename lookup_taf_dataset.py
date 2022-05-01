@@ -144,6 +144,7 @@ if __name__ == '__main__':
     c = np.right_shift(np.bitwise_and(locations, 7864320), 19).astype(np.float32)
     p = np.right_shift(np.bitwise_and(locations, 8388608), 23).astype(np.float32)
     features = np.fromfile(event_file + "_features.npy", dtype=np.float32)
+    print(features.min())
 
     z = np.zeros_like(c)
     t = np.zeros_like(c) + time_stamp_end
