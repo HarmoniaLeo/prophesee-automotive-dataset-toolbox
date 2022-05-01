@@ -42,7 +42,7 @@ def taf_cuda(x, y, t, p, shape, volume_bins, past_volume):
             img_ecd[:,i-1,0,1] = img_ecd[:,i-1,0,1] - count_n
             img_ecd[:,i-1,1,1] = img_ecd[:,i-1,1,1] - count_p
             img_ecd[:,i:i+1] = torch.where(forward, img_ecd[:,i-1:i],img_ecd[:,i:i+1])
-        img_ecd[:,:1] = torch.where(forward, torch.cat([torch.zeros_like(forward).float(),torch.zeros_like(forward).float() -1e6],dim=3), img_ecd[:,:1])
+        img_ecd[:,:1] = torch.where(forward, torch.cat([torch.zeros_like(forward).float(),torch.zeros_like(forward).float() -1e8],dim=3), img_ecd[:,:1])
     else:
         ecd = torch.where(forward, torch.zeros_like(forward).float() -1e8, torch.zeros_like(forward).float())   #ecd: hw, 1, 2, 1
         img_ecd = torch.cat([img, torch.cat([ecd,ecd],dim=1)],dim=3)    #img_ecd: hw, 2, 2, 2
@@ -219,7 +219,7 @@ for mode in ["test"]:
                     total_taf_time.append(generate_volume_time + generate_encode_time)
                 #print(total_time/generate_times)
             volume_ = volume.cpu().numpy().copy()
-            volume_[...,1] = np.where(volume_[...,1]>-1e6, volume_[...,1] - 1, 0)
+            volume_[...,1] = np.where(volume_[...,1]>-1e8, volume_[...,1] - 1, 0)
             locations, features = denseToSparse(volume_)
             c, y, x, p = locations
             
