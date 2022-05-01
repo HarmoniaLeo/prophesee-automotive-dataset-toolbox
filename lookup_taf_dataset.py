@@ -12,31 +12,31 @@ sns.set_style("darkgrid")
 
 def point1_transform(volume):
     volume = volume.copy()
-    volume[...,1] = np.where(volume[...,1] > -1e6, 0.1 * volume[...,1], volume[...,1])
+    volume[...,1] = np.where(volume[...,1] > -1e8, 0.1 * volume[...,1], volume[...,1])
     return volume
 
 def point01_transform(volume):
     volume = volume.copy()
-    volume[...,1] = np.where(volume[...,1] > -1e6, 0.01 * volume[...,1], volume[...,1])
+    volume[...,1] = np.where(volume[...,1] > -1e8, 0.01 * volume[...,1], volume[...,1])
     return volume
 
 def minmax_transform(volume):
     volume = volume.copy()
-    ecd_view = volume[...,1][volume[...,1] > -1e6]
+    ecd_view = volume[...,1][volume[...,1] > -1e8]
     #q10, q90 = torch.quantile(ecd_view, torch.tensor([0.1,0.9]).to(x.device))
     q100 = np.max(ecd_view)
     q0 = np.min(ecd_view)
-    volume[...,1] = np.where(volume[...,1] > -1e6, (volume[...,1] - q100) / (q100 - q0 + 1e-8) * 6, volume[...,1])
+    volume[...,1] = np.where(volume[...,1] > -1e8, (volume[...,1] - q100) / (q100 - q0 + 1e-8) * 6, volume[...,1])
     return volume
 
 def quantile_transform(volume):
     volume = volume.copy()
-    ecd_view = volume[...,1][volume[...,1] > -1e6]
+    ecd_view = volume[...,1][volume[...,1] > -1e8]
     q90 = np.quantile(ecd_view, 0.90)
     q10 = np.quantile(ecd_view, 0.10)
-    volume[...,1] = np.where(volume[...,1] > -1e6, volume[...,1] - q90, volume[...,1])
-    volume[...,1] = np.where((volume[...,1] > -1e6) & (volume[...,1] < 0), volume[...,1]/(q90 - q10 + 1e-8) * 2, volume[...,1])
-    ecd_view = volume[...,1][volume[...,1] > -1e6]
+    volume[...,1] = np.where(volume[...,1] > -1e8, volume[...,1] - q90, volume[...,1])
+    volume[...,1] = np.where((volume[...,1] > -1e8) & (volume[...,1] < 0), volume[...,1]/(q90 - q10 + 1e-8) * 2, volume[...,1])
+    ecd_view = volume[...,1][volume[...,1] > -1e8]
     q100 = np.max(ecd_view)
     volume[...,1] = np.where(volume[...,1] > 0, volume[...,1] / (q100 + 1e-8) * 2, volume[...,1])
     return volume
@@ -57,7 +57,7 @@ def generate_event_volume(events,shape,ori_shape):
     np.add.at(feature_map, c * H * W * 2 + y * W * 2 + x * 2 + p, features)
 
     volume = feature_map.reshape(C, H, W, 2)
-    volume[...,1] = np.where(volume[...,1] ==0, -1e6, volume[...,1] + 1)
+    volume[...,1] = np.where(volume[...,1] ==0, -1e8, volume[...,1] + 1)
 
     for transform in transforms:    
         volume_t = transform(volume)
