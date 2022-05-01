@@ -34,6 +34,7 @@ def quantile_transform(volume):
     ecd_view = volume[...,1][volume[...,1] > -1e8]
     q90 = np.quantile(ecd_view, 0.90)
     q10 = np.quantile(ecd_view, 0.10)
+    print(q90,q10)
     volume[...,1] = np.where(volume[...,1] > -1e8, volume[...,1] - q90, volume[...,1])
     volume[...,1] = np.where((volume[...,1] > -1e8) & (volume[...,1] < 0), volume[...,1]/(q90 - q10 + 1e-8) * 2, volume[...,1])
     ecd_view = volume[...,1][volume[...,1] > -1e8]
