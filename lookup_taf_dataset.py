@@ -34,7 +34,6 @@ def quantile_transform(volume):
     ecd_view = volume[...,1][volume[...,1] > -1e8]
     q90 = np.quantile(ecd_view, 0.90)
     q10 = np.quantile(ecd_view, 0.10)
-    print(q90,q10)
     volume[...,1] = np.where(volume[...,1] > -1e8, volume[...,1] - q90, volume[...,1])
     volume[...,1] = np.where((volume[...,1] > -1e8) & (volume[...,1] < 0), volume[...,1]/(q90 - q10 + 1e-8) * 2, volume[...,1])
     ecd_view = volume[...,1][volume[...,1] > -1e8]
@@ -95,8 +94,8 @@ def visualizeVolume(volume,gt_i,filename,path,time_stamp_end,typ):
     ecd = volume[1:volume.shape[0]:2]
     volume = volume[:volume.shape[0]:2]
     img_s = 255 * np.ones((volume.shape[1], volume.shape[2], 3), dtype=np.uint8)
-    #tar = ecd[-1] + 2.0
-    tar = volume[-1] - volume[-2]
+    tar = ecd[-1] + 2.0
+    #tar = volume[-1] - volume[-2]
     tar = tar / 2.0
     tar = np.where(tar<0,0,tar)
     #tar = np.where(tar * 10 > 1, 1, tar)
@@ -149,7 +148,6 @@ if __name__ == '__main__':
     z = np.zeros_like(c)
     t = np.zeros_like(c) + time_stamp_end
     events = np.stack([x, y, t, c, z, p, features], axis=1)
-    print(features.min())
 
     volumes = generate_event_volume(events,(256,320),(240,304))
     gt_i = dat_bbox[dat_bbox['t']==time_stamp_end]
