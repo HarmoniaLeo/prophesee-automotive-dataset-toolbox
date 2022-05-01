@@ -148,6 +148,7 @@ if __name__ == '__main__':
     z = np.zeros_like(c)
     t = np.zeros_like(c) + time_stamp_end
     events = np.stack([x, y, t, c, z, p, features], axis=1)
+    print(x.max(),y.max(),c.max(),p.max())
 
     volumes = generate_event_volume(events,(256,320),(240,304))
     gt_i = dat_bbox[dat_bbox['t']==time_stamp_end]
