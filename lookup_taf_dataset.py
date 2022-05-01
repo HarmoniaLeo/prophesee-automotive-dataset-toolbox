@@ -120,14 +120,14 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
 
-    result_path = 'result_taf_dataset'
+    result_path = 'result_taf_dataset_point'
     if not os.path.exists(result_path):
         os.mkdir(result_path)
     data_folder = 'test'
     item = args.item
     time_stamp_end = args.end
     bbox_path = "/data/lbd/ATIS_Automotive_Detection_Dataset/detection_dataset_duration_60s_ratio_1.0"
-    data_path = "/data/lbd/ATIS_taf"
+    data_path = "/data/lbd/ATIS_taf_point"
     final_path = os.path.join(bbox_path,data_folder)
     bbox_file = os.path.join(final_path, item+"_bbox.npy")
     f_bbox = open(bbox_file, "rb")
@@ -139,10 +139,10 @@ if __name__ == '__main__':
     event_file = os.path.join(final_path, item+"_"+str(time_stamp_end))
     #print(target)
     locations = np.fromfile(event_file + "_locations.npy", dtype=np.int32)
-    x = np.bitwise_and(locations, 511).astype(np.float32)
-    y = np.right_shift(np.bitwise_and(locations, 130560), 9).astype(np.float32)
-    c = np.right_shift(np.bitwise_and(locations, 1966080), 17).astype(np.float32)
-    p = np.right_shift(np.bitwise_and(locations, 2097152), 21).astype(np.float32)
+    x = np.bitwise_and(locations, 1023).astype(np.float32)
+    y = np.right_shift(np.bitwise_and(locations, 523264), 10).astype(np.float32)
+    c = np.right_shift(np.bitwise_and(locations, 7864320), 19).astype(np.float32)
+    p = np.right_shift(np.bitwise_and(locations, 8388608), 23).astype(np.float32)
     features = np.fromfile(event_file + "_features.npy", dtype=np.float32)
 
     z = np.zeros_like(c)
