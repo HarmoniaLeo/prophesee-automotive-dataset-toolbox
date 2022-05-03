@@ -72,7 +72,7 @@ for mode in ["train","val","test"]:
         for bbox_count,unique_time in enumerate(unique_ts):
             if unique_time <= 500000:
                 continue
-            if (unique_time - time_upperbound < 500000):
+            if (unique_time - time_upperbound < 1000000):
                 continue
             else:
                 sampling_start_time = unique_time
