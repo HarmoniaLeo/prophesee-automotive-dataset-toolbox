@@ -114,7 +114,7 @@ for mode in ["train","val","test"]:
             time_upperbound = end_time
             count_upperbound = end_count
         #h5.close()
-            print(events['ts'].max(),events['ts'].min(),unique_time)
+            print(events['t'].max(),events['t'].min(),unique_time)
         dat_events_tools.write_event_buffer(f_event_new, np.concatenate(sampled_events))
         sampled_bboxes = np.concatenate(sampled_bboxes)
         mmp = np.lib.format.open_memmap(new_bbox_file, "w+", dtype, sampled_bboxes.shape)
