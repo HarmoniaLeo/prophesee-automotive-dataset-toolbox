@@ -17,6 +17,7 @@ min_event_count = 800000
 events_window_abin = 10000
 event_volume_bins = 5
 events_window = events_window_abin * event_volume_bins
+events_window_total = int(50000 + 16667 * 17)
 raw_dir = "/data/Large_Automotive_Detection_Dataset"
 target_dir = "/data/Large_Automotive_Detection_Dataset_sampling"
 
@@ -71,15 +72,10 @@ for mode in ["train","val","test"]:
         for bbox_count,unique_time in enumerate(unique_ts):
             if unique_time <= 500000:
                 continue
-            if (not sampling) and (unique_time - time_upperbound < 450000):
+            if (unique_time - time_upperbound < 500000):
                 continue
             else:
-                if not sampling:
-                    sampling_start_time = unique_time
-                    sampling = True
-                if unique_time - sampling_start_time > 50000:
-                    sampling = False
-                    continue
+                sampling_start_time = unique_time
             end_time = int(unique_time)
             end_count = f_event.seek_time(end_time)
             if end_count is None:
@@ -89,8 +85,8 @@ for mode in ["train","val","test"]:
                 start_count = 0
             f_event.seek_event(start_count)
             start_time = int(f_event.current_time)
-            if (end_time - start_time) < events_window:
-                start_time = end_time - events_window
+            if (end_time - start_time) < events_window_total:
+                start_time = end_time - events_window_total
             else:
                 start_time = end_time - round((end_time - start_time - events_window)/events_window_abin) * events_window_abin - events_window
 
@@ -98,7 +94,6 @@ for mode in ["train","val","test"]:
                 start_count = f_event.seek_time(start_time)
                 if (start_count is None) or (start_time < 0):
                     start_count = 0
-                memory = None
             else:
                 start_count = count_upperbound
                 start_time = time_upperbound
