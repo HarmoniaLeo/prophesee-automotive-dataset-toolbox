@@ -18,8 +18,8 @@ events_window_abin = 10000
 event_volume_bins = 5
 events_window = events_window_abin * event_volume_bins
 events_window_total = int(50000 + 16667 * 17)
-raw_dir = "/data/liubingde/Large_Automotive_Detection_Dataset"
-target_dir = "/data/liubingde/Large_Automotive_Detection_Dataset_sampling"
+raw_dir = "/data/lbd/Large_Automotive_Detection_Dataset"
+target_dir = "/data/lbd/Large_Automotive_Detection_Dataset_sampling"
 
 for mode in ["train","val","test"]:
     
