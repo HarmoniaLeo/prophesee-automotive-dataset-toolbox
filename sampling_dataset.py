@@ -111,8 +111,6 @@ for mode in ["train","val","test"]:
             sampled_events.append(events)
             sampled_bboxes.append(dat_bbox[dat_bbox['t']==unique_time])
 
-            print(int(end_count - start_count))
-
             time_upperbound = end_time
             count_upperbound = end_count
         dat_events_tools.write_event_buffer(f_event_new, np.concatenate(sampled_events))
