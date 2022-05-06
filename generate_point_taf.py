@@ -79,7 +79,7 @@ def denseToSparse(dense_tensor):
     return np.stack(non_zero_indices), features
 
 #min_event_count = 200000
-min_event_count = 800000
+min_event_count = 200000
 events_window_abin = 10000
 event_volume_bins = 5
 events_window = events_window_abin * event_volume_bins
@@ -96,7 +96,7 @@ target_dir = "/data/lbd/ATIS_taf_point"
 
 total_volume_time = []
 total_taf_time = []
-for mode in ["test"]:
+for mode in ["train","val","test"]:
     
     file_dir = os.path.join(raw_dir, mode)
     root = file_dir
