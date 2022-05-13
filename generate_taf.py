@@ -80,7 +80,7 @@ if __name__ == '__main__':
     description='visualize one or several event files along with their boxes')
     parser.add_argument('-raw_dir', type=str)
     parser.add_argument('-target_dir', type=str)
-    parser.add_argument('-dataset', type=str)
+    parser.add_argument('-dataset', type=str, default="gen4")
 
     args = parser.parse_args()
     raw_dir = args.raw_dir
