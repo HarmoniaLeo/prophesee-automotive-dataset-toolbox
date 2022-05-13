@@ -80,25 +80,32 @@ if __name__ == '__main__':
     description='visualize one or several event files along with their boxes')
     parser.add_argument('-raw_dir', type=str)
     parser.add_argument('-target_dir', type=str)
+    parser.add_argument('-dataset', type=str)
+
+    args = parser.parse_args()
+    raw_dir = args.raw_dir
+    target_dir = args.target_dir
+    dataset = args.dataset
 
     #min_event_count = 200000
-    min_event_count = 800000
+    if dataset == "gen4":
+        min_event_count = 800000
+        shape = [720,1280]
+        target_shape = [512, 640]
+    else:
+        min_event_count = 200000
+        shape = [240,304]
+        target_shape = [256, 320]
     events_window_abin = 10000
     event_volume_bins = 5
     events_window = events_window_abin * event_volume_bins
-    #shape = [720,1280]
-    #target_shape = [512, 640]
-    shape = [240,304]
-    target_shape = [256, 320]
     rh = target_shape[0] / shape[0]
     rw = target_shape[1] / shape[1]
     #raw_dir = "/data/lbd/ATIS_Automotive_Detection_Dataset/detection_dataset_duration_60s_ratio_1.0"
     #target_dir = "/data/lbd/ATIS_taf"
     #raw_dir = "/data/Large_Automotive_Detection_Dataset_sampling"
     #target_dir = "/data/Large_taf"
-    args = parser.parse_args()
-    raw_dir = args.raw_dir
-    target_dir = args.target_dir
+    
 
     total_volume_time = []
     total_taf_time = []
