@@ -179,7 +179,8 @@ if __name__ == '__main__':
     f_event.seek_event(n_start)
     events = f_event.load_n_events(args.window)
     time_stamp_start = events['t'].min()
-    time_stamp_end = events['t'].max()
+    #time_stamp_end = events['t'].max()
+    time_stamp_end = args.end
     x,y,t,p = events['x'], events['y'], events['t'], events['p']
     events = np.stack([x.astype(int), y.astype(int), t, p], axis=-1)
     volume = generate_event_volume(events,(240,304),5)
