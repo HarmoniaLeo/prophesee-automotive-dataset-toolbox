@@ -77,7 +77,7 @@ def draw_bboxes(img, boxes, dt = 0, labelmap=LABELMAP):
         cv2.rectangle(img, pt1, pt2, color, 2)
         #if dt:
         cv2.rectangle(img, (pt1[0], pt1[1] - 15), (pt1[0] + 75, pt1[1]), color, -1)
-        cv2.putText(img, class_name + str().format(" {0:.2f}",score), (pt1[0]+3, pt1[1] - 5), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0,0,0), 1)
+        cv2.putText(img, class_name + " {0:.2f}".format(score), (pt1[0]+3, pt1[1] - 5), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0,0,0), 1)
         # else:
         #     cv2.rectangle(img, (pt1[0], pt1[1] - 15), (pt1[0] + 35, pt1[1]), color, -1)
         #     cv2.putText(img, class_name[:3], (pt1[0]+3, pt1[1] - 5), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0,0,0), 1)
