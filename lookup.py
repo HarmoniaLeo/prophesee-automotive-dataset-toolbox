@@ -119,8 +119,8 @@ def draw_bboxes(img, boxes, dt = 0, labelmap=LABELMAP):
         color = colors[(dt+1) * 60]
         center = ((pt1[0] + pt2[0]) // 2, (pt1[1] + pt2[1]) // 2)
         cv2.rectangle(img, pt1, pt2, color, 2)
-        cv2.rectangle(img, (pt1[1], pt1[0] - 10), (pt1[1] + 30, pt1[0]), color, -1)
-        cv2.putText(img, class_name, (pt1[1]+3, pt1[0] - 7), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0,0,0), 1)
+        cv2.rectangle(img, (pt1[0], pt1[1] - 15), (pt1[0] + 45, pt1[1]), color, -1)
+        cv2.putText(img, class_name, (pt1[0]+3, pt1[1] - 7), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0,0,0), 1)
         if dt:
             cv2.putText(img, str().format("{0:.2f}",score), (center[0], pt1[1] - 1), cv2.FONT_HERSHEY_SIMPLEX, 0.8, color, 1)
 
