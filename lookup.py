@@ -18,50 +18,6 @@ import torch.nn.functional as F
 from torch.nn.modules.utils import _pair, _quadruple
 
 
-class MedianPool2d(nn.Module):
-    """ Median pool (usable as median filter when stride=1) module.
-    
-    Args:
-         kernel_size: size of pooling kernel, int or 2-tuple
-         stride: pool stride, int or 2-tuple
-         padding: pool padding, int or 4-tuple (l, r, t, b) as in pytorch F.pad
-         same: override padding and enforce same padding, boolean
-    """
-    def __init__(self, kernel_size=3, stride=1, padding=0, same=False):
-        super(MedianPool2d, self).__init__()
-        self.k = _pair(kernel_size)
-        self.stride = _pair(stride)
-        self.padding = _quadruple(padding)  # convert to l, r, t, b
-        self.same = same
-
-    def _padding(self, x):
-        if self.same:
-            ih, iw = x.size()[2:]
-            if ih % self.stride[0] == 0:
-                ph = max(self.k[0] - self.stride[0], 0)
-            else:
-                ph = max(self.k[0] - (ih % self.stride[0]), 0)
-            if iw % self.stride[1] == 0:
-                pw = max(self.k[1] - self.stride[1], 0)
-            else:
-                pw = max(self.k[1] - (iw % self.stride[1]), 0)
-            pl = pw // 2
-            pr = pw - pl
-            pt = ph // 2
-            pb = ph - pt
-            padding = (pl, pr, pt, pb)
-        else:
-            padding = self.padding
-        return padding
-    
-    def forward(self, x):
-        # using existing pytorch functions and tensor ops so that we get autograd, 
-        # would likely be more efficient to implement from scratch at C/Cuda level
-        x = F.pad(x, self._padding(x), mode='reflect')
-        x = x.unfold(2, self.k[0], self.stride[0]).unfold(3, self.k[1], self.stride[1])
-        x = x.contiguous().view(x.size()[:4] + (-1,)).median(dim=-1)[0]
-        return x
-
 def generate_event_volume(events,shape,bins=5):
     H, W = shape
     x, y, t, p = events.T
@@ -119,10 +75,12 @@ def draw_bboxes(img, boxes, dt = 0, labelmap=LABELMAP):
         color = colors[(dt+1) * 60]
         center = ((pt1[0] + pt2[0]) // 2, (pt1[1] + pt2[1]) // 2)
         cv2.rectangle(img, pt1, pt2, color, 2)
-        cv2.rectangle(img, (pt1[0], pt1[1] - 15), (pt1[0] + 45, pt1[1]), color, -1)
-        cv2.putText(img, class_name, (pt1[0]+3, pt1[1] - 5), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0,0,0), 1)
-        if dt:
-            cv2.putText(img, str().format("{0:.2f}",score), (center[0], pt1[1] - 1), cv2.FONT_HERSHEY_SIMPLEX, 0.8, color, 1)
+        #if dt:
+        cv2.rectangle(img, (pt1[0], pt1[1] - 15), (pt1[0] + 75, pt1[1]), color, -1)
+        cv2.putText(img, class_name + str().format(" {0:.2f}",score), (pt1[0]+3, pt1[1] - 5), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0,0,0), 1)
+        # else:
+        #     cv2.rectangle(img, (pt1[0], pt1[1] - 15), (pt1[0] + 35, pt1[1]), color, -1)
+        #     cv2.putText(img, class_name[:3], (pt1[0]+3, pt1[1] - 5), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0,0,0), 1)
 
 def visualizeVolume(volume,gt,filename,path,time_stamp_start,time_stamp_end):
     img = 127 * np.ones((volume.shape[1], volume.shape[2], 3), dtype=np.uint8)
@@ -222,10 +180,4 @@ if __name__ == '__main__':
     x,y,t,p = events['x'], events['y'], events['t'], events['p']
     events = np.stack([x.astype(int), y.astype(int), t, p], axis=-1)
     volume = generate_event_volume(events,(240,304),5)
-    volume = torch.from_numpy(volume).cuda()
-    median_filter = MedianPool2d(3,1,same=True).cuda()
-    start = time.time()
-    volume = median_filter(volume[None,:,:,:])
-    torch.cuda.synchronize()
-    print("elapse",time.time()-start)
-    visualizeVolume(volume[0].cpu().numpy(),dat_bbox,item,result_path,time_stamp_start,time_stamp_end)
+    visualizeVolume(volume,dat_bbox,item,result_path,time_stamp_start,time_stamp_end)
