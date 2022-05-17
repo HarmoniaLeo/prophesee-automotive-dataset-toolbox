@@ -118,9 +118,11 @@ def draw_bboxes(img, boxes, dt = 0, labelmap=LABELMAP):
         class_name = labelmap[int(class_id)]
         color = colors[(dt+1) * 60]
         center = ((pt1[0] + pt2[0]) // 2, (pt1[1] + pt2[1]) // 2)
-        cv2.rectangle(img, pt1, pt2, color, 1)
-        cv2.putText(img, class_name, (center[0], pt2[1] - 1), cv2.FONT_HERSHEY_SIMPLEX, 0.5, color)
-        cv2.putText(img, str(score), (center[0], pt1[1] - 1), cv2.FONT_HERSHEY_SIMPLEX, 0.5, color)
+        cv2.rectangle(img, pt1, pt2, color, 2)
+        cv2.rectangle(img, (pt1[0] - 10, pt1[1]), (pt1[0], pt1[1] + 30), color, -1)
+        cv2.putText(img, class_name, (pt1[0] - 7, pt1[1]+3), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0,0,0), 1)
+        if dt:
+            cv2.putText(img, str().format("{0:.2f}",score), (center[0], pt1[1] - 1), cv2.FONT_HERSHEY_SIMPLEX, 0.8, color, 1)
 
 def visualizeVolume(volume,gt,filename,path,time_stamp_start,time_stamp_end):
     img = 127 * np.ones((volume.shape[1], volume.shape[2], 3), dtype=np.uint8)
@@ -153,8 +155,8 @@ def visualizeVolume(volume,gt,filename,path,time_stamp_start,time_stamp_end):
     #c_map = np.where(c_n>0,-127,0)
     #c_map = np.where(c_p>0,127,0)
     img_s = img + c_map.astype(np.uint8)[:,:,None]
-    #draw_bboxes(img_s,gt,0,LABELMAP)
-    path_t = os.path.join(path,filename+"_{0}_window{1}_neg.png".format(int(time_stamp_end),time_stamp_end-time_stamp_start))
+    draw_bboxes(img_s,gt,0,LABELMAP)
+    path_t = os.path.join(path,filename+"_{0}_window{1}.png".format(int(time_stamp_end),time_stamp_end-time_stamp_start))
     cv2.imwrite(path_t,img_s)
     points_in_view = np.sum(np.sum(np.sum(volume>0,axis=0),axis=0),axis=0)
     density = points_in_view/(volume.shape[0]*volume.shape[1]*volume.shape[2])
