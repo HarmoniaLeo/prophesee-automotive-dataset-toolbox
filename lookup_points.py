@@ -159,13 +159,11 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
 
-    result_path = 'result_lookup'
+    result_path = 'result_lookup_points'
     if not os.path.exists(result_path):
         os.mkdir(result_path)
     data_folder = 'test'
     item = args.item
-    time_stamp_start = args.end - args.window
-    time_stamp_end = args.end
     data_path = "/data/lbd/ATIS_Automotive_Detection_Dataset/detection_dataset_duration_60s_ratio_1.0"
     final_path = os.path.join(data_path,data_folder)
     event_file = os.path.join(final_path, item+"_td.dat")
@@ -176,8 +174,12 @@ if __name__ == '__main__':
     f_bbox.close()
     #print(target)
     f_event = PSEELoader(event_file)
-    f_event.seek_time(time_stamp_start)
-    events = f_event.load_delta_t(time_stamp_end - time_stamp_start)
+    n_end = f_event.seek_time(args.end)
+    n_start = n_end - args.window
+    f_event.seek_event(n_start)
+    events = f_event.load_n_events(args.window)
+    time_stamp_start = events['t'].min()
+    time_stamp_end = events['t'].max()
     x,y,t,p = events['x'], events['y'], events['t'], events['p']
     events = np.stack([x.astype(int), y.astype(int), t, p], axis=-1)
     volume = generate_event_volume(events,(240,304),5)
