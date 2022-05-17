@@ -89,11 +89,11 @@ if __name__ == '__main__':
 
     #min_event_count = 200000
     if dataset == "gen4":
-        min_event_count = 800000
+        # min_event_count = 800000
         shape = [720,1280]
         target_shape = [512, 640]
     else:
-        min_event_count = 200000
+        # min_event_count = 200000
         shape = [240,304]
         target_shape = [256, 320]
     events_window_abin = 10000
@@ -154,6 +154,9 @@ if __name__ == '__main__':
             count_upperbound = -1
             already = False
             sampling = False
+
+            min_event_count = f_event.event_count()
+
             for bbox_count,unique_time in enumerate(unique_ts):
                 volume_save_path_l = os.path.join(target_root, file_name+"_"+str(unique_time)+"_locations.npy")
                 volume_save_path_f = os.path.join(target_root, file_name+"_"+str(unique_time)+"_features.npy")
