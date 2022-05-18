@@ -9,19 +9,156 @@ import matplotlib.pyplot as plt
 import pandas as pd
 sns.set_style("darkgrid")
 
+def make_color_wheel():
+    """
+    Generate color wheel according Middlebury color code
+    :return: Color wheel
+    """
+    RY = 15
+    YG = 6
+    GC = 4
+    CB = 11
+    BM = 13
+    MR = 6
 
-def compute_TVL1(prev, curr, bound=15):
+    ncols = RY + YG + GC + CB + BM + MR
+
+    colorwheel = np.zeros([ncols, 3])
+
+    col = 0
+
+    # RY
+    colorwheel[0:RY, 0] = 255
+    colorwheel[0:RY, 1] = np.transpose(np.floor(255*np.arange(0, RY) / RY))
+    col += RY
+
+    # YG
+    colorwheel[col:col+YG, 0] = 255 - np.transpose(np.floor(255*np.arange(0, YG) / YG))
+    colorwheel[col:col+YG, 1] = 255
+    col += YG
+
+    # GC
+    colorwheel[col:col+GC, 1] = 255
+    colorwheel[col:col+GC, 2] = np.transpose(np.floor(255*np.arange(0, GC) / GC))
+    col += GC
+
+    # CB
+    colorwheel[col:col+CB, 1] = 255 - np.transpose(np.floor(255*np.arange(0, CB) / CB))
+    colorwheel[col:col+CB, 2] = 255
+    col += CB
+
+    # BM
+    colorwheel[col:col+BM, 2] = 255
+    colorwheel[col:col+BM, 0] = np.transpose(np.floor(255*np.arange(0, BM) / BM))
+    col += + BM
+
+    # MR
+    colorwheel[col:col+MR, 2] = 255 - np.transpose(np.floor(255 * np.arange(0, MR) / MR))
+    colorwheel[col:col+MR, 0] = 255
+
+    return colorwheel
+
+def compute_color(u, v):
+    """
+    compute optical flow color map
+    :param u: optical flow horizontal map
+    :param v: optical flow vertical map
+    :return: optical flow in color code
+    """
+    [h, w] = u.shape
+    img = np.zeros([h, w, 3])
+    nanIdx = np.isnan(u) | np.isnan(v)
+    u[nanIdx] = 0
+    v[nanIdx] = 0
+
+    colorwheel = make_color_wheel()
+    ncols = np.size(colorwheel, 0)
+
+    rad = np.sqrt(u**2+v**2)
+
+    a = np.arctan2(-v, -u) / np.pi
+
+    fk = (a+1) / 2 * (ncols - 1) + 1
+
+    k0 = np.floor(fk).astype(int)
+
+    k1 = k0 + 1
+    k1[k1 == ncols+1] = 1
+    f = fk - k0
+
+    for i in range(0, np.size(colorwheel,1)):
+        tmp = colorwheel[:, i]
+        col0 = tmp[k0-1] / 255
+        col1 = tmp[k1-1] / 255
+        col = (1-f) * col0 + f * col1
+
+        idx = rad <= 1
+        col[idx] = 1-rad[idx]*(1-col[idx])
+        notidx = np.logical_not(idx)
+
+        col[notidx] *= 0.75
+        img[:, :, i] = np.uint8(np.floor(255 * col*(1-nanIdx)))
+
+    return img
+
+def flow_to_image(flow):
+    """
+    Convert flow into middlebury color code image
+    :param flow: optical flow map
+    :return: optical flow image in middlebury color
+    """
+    u = flow[:, :, 0]
+    v = flow[:, :, 1]
+
+    maxu = -999.
+    maxv = -999.
+    minu = 999.
+    minv = 999.
+    UNKNOWN_FLOW_THRESH = 1e7
+    SMALLFLOW = 0.0
+    LARGEFLOW = 1e8
+
+    idxUnknow = (abs(u) > UNKNOWN_FLOW_THRESH) | (abs(v) > UNKNOWN_FLOW_THRESH)
+    u[idxUnknow] = 0
+    v[idxUnknow] = 0
+
+    maxu = max(maxu, np.max(u))
+    minu = min(minu, np.min(u))
+
+    maxv = max(maxv, np.max(v))
+    minv = min(minv, np.min(v))
+
+    # u = np.where(u>np.quantile(u,0.98),np.quantile(u,0.98),u)
+    # u = np.where(u<np.quantile(u,0.02),np.quantile(u,0.02),u)
+    # v = np.where(v>np.quantile(v,0.98),np.quantile(v,0.98),v)
+    # v = np.where(v<np.quantile(u,0.02),np.quantile(v,0.02),v)
+
+    rad = np.sqrt(u ** 2 + v ** 2)
+    maxrad = max(-1, np.max(rad))
+
+    u = u/(maxrad + np.finfo(float).eps)
+    v = v/(maxrad + np.finfo(float).eps)
+
+    img = compute_color(u, v)
+
+    idx = np.repeat(idxUnknow[:, :, np.newaxis], 3, axis=2)
+    img[idx] = 0
+
+    return np.uint8(img)
+
+def compute_TVL1(prev, curr, bound=1):
     """Compute the TV-L1 optical flow."""
     TVL1=cv2.optflow.DualTVL1OpticalFlow_create()
     #TVL1 = cv2.DualTVL1OpticalFlow_create()
     #TVL1=cv2.createOptFlow_DualTVL1()
     flow = TVL1.calc(prev, curr, None)
-    assert flow.dtype == np.float32
- 
-    flow = (flow + bound) * (255.0 / (2 * bound))
-    flow = np.round(flow).astype(int)
-    flow[flow >= 255] = 255
-    flow[flow <= 0] = 0
+    # assert flow.dtype == np.float32
+    
+    # flow = np.sqrt(flow[:,:,:1] ** 2 + flow[:,:,1:2] ** 2)
+    # flow = (flow + bound) * (255.0 / (2 * bound))
+    # flow = np.round(flow).astype(int)
+    # flow[flow >= 255] = 255
+    # flow[flow <= 0] = 0
  
     return flow
 
@@ -62,31 +199,47 @@ def draw_bboxes(img, boxes, dt = 0, labelmap=LABELMAP):
             cv2.putText(img, class_name[:3], (pt1[0]+3, pt1[1] - 5), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0,0,0), 1)
 
 def save_flow(flow, gt,filename,flow_path,time_stamp_end):
-    if not os.path.exists(os.path.join(flow_path, 'u')):
-        os.mkdir(os.path.join(flow_path, 'u'))
-    if not os.path.exists(os.path.join(flow_path, 'v')):
-        os.mkdir(os.path.join(flow_path, 'v'))
-    flow_u = flow[:, :, :1]
-    draw_bboxes(flow_u,gt)
-    flow_v = flow[:, :, 1:2]
-    draw_bboxes(flow_v,gt)
-    cv2.imwrite(os.path.join(flow_path,filename+"_end{0}_u.png".format(time_stamp_end)),flow_u)
-    cv2.imwrite(os.path.join(flow_path,filename+"_end{0}_v.png".format(time_stamp_end)),flow_v)
+    if not os.path.exists(flow_path):
+        os.mkdir(flow_path)
+    # flow_u = flow[:, :, :1]
+    # draw_bboxes(flow_u,gt)
+    # flow_v = flow[:, :, 1:2]
+    # draw_bboxes(flow_v,gt)
+    #cv2.imwrite(os.path.join(flow_path,filename+"_end{0}_u.png".format(time_stamp_end)),flow_u)
+    flow = flow_to_image(flow)
+    draw_bboxes(flow,gt)
+    cv2.imwrite(os.path.join(flow_path,filename+"_end{0}.png".format(time_stamp_end)),flow)
+    #cv2.imwrite(os.path.join(flow_path,filename+"_end{0}_v.png".format(time_stamp_end)),flow_v)
+
+def visualize_timesuface(volume1, volume2, gt,filename,flow_path,time_stamp_end):
+    if not os.path.exists(flow_path):
+        os.mkdir(flow_path)
+
+    draw_bboxes(volume1[:,:,None],gt)
+    draw_bboxes(volume2[:,:,None],gt)
+    cv2.imwrite(os.path.join(flow_path,filename+"_end{0}_u.png".format(time_stamp_end)),volume1)
+    cv2.imwrite(os.path.join(flow_path,filename+"_end{0}_v.png".format(time_stamp_end)),volume2)
  
 def extract_flow(volume1, volume2, gt,filename,path,time_stamp_end):
     flow = cal_for_frames(volume1, volume2)
     save_flow(flow, gt,filename,path,time_stamp_end)
+    #visualize_timesuface(volume1, volume2, gt,filename,path,time_stamp_end)
 
 def generate_timesurface(events,shape,end_stamp):
     volume1, volume2 = np.zeros(shape), np.zeros(shape)
     for event in events:
-        if event[2] < end_stamp - 10000:
+        if event[2] < end_stamp - 20000:
             volume1[event[1]][event[0]] = event[2]
         volume2[event[1]][event[0]] = event[2]
     volume1 = volume1 - events[:,2].min()
-    volume2 = volume2 - events[:,2].min() - 10000
-    volume1 = volume1 - (events[:,2].max() - events[:,2].min())
-    volume2 = volume2 - (events[:,2].max() - events[:,2].min())
+    volume2 = volume2 - events[:,2].min() - 20000
+    volume1 = volume1 / (events[:,2].max() - events[:,2].min()) * 255
+    volume2 = volume2 / (events[:,2].max() - events[:,2].min()) * 255
+    # volume1 = volume1 - events[:,2].max() + 50000
+    # volume2 = volume2 - events[:,2].max() + 40000
+    # volume1 = volume1 / 50000 * 255
+    # volume2 = volume2 / 50000 * 255
+    volume1 = np.where(volume1<0, 0, volume1)
     volume2 = np.where(volume2<0, 0, volume2)
     return volume1.astype(np.uint8), volume2.astype(np.uint8)
 

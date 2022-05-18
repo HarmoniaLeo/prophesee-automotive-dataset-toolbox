@@ -187,6 +187,7 @@ if __name__ == '__main__':
                 else:
                     start_time = end_time - round((end_time - start_time - events_window)/events_window_abin) * events_window_abin - events_window
 
+                assert (start_time > time_upperbound) or (start_time == 0)
                 if start_time > time_upperbound:
                     start_count = f_event.seek_time(start_time)
                     if (start_count is None) or (start_time < 0):
