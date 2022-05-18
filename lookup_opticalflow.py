@@ -66,9 +66,9 @@ def save_flow(flow, gt,filename,flow_path,time_stamp_end):
         os.mkdir(os.path.join(flow_path, 'u'))
     if not os.path.exists(os.path.join(flow_path, 'v')):
         os.mkdir(os.path.join(flow_path, 'v'))
-    flow_u = flow[None, :, :, 0]
+    flow_u = flow[:, :, :1]
     draw_bboxes(flow_u,gt)
-    flow_v = flow[None, :, :, 1]
+    flow_v = flow[:, :, 1:2]
     draw_bboxes(flow_v,gt)
     cv2.imwrite(os.path.join(flow_path,filename+"_end{0}_u.png".format(time_stamp_end)),flow_u)
     cv2.imwrite(os.path.join(flow_path,filename+"_end{0}_v.png".format(time_stamp_end)),flow_v)
