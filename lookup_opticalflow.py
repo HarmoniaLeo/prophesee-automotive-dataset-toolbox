@@ -12,9 +12,9 @@ sns.set_style("darkgrid")
 
 def compute_TVL1(prev, curr, bound=15):
     """Compute the TV-L1 optical flow."""
-    #TVL1=cv2.optflow.DualTVL1OpticalFlow_create()
-    # TVL1 = cv2.DualTVL1OpticalFlow_create()
-    TVL1=cv2.createOptFlow_DualTVL1()
+    TVL1=cv2.optflow.DualTVL1OpticalFlow_create()
+    #TVL1 = cv2.DualTVL1OpticalFlow_create()
+    #TVL1=cv2.createOptFlow_DualTVL1()
     flow = TVL1.calc(prev, curr, None)
     assert flow.dtype == np.float32
  
@@ -83,7 +83,12 @@ def generate_timesurface(events,shape,end_stamp):
         if event[2] < end_stamp - 10000:
             volume1[event[1]][event[0]] = event[2]
         volume2[event[1]][event[0]] = event[2]
-    return volume1, volume2
+    volume1 = volume1 - events[:,2].min()
+    volume2 = volume2 - events[:,2].min() - 10000
+    volume1 = volume1 - (events[:,2].max() - events[:,2].min())
+    volume2 = volume2 - (events[:,2].max() - events[:,2].min())
+    volume2 = np.where(volume2<0, 0, volume2)
+    return volume1.astype(np.uint8), volume2.astype(np.uint8)
 
 
 if __name__ == '__main__':
