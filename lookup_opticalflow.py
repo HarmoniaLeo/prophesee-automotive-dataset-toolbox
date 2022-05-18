@@ -12,9 +12,9 @@ sns.set_style("darkgrid")
 
 def compute_TVL1(prev, curr, bound=15):
     """Compute the TV-L1 optical flow."""
-    TVL1=cv2.optflow.DualTVL1OpticalFlow_create()
+    #TVL1=cv2.optflow.DualTVL1OpticalFlow_create()
     # TVL1 = cv2.DualTVL1OpticalFlow_create()
-    # TVL1=cv2.createOptFlow_DualTVL1()
+    TVL1=cv2.createOptFlow_DualTVL1()
     flow = TVL1.calc(prev, curr, None)
     assert flow.dtype == np.float32
  
