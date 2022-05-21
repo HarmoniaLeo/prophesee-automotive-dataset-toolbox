@@ -115,7 +115,7 @@ if __name__ == '__main__':
     if not os.path.exists(target_dir):
         os.makedirs(target_dir)
 
-    for mode in ["train","test","val"]:
+    for mode in ["test"]:
         file_dir = os.path.join(raw_dir, mode)
         if not os.path.exists(file_dir):
             os.makedirs(file_dir)
