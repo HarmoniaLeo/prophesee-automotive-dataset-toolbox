@@ -128,10 +128,10 @@ def flow_to_image(flow):
     maxv = max(maxv, np.max(v))
     minv = min(minv, np.min(v))
 
-    # u = np.where(u>np.quantile(u,0.98),np.quantile(u,0.98),u)
-    # u = np.where(u<np.quantile(u,0.02),np.quantile(u,0.02),u)
-    # v = np.where(v>np.quantile(v,0.98),np.quantile(v,0.98),v)
-    # v = np.where(v<np.quantile(u,0.02),np.quantile(v,0.02),v)
+    u = np.where(u>np.quantile(u,0.98),np.quantile(u,0.98),u)
+    u = np.where(u<np.quantile(u,0.02),np.quantile(u,0.02),u)
+    v = np.where(v>np.quantile(v,0.98),np.quantile(v,0.98),v)
+    v = np.where(v<np.quantile(u,0.02),np.quantile(v,0.02),v)
 
     rad = np.sqrt(u ** 2 + v ** 2)
     maxrad = max(-1, np.max(rad))
@@ -227,14 +227,17 @@ def extract_flow(volume1, volume2, gt,filename,path,time_stamp_end):
 
 def generate_timesurface(events,shape,end_stamp):
     volume1, volume2 = np.zeros(shape), np.zeros(shape)
+    end_stamp = events[:,2].max()
+    start_stamp = events[:,2].min()
+    print(end_stamp)
     for event in events:
-        if event[2] < end_stamp - 20000:
+        if event[2] < end_stamp - 50000:
             volume1[event[1]][event[0]] = event[2]
         volume2[event[1]][event[0]] = event[2]
-    volume1 = volume1 - events[:,2].min()
-    volume2 = volume2 - events[:,2].min() - 20000
-    volume1 = volume1 / (events[:,2].max() - events[:,2].min()) * 255
-    volume2 = volume2 / (events[:,2].max() - events[:,2].min()) * 255
+    volume1 = volume1 - start_stamp
+    volume2 = volume2 - start_stamp - 50000
+    volume1 = volume1 / (end_stamp - 50000 - start_stamp) * 255
+    volume2 = volume2 / (end_stamp - 50000 - start_stamp) * 255
     # volume1 = volume1 - events[:,2].max() + 50000
     # volume2 = volume2 - events[:,2].max() + 40000
     # volume1 = volume1 / 50000 * 255
@@ -269,10 +272,12 @@ if __name__ == '__main__':
     f_bbox.close()
     #print(target)
     f_event = PSEELoader(event_file)
-    end_count = f_event.seek_time(args.end)
+    end_count = f_event.seek_time(time_stamp_end)
     f_event.seek_event(end_count - 800000)
-    events = f_event.load_n_events(800000)
+    time_stamp_start = f_event.current_time
+    events = f_event.load_delta_t(time_stamp_end-time_stamp_start)
     x,y,t,p = events['x'], events['y'], events['t'], events['p']
     events = np.stack([x.astype(int), y.astype(int), t, p], axis=-1)
-    volume1, volume2 = generate_timesurface(events,(240,304),args.end)
+    volume1, volume2 = generate_timesurface(events,(240,304),time_stamp_end)
     extract_flow(volume1, volume2, dat_bbox[(dat_bbox['t']==time_stamp_end)],item,result_path,time_stamp_end)
+    visualize_timesuface(volume1,volume2,dat_bbox[(dat_bbox['t']==time_stamp_end)],item,result_path,time_stamp_end)

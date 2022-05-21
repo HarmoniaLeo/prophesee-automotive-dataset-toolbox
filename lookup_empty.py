@@ -8,6 +8,7 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 import pandas as pd
 import torch
+import tqdm
 sns.set_style("darkgrid")
 
 def point1_transform(volume):
@@ -41,7 +42,7 @@ def quantile_transform(volume):
     volume[...,1] = np.where(volume[...,1] > 0, volume[...,1] / (q100 + 1e-8) * 2, volume[...,1])
     return volume
 
-def generate_event_volume(events,shape,ori_shape):
+def generate_event_volume(events,shape,ori_shape,item):
 
     volumes = []
     transforms = [point1_transform,point01_transform,quantile_transform,minmax_transform]
@@ -59,14 +60,8 @@ def generate_event_volume(events,shape,ori_shape):
     volume = feature_map.reshape(C, H, W, 2)
     volume[...,1] = np.where(volume[...,1] ==0, -1e8, volume[...,1] + 1)
 
-    for transform in transforms:    
-        volume_t = transform(volume)
-        volume_t = torch.from_numpy(volume_t).permute(0,3,1,2).contiguous().view(volume_t.shape[0] * volume_t.shape[3], volume_t.shape[1], volume_t.shape[2])
-        volume_t = torch.nn.functional.interpolate(volume_t[None,:],torch.Size(ori_shape))[0]
-        volume_t = volume_t.cpu().numpy()
-        volumes.append(volume_t)
-
-    return volumes
+    if np.sum(volume[...,1] > -1e8)==0:
+        print(item)
 
 LABELMAP = ["car", "pedestrian"]
 
@@ -118,43 +113,27 @@ def visualizeVolume(volume,gt_i,filename,path,time_stamp_end,typ):
     cv2.imwrite(os.path.join(path_t,typ+'.png'),img_s)
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(
-        description='visualize one or several event files along with their boxes')
-    parser.add_argument('-item', type=str)
-    parser.add_argument('-end', type=int)
-
-    args = parser.parse_args()
-
-    result_path = 'result_taf_dataset_point'
-    if not os.path.exists(result_path):
-        os.mkdir(result_path)
-    data_folder = 'test'
-    item = args.item
-    time_stamp_end = args.end
-    bbox_path = "/data/lbd/ATIS_Automotive_Detection_Dataset/detection_dataset_duration_60s_ratio_1.0"
     data_path = "/data/lbd/ATIS_taf_all"
-    final_path = os.path.join(bbox_path,data_folder)
-    bbox_file = os.path.join(final_path, item+"_bbox.npy")
-    f_bbox = open(bbox_file, "rb")
-    start, v_type, ev_size, size, _ = npy_events_tools.parse_header(f_bbox)
-    dat_bbox = np.fromfile(f_bbox, dtype=v_type, count=-1)
-    f_bbox.close()
+    for data_folder in ["train","val","test"]:
+        file_dir = os.path.join(data_path, data_folder)
+        files = os.listdir(file_dir)
+        # Remove duplicates (.npy and .dat)
+        files = [time_seq_name[:-14] for time_seq_name in files
+                      if (time_seq_name[-3:] == 'npy') and ("locations" in time_seq_name)]
+        pbar = tqdm.tqdm(total=len(files), unit='File', unit_scale=True)
+        for item in files:
+            event_file = os.path.join(file_dir, item)
+            #print(target)
+            locations = np.fromfile(event_file + "_locations.npy", dtype=np.int32)
+            x = np.bitwise_and(locations, 1023).astype(np.float32)
+            y = np.right_shift(np.bitwise_and(locations, 523264), 10).astype(np.float32)
+            c = np.right_shift(np.bitwise_and(locations, 7864320), 19).astype(np.float32)
+            p = np.right_shift(np.bitwise_and(locations, 8388608), 23).astype(np.float32)
+            features = np.fromfile(event_file + "_features.npy", dtype=np.float32)
 
-    final_path = os.path.join(data_path,data_folder)
-    event_file = os.path.join(final_path, item+"_"+str(time_stamp_end))
-    #print(target)
-    locations = np.fromfile(event_file + "_locations.npy", dtype=np.int32)
-    x = np.bitwise_and(locations, 1023).astype(np.float32)
-    y = np.right_shift(np.bitwise_and(locations, 523264), 10).astype(np.float32)
-    c = np.right_shift(np.bitwise_and(locations, 7864320), 19).astype(np.float32)
-    p = np.right_shift(np.bitwise_and(locations, 8388608), 23).astype(np.float32)
-    features = np.fromfile(event_file + "_features.npy", dtype=np.float32)
-
-    z = np.zeros_like(c)
-    t = np.zeros_like(c) + time_stamp_end
-    events = np.stack([x, y, t, c, z, p, features], axis=1)
-
-    volumes = generate_event_volume(events,(256,320),(240,304))
-    gt_i = dat_bbox[dat_bbox['t']==time_stamp_end]
-    for volume,typ in zip(volumes,["point1_transform","point001_transform","quantile_transform","minmax_transform"]):
-        visualizeVolume(volume,gt_i,item,result_path,time_stamp_end,typ)
+            z = np.zeros_like(c)
+            t = np.zeros_like(c)
+            events = np.stack([x, y, t, c, z, p, features], axis=1)
+            volumes = generate_event_volume(events,(256,320),(240,304),item)
+            pbar.update(1)
+        pbar.close()
