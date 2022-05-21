@@ -31,8 +31,6 @@ for mode in ["test"]:
 
     pbar = tqdm.tqdm(total=len(files), unit='File', unit_scale=True)
 
-    time_upperbound = -1e16
-
     for i_file, file_name in enumerate(files):
         bbox_file = os.path.join(root, file_name + '_bbox.npy')
         new_bbox_file = os.path.join(target_root, file_name + '_bbox.npy')
@@ -52,6 +50,7 @@ for mode in ["test"]:
         #raise Exception("break")
 
         sampled_bboxes = []
+        time_upperbound = -1e16
         for bbox_count,unique_time in enumerate(unique_ts):
             if unique_time <= 500000:
                 continue
