@@ -115,7 +115,7 @@ if __name__ == '__main__':
     if not os.path.exists(target_dir):
         os.makedirs(target_dir)
 
-    for mode in ["test"]:
+    for mode in ["train","val","test"]:
         file_dir = os.path.join(raw_dir, mode)
         if not os.path.exists(file_dir):
             os.makedirs(file_dir)
@@ -130,7 +130,7 @@ if __name__ == '__main__':
             continue
         # Remove duplicates (.npy and .dat)
         # files = files[int(2*len(files)/3):]
-        files = files[:int(len(files)/3)]
+        #files = files[int(len(files)/3):]
         files = [time_seq_name[:-7] for time_seq_name in files
                         if time_seq_name[-3:] == 'dat']
 
