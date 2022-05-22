@@ -87,7 +87,7 @@ if __name__ == '__main__':
     target_dir = args.target_dir
     dataset = args.dataset
 
-    #min_event_count = 200000
+    min_event_count = 20000000
     if dataset == "gen4":
         # min_event_count = 800000
         shape = [720,1280]
@@ -188,7 +188,7 @@ if __name__ == '__main__':
                 else:
                     start_time = end_time - round((end_time - start_time - events_window)/events_window_abin) * events_window_abin - events_window
 
-                assert (start_time < time_upperbound) or (time_upperbound < 0)
+                #assert (start_time < time_upperbound) or (time_upperbound < 0)
                 if start_time > time_upperbound:
                     start_count = f_event.seek_time(start_time)
                     if (start_count is None) or (start_time < 0):
@@ -207,6 +207,7 @@ if __name__ == '__main__':
                 #if not (os.path.exists(volume_save_path)):
                 dat_event = f_event
                 dat_event.seek_event(start_count)
+
                 events = dat_event.load_n_events(int(end_count - start_count))
                 del dat_event
                 events = torch.from_numpy(rfn.structured_to_unstructured(events)[:, [1, 2, 0, 3]].astype(float)).cuda()
@@ -258,6 +259,7 @@ if __name__ == '__main__':
                 #h5.create_dataset(str(unique_time)+"/features", data=features)
                 time_upperbound = end_time
                 count_upperbound = end_count
+                torch.cuda.empty_cache()
             #h5.close()
             pbar.update(1)
         pbar.close()
