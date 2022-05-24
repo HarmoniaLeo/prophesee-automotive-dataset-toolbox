@@ -117,38 +117,38 @@ def visualizeVolume(volume,gt,filename,path,time_stamp_start,time_stamp_end):
     draw_bboxes(img_s,gt,0,LABELMAP)
     path_t = os.path.join(path,filename+"_{0}_window{1}.png".format(int(time_stamp_end),time_stamp_end-time_stamp_start))
     cv2.imwrite(path_t,img_s)
-    points_in_view = np.sum(np.sum(np.sum(volume>0,axis=0),axis=0),axis=0)
-    density = points_in_view/(volume.shape[0]*volume.shape[1]*volume.shape[2])
-    density_p = 2*np.sum(np.sum(np.sum(volume[1::2]>0,axis=0),axis=0),axis=0)/(volume.shape[0]*volume.shape[1]*volume.shape[2])
-    density_n = 2*np.sum(np.sum(np.sum(volume[0::2]>0,axis=0),axis=0),axis=0)/(volume.shape[0]*volume.shape[1]*volume.shape[2])
-    bbox_mask = np.zeros([volume.shape[0],volume.shape[1],volume.shape[2]],dtype=bool)
-    gt_trans = gt
-    max_density = 0
-    min_density = 1.0
-    for j in range(len(gt_trans)):
-        x, y, w, h = gt_trans['x'][j], gt_trans['y'][j], gt_trans['w'][j], gt_trans['h'][j]
-        x = np.where(x<0, 0, x)
-        y = np.where(y<0, 0, y)
-        w = np.where(x + w > volume.shape[2], volume.shape[2] - x, w)
-        h = np.where(y + h > volume.shape[1], volume.shape[1] - y, h)
-        area = w * h * volume.shape[0]
-        if (area <= 0) or (w<0) or (h<0):
-            continue
-        points = np.sum(np.sum(np.sum(volume[:,int(y):int(y+h),int(x):int(x+w)]>0,axis=0),axis=0),axis=0)
-        bbox_mask[:,int(y):int(y+h),int(x):int(x+w)] = True
-        if points / area > max_density:
-            max_density = points / area
-        if points / area < min_density:
-            min_density = points / area
-    density_eff = np.sum(np.sum(np.sum(volume[bbox_mask]>0,axis=0),axis=0),axis=0)/(np.sum(np.sum(np.sum(bbox_mask,axis=0),axis=0),axis=0))
-    density_uneff = np.sum(np.sum(np.sum(volume[~bbox_mask]>0,axis=0),axis=0),axis=0)/(np.sum(np.sum(np.sum(~bbox_mask,axis=0),axis=0),axis=0))
-    print("density",density)
-    print("density_p",density_n)
-    print("density_n",density_p)
-    print("density_eff",density_eff)
-    print("density_uneff",density_uneff)
-    print("density_eff_max",max_density)
-    print("density_eff_min",min_density)
+    # points_in_view = np.sum(np.sum(np.sum(volume>0,axis=0),axis=0),axis=0)
+    # density = points_in_view/(volume.shape[0]*volume.shape[1]*volume.shape[2])
+    # density_p = 2*np.sum(np.sum(np.sum(volume[1::2]>0,axis=0),axis=0),axis=0)/(volume.shape[0]*volume.shape[1]*volume.shape[2])
+    # density_n = 2*np.sum(np.sum(np.sum(volume[0::2]>0,axis=0),axis=0),axis=0)/(volume.shape[0]*volume.shape[1]*volume.shape[2])
+    # bbox_mask = np.zeros([volume.shape[0],volume.shape[1],volume.shape[2]],dtype=bool)
+    # gt_trans = gt
+    # max_density = 0
+    # min_density = 1.0
+    # for j in range(len(gt_trans)):
+    #     x, y, w, h = gt_trans['x'][j], gt_trans['y'][j], gt_trans['w'][j], gt_trans['h'][j]
+    #     x = np.where(x<0, 0, x)
+    #     y = np.where(y<0, 0, y)
+    #     w = np.where(x + w > volume.shape[2], volume.shape[2] - x, w)
+    #     h = np.where(y + h > volume.shape[1], volume.shape[1] - y, h)
+    #     area = w * h * volume.shape[0]
+    #     if (area <= 0) or (w<0) or (h<0):
+    #         continue
+    #     points = np.sum(np.sum(np.sum(volume[:,int(y):int(y+h),int(x):int(x+w)]>0,axis=0),axis=0),axis=0)
+    #     bbox_mask[:,int(y):int(y+h),int(x):int(x+w)] = True
+    #     if points / area > max_density:
+    #         max_density = points / area
+    #     if points / area < min_density:
+    #         min_density = points / area
+    # density_eff = np.sum(np.sum(np.sum(volume[bbox_mask]>0,axis=0),axis=0),axis=0)/(np.sum(np.sum(np.sum(bbox_mask,axis=0),axis=0),axis=0))
+    # density_uneff = np.sum(np.sum(np.sum(volume[~bbox_mask]>0,axis=0),axis=0),axis=0)/(np.sum(np.sum(np.sum(~bbox_mask,axis=0),axis=0),axis=0))
+    # print("density",density)
+    # print("density_p",density_n)
+    # print("density_n",density_p)
+    # print("density_eff",density_eff)
+    # print("density_uneff",density_uneff)
+    # print("density_eff_max",max_density)
+    # print("density_eff_min",min_density)
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(

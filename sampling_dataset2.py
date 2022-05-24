@@ -15,7 +15,7 @@ import math
 raw_dir = "/data/lbd/Large_Automotive_Detection_Dataset"
 target_dir = "/data/lbd/Large_Automotive_Detection_Dataset"
 
-for mode in ["train","val"]:
+for mode in ["train"]:
     
     file_dir = os.path.join(raw_dir, mode)
     root = file_dir

@@ -173,7 +173,7 @@ def cal_for_frames(volume1, volume2):
  
 LABELMAP = ["car", "pedestrian"]
 
-def draw_bboxes(img, boxes, dt = 0, labelmap=LABELMAP):
+def draw_bboxes(img, flow, boxes, dt = 0, labelmap=LABELMAP):
     """
     draw bboxes in the image img
     """
@@ -184,6 +184,7 @@ def draw_bboxes(img, boxes, dt = 0, labelmap=LABELMAP):
         pt1 = (int(boxes[i][1]), int(boxes[i][2]))
         size = (int(boxes[i][3]), int(boxes[i][4]))
         pt2 = (pt1[0] + size[0], pt1[1] + size[1])
+        print(np.sum(np.sqrt(flow[pt1[1]:pt2[1],pt1[0]:pt2[0]]**2))/size[0]/size[1])
         score = boxes[i][-2]
         class_id = boxes[i][-3]
         class_name = labelmap[int(class_id)]
@@ -206,17 +207,15 @@ def save_flow(flow, gt,filename,flow_path,time_stamp_end):
     # flow_v = flow[:, :, 1:2]
     # draw_bboxes(flow_v,gt)
     #cv2.imwrite(os.path.join(flow_path,filename+"_end{0}_u.png".format(time_stamp_end)),flow_u)
-    flow = flow_to_image(flow)
-    draw_bboxes(flow,gt)
-    cv2.imwrite(os.path.join(flow_path,filename+"_end{0}.png".format(time_stamp_end)),flow)
+    flow_img = 255 - flow_to_image(flow)
+    draw_bboxes(flow_img, flow,gt)
+    cv2.imwrite(os.path.join(flow_path,filename+"_end{0}.png".format(time_stamp_end)),flow_img)
     #cv2.imwrite(os.path.join(flow_path,filename+"_end{0}_v.png".format(time_stamp_end)),flow_v)
 
 def visualize_timesuface(volume1, volume2, gt,filename,flow_path,time_stamp_end):
     if not os.path.exists(flow_path):
         os.mkdir(flow_path)
 
-    draw_bboxes(volume1[:,:,None],gt)
-    draw_bboxes(volume2[:,:,None],gt)
     cv2.imwrite(os.path.join(flow_path,filename+"_end{0}_u.png".format(time_stamp_end)),volume1)
     cv2.imwrite(os.path.join(flow_path,filename+"_end{0}_v.png".format(time_stamp_end)),volume2)
  

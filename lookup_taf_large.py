@@ -71,7 +71,7 @@ def generate_event_volume(events,shape,ori_shape):
 
     return volumes
 
-LABELMAP = ["car", "pedestrian"]
+LABELMAP = ['pedestrian', 'two wheeler', 'car', 'truck', 'bus', 'traffic sign', 'traffic light']
 
 def draw_bboxes(img, boxes, dt = 0, labelmap=LABELMAP):
     """
@@ -135,15 +135,15 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
 
-    result_path = 'result_taf_dataset'
+    result_path = 'result_taf_large'
     if not os.path.exists(result_path):
         os.mkdir(result_path)
     data_folder = 'test'
     item = args.item
     time_stamp_end = args.end
 
-    bbox_path = "/data/lbd/ATIS_Automotive_Detection_Dataset/detection_dataset_duration_60s_ratio_1.0"
-    data_path = "/data/lbd/ATIS_taf_all"
+    bbox_path = "/datassd4t/lbd/Large_Automotive_Detection_Dataset_sampling"
+    data_path = "/datassd4t/lbd/Large_taf"
     final_path = os.path.join(bbox_path,data_folder)
     bbox_file = os.path.join(final_path, item+"_bbox.npy")
     f_bbox = open(bbox_file, "rb")
@@ -165,7 +165,7 @@ if __name__ == '__main__':
     t = np.zeros_like(c) + time_stamp_end
     events = np.stack([x, y, t, c, z, p, features], axis=1)
 
-    volumes = generate_event_volume(events,(256,320),(240,304))
+    volumes = generate_event_volume(events,(512,640),(720,1280))
     gt_i = dat_bbox[dat_bbox['t']==time_stamp_end]
     #for volume,typ in zip(volumes,["point1_transform","point001_transform","quantile_transform","minmax_transform"]):
     visualizeVolume(volumes[0],gt_i,item,result_path,time_stamp_end)

@@ -87,7 +87,7 @@ if __name__ == '__main__':
     target_dir = args.target_dir
     dataset = args.dataset
 
-    min_event_count = 10000000
+    min_event_count = 50000000
     if dataset == "gen4":
         # min_event_count = 800000
         shape = [720,1280]
@@ -156,7 +156,7 @@ if __name__ == '__main__':
             already = False
             sampling = False
 
-            min_event_count = f_event.event_count()
+            #min_event_count = f_event.event_count()
 
             for bbox_count,unique_time in enumerate(unique_ts):
                 volume_save_path_l = os.path.join(target_root, file_name+"_"+str(unique_time)+"_locations.npy")
