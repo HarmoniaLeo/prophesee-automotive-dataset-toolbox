@@ -159,7 +159,7 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
 
-    result_path = 'result_lookup'
+    result_path = 'result_lookup_large'
     if not os.path.exists(result_path):
         os.mkdir(result_path)
     data_folder = 'val'
