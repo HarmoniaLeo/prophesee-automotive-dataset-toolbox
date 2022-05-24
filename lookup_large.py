@@ -166,7 +166,7 @@ if __name__ == '__main__':
     item = args.item
     time_stamp_start = args.end - args.window
     time_stamp_end = args.end
-    data_path = "/datassd4t/lbd/Large_Automotive_Detection_Dataset_sampling"
+    data_path = "/data/lbd/Large_Automotive_Detection_Dataset_sampling"
     final_path = os.path.join(data_path,data_folder)
     event_file = os.path.join(final_path, item+"_td.dat")
     bbox_file = os.path.join(final_path, item+"_bbox.npy")
