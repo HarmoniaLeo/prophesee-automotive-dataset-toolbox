@@ -162,7 +162,7 @@ if __name__ == '__main__':
     result_path = 'result_lookup'
     if not os.path.exists(result_path):
         os.mkdir(result_path)
-    data_folder = 'test'
+    data_folder = 'val'
     item = args.item
     time_stamp_start = args.end - args.window
     time_stamp_end = args.end
