@@ -138,14 +138,14 @@ if __name__ == '__main__':
     result_path = 'result_taf_large'
     if not os.path.exists(result_path):
         os.mkdir(result_path)
-    data_folder = 'test'
+    data_folder = 'train'
     item = args.item
     time_stamp_end = args.end
 
     bbox_path = "/datassd4t/lbd/Large_Automotive_Detection_Dataset_sampling"
     data_path = "/datassd4t/lbd/Large_taf"
     final_path = os.path.join(bbox_path,data_folder)
-    bbox_file = os.path.join(final_path, item+"_bbox.npy")
+    bbox_file = os.path.join(final_path, item+"_bbox.npy") 
     f_bbox = open(bbox_file, "rb")
     start, v_type, ev_size, size, _ = npy_events_tools.parse_header(f_bbox)
     dat_bbox = np.fromfile(f_bbox, dtype=v_type, count=-1)
