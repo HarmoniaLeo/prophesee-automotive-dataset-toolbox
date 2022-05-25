@@ -78,6 +78,13 @@ def denseToSparse(dense_tensor):
 
 if __name__ == '__main__':
 
+    parser = argparse.ArgumentParser(
+    description='visualize one or several event files along with their boxes')
+    parser.add_argument('-rank', type=int)
+
+    args = parser.parse_args()
+    rank = args.rank
+
     raw_dir = "/datassd4t/lbd/Large_Automotive_Detection_Dataset"
     target_dir1 = "/datassd4t/lbd/Large_Automotive_Detection_Dataset_sampling"
     target_dir2 = "/datassd4t/lbd/Large_taf"
@@ -114,7 +121,7 @@ if __name__ == '__main__':
         except Exception:
             continue
         # Remove duplicates (.npy and .dat)
-        # files = files[int(2*len(files)/3):]
+        files = files[int(len(files)/4 * rank):int(len(files)/4 * (rank+1))]
         #files = files[int(len(files)/3):]
         files = [time_seq_name[:-7] for time_seq_name in files
                         if time_seq_name[-3:] == 'dat']
