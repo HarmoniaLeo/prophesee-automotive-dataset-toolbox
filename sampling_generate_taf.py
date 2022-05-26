@@ -121,6 +121,7 @@ if __name__ == '__main__':
         except Exception:
             continue
         # Remove duplicates (.npy and .dat)
+        print(files)
         files = files[int(len(files)/4 * rank):int(len(files)/4 * (rank+1))]
         #files = files[int(len(files)/3):]
         files = [time_seq_name[:-7] for time_seq_name in files
