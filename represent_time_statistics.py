@@ -8,6 +8,7 @@ import pandas as pd
 import torch
 import time
 import math
+import argparse
 
 def taf_cuda(x, y, t, p, shape, volume_bins, past_volume):
     tick = time.time()
@@ -58,100 +59,114 @@ def generate_taf_cuda(events, shape, past_volume = None, volume_bins=5):
 
     return histogram_ecd, past_volume, generate_volume_time, generate_encode_time
 
-events_window_abin = 10000
-event_volume_bins = 5
-events_window = events_window_abin * (event_volume_bins + 1)
-shape = [720,1280]
-target_shape = [512, 640]
-rh = target_shape[0] / shape[0]
-rw = target_shape[1] / shape[1]
-#shape = [240,304]
-#raw_dir = "/data/lbd/ATIS_Automotive_Detection_Dataset/detection_dataset_duration_60s_ratio_1.0"
-raw_dir = "/datassd4t/lbd/Large_Automotive_Detection_Dataset_sampling"
-# target_dir = "/data/Large_taf"
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser(
+        description='visualize one or several event files along with their boxes')
+    parser.add_argument('-dataset', type=str)
+    args = parser.parse_args()
 
-for mode in ["test"]:
+    events_window_abin = 10000
+    event_volume_bins = 5
+    events_window = events_window_abin * (event_volume_bins + 1)
     
-    file_dir = os.path.join(raw_dir, mode)
-    root = file_dir
-    #h5 = h5py.File(raw_dir + '/ATIS_taf_'+mode+'.h5', 'w')
-    try:
-        files = os.listdir(file_dir)
-    except Exception:
-        continue
-    # Remove duplicates (.npy and .dat)
-    files = [time_seq_name[:-7] for time_seq_name in files
-                    if time_seq_name[-3:] == 'dat']
+    if args.dataset == "gen4":
+        shape = [720,1280]
+        target_shape = [512, 640]
+        raw_dir = "/data/lbd/Large_Automotive_Detection_Dataset_sampling"
+    else:
+        shape = [240,304]
+        target_shape = [256, 320]
+        raw_dir = "/data/lbd/ATIS_Automotive_Detection_Dataset/detection_dataset_duration_60s_ratio_1.0"
+    rh = target_shape[0] / shape[0]
+    rw = target_shape[1] / shape[1]
+    #shape = [240,304]
+    #raw_dir = "/data/lbd/ATIS_Automotive_Detection_Dataset/detection_dataset_duration_60s_ratio_1.0"
+    # target_dir = "/data/Large_taf"
 
-    pbar = tqdm.tqdm(total=len(files), unit='File', unit_scale=True)
+    for mode in ["test"]:
+        
+        file_dir = os.path.join(raw_dir, mode)
+        root = file_dir
+        #h5 = h5py.File(raw_dir + '/ATIS_taf_'+mode+'.h5', 'w')
+        try:
+            files = os.listdir(file_dir)
+        except Exception:
+            continue
+        # Remove duplicates (.npy and .dat)
+        files = [time_seq_name[:-7] for time_seq_name in files
+                        if time_seq_name[-3:] == 'dat']
 
-    file_names = []
-    time_stamps = []
-    generate_volume_times = []
-    generate_taf_times = []
+        pbar = tqdm.tqdm(total=len(files), unit='File', unit_scale=True)
 
-    for i_file, file_name in enumerate(files):
-        event_file = os.path.join(root, file_name + '_td.dat')
-        bbox_file = os.path.join(root, file_name + '_bbox.npy')
-        # if os.path.exists(volume_save_path):
-        #     continue
-        #h5 = h5py.File(volume_save_path, "w")
-        f_bbox = open(bbox_file, "rb")
-        start, v_type, ev_size, size, dtype = npy_events_tools.parse_header(f_bbox)
-        dat_bbox = np.fromfile(f_bbox, dtype=v_type, count=-1)
-        f_bbox.close()
+        file_names = []
+        time_stamps = []
+        generate_volume_times = []
+        generate_taf_times = []
 
-        unique_ts, unique_indices = np.unique(dat_bbox['t'], return_index=True)
+        for i_file, file_name in enumerate(files):
+            event_file = os.path.join(root, file_name + '_td.dat')
+            bbox_file = os.path.join(root, file_name + '_bbox.npy')
+            # if os.path.exists(volume_save_path):
+            #     continue
+            #h5 = h5py.File(volume_save_path, "w")
+            f_bbox = open(bbox_file, "rb")
+            start, v_type, ev_size, size, dtype = npy_events_tools.parse_header(f_bbox)
+            dat_bbox = np.fromfile(f_bbox, dtype=v_type, count=-1)
+            f_bbox.close()
 
-        f_event = psee_loader.PSEELoader(event_file)
+            unique_ts, unique_indices = np.unique(dat_bbox['t'], return_index=True)
 
-        history_density = -1
+            f_event = psee_loader.PSEELoader(event_file)
 
-        for bbox_count,unique_time in enumerate(unique_ts):
-            end_time = int(unique_time)
-            start_time = end_time - events_window
+            history_density = -1
 
-            dat_event = f_event
-            if start_time >=0:
-                dat_event.seek_time(start_time)
-                events = dat_event.load_delta_t(int(end_time - start_time))
-            else:
-                dat_event.seek_time(0)
-                events = dat_event.load_delta_t(int(end_time))
-            del dat_event
-            events = torch.from_numpy(rfn.structured_to_unstructured(events)[:, [1, 2, 0, 3]].astype(float)).cuda()
+            for bbox_count,unique_time in enumerate(unique_ts):
+                end_time = int(unique_time)
+                start_time = end_time - events_window
 
-            events[:,0] = events[:,0] * rw
-            events[:,1] = events[:,1] * rh
+                dat_event = f_event
+                if start_time >=0:
+                    dat_event.seek_time(start_time)
+                    events = dat_event.load_delta_t(int(end_time - start_time))
+                else:
+                    dat_event.seek_time(0)
+                    events = dat_event.load_delta_t(int(end_time))
+                del dat_event
+                events = torch.from_numpy(rfn.structured_to_unstructured(events)[:, [1, 2, 0, 3]].astype(float)).cuda()
 
-            z = torch.zeros_like(events[:,0])
+                events[:,0] = events[:,0] * rw
+                events[:,1] = events[:,1] * rh
 
-            bins = math.ceil((end_time - start_time) / events_window_abin)
-            
-            for i in range(bins):
-                z = torch.where((events[:,2] >= start_time + i * events_window_abin)&(events[:,2] <= start_time + (i + 1) * events_window_abin), torch.zeros_like(events[:,2])+i, z)
-                #events_timestamps.append(start_time + (i + 1) * self.events_window_abin)
-            events = torch.cat([events,z[:,None]], dim=1)
+                z = torch.zeros_like(events[:,0])
 
-            memory = None
-            for iter in range(bins):
-                events_ = events[events[...,4] == iter]
-                t_max = start_time + (iter + 1) * events_window_abin
-                t_min = start_time + iter * events_window_abin
-                events_[:,2] = (events_[:, 2] - t_min)/(t_max - t_min + 1e-8)
-                volume, memory, generate_volume_time, generate_encode_time = generate_taf_cuda(events_, target_shape, memory, event_volume_bins)
-            
-            file_names.append(file_name)
-            time_stamps.append(unique_time)
-            generate_volume_times.append(generate_volume_time)
-            generate_taf_times.append(generate_volume_time + generate_encode_time)
+                bins = math.ceil((end_time - start_time) / events_window_abin)
+                
+                for i in range(bins):
+                    z = torch.where((events[:,2] >= start_time + i * events_window_abin)&(events[:,2] <= start_time + (i + 1) * events_window_abin), torch.zeros_like(events[:,2])+i, z)
+                    #events_timestamps.append(start_time + (i + 1) * self.events_window_abin)
+                events = torch.cat([events,z[:,None]], dim=1)
 
-        #h5.close()
-        pbar.update(1)
-    pbar.close()
-    csv_path = os.path.join(file_dir,"generate_time.csv")
-    pd.DataFrame({
-        "File name":file_names,
-        "Time stamp":time_stamps,
-        "Generate volume time":generate_volume_times,
-        "Generate taf time":generate_taf_times}).to_csv(csv_path)
+                memory = None
+                for iter in range(bins):
+                    events_ = events[events[...,4] == iter]
+                    t_max = start_time + (iter + 1) * events_window_abin
+                    t_min = start_time + iter * events_window_abin
+                    events_[:,2] = (events_[:, 2] - t_min)/(t_max - t_min + 1e-8)
+                    volume, memory, generate_volume_time, generate_encode_time = generate_taf_cuda(events_, target_shape, memory, event_volume_bins)
+                
+                file_names.append(file_name)
+                time_stamps.append(unique_time)
+                generate_volume_times.append(generate_volume_time)
+                generate_taf_times.append(generate_volume_time + generate_encode_time)
+
+            #h5.close()
+            pbar.update(1)
+        pbar.close()
+        print("Generate volume time: ",np.mean(generate_volume_times))
+        print("Generate taf time: ",np.mean(generate_taf_times))
+        # csv_path = os.path.join(file_dir,"generate_time.csv")
+        # pd.DataFrame({
+        #     "File name":file_names,
+        #     "Time stamp":time_stamps,
+        #     "Generate volume time":generate_volume_times,
+        #     "Generate taf time":generate_taf_times}).to_csv(csv_path)

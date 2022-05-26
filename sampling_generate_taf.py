@@ -182,7 +182,6 @@ if __name__ == '__main__':
                 volume_save_path_l = os.path.join(target_root2, file_name+"_"+str(unique_time)+"_locations.npy")
                 volume_save_path_f = os.path.join(target_root2, file_name+"_"+str(unique_time)+"_features.npy")
                 if os.path.exists(volume_save_path_f) and os.path.exists(volume_save_path_l):
-                    print("exist")
                     continue
                 end_time = int(unique_time)
                 end_count = f_event.seek_time(end_time)

@@ -73,7 +73,7 @@ def generate_event_volume(events,shape,ori_shape):
 
 LABELMAP = ["car", "pedestrian"]
 
-def draw_bboxes(img, boxes, dt = 0, labelmap=LABELMAP):
+def draw_bboxes(img, boxes, dt, labelmap):
     """
     draw bboxes in the image img
     """
@@ -98,7 +98,7 @@ def draw_bboxes(img, boxes, dt = 0, labelmap=LABELMAP):
             cv2.rectangle(img, (pt1[0], pt1[1] - 15), (pt1[0] + 35, pt1[1]), color, -1)
             cv2.putText(img, class_name[:3], (pt1[0]+3, pt1[1] - 5), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0,0,0), 1)
 
-def visualizeVolume(volume,gt_i,filename,path,time_stamp_end):
+def visualizeVolume(volume,gt,dt,filename,path,time_stamp_end,tol,LABELMAP):
     ecd = np.exp(volume[-1])
     #ecd = volume[-1]
     #ecd = volume[-1]
@@ -121,8 +121,15 @@ def visualizeVolume(volume,gt_i,filename,path,time_stamp_end):
     mask = np.where(volume[:,:,None] * 8 > 1, 1, volume[:,:,None] * 8)
     #mask = np.where(volume[:,:,None] > 1, 1, volume[:,:,None])
     img_s = (mask * img_s).astype(np.uint8)
-    draw_bboxes(img_s,gt_i)
-    path_t = os.path.join(path,filename+"_end{0}.png".format(int(time_stamp_end)))
+    gt = gt[gt['t']==time_stamp_end]
+    draw_bboxes(img_s,gt,0,LABELMAP)
+    if not (dt is None):
+        dt = dt[(dt['t']>time_stamp_end-tol)&(dt['t']<time_stamp_end+tol)]
+        draw_bboxes(img_s,dt,1,LABELMAP)
+        path_t = os.path.join(path,filename+"_{0}_result.png".format(int(time_stamp_end)))
+    else:
+        path_t = os.path.join(path,filename+"_{0}.png".format(int(time_stamp_end)))
+    cv2.imwrite(path_t,img_s)
     # if not(os.path.exists(path_t)):
     #     os.mkdir(path_t)
     cv2.imwrite(path_t,img_s)
@@ -132,6 +139,10 @@ if __name__ == '__main__':
         description='visualize one or several event files along with their boxes')
     parser.add_argument('-item', type=str)
     parser.add_argument('-end', type=int)
+    parser.add_argument('-window', type=int, default=50000)
+    parser.add_argument('-exp_name', type=str, default=None)
+    parser.add_argument('-tol', type = int, default=4999)
+    parser.add_argument('-dataset', type = str, default="gen1")
 
     args = parser.parse_args()
 
@@ -140,16 +151,41 @@ if __name__ == '__main__':
         os.mkdir(result_path)
     data_folder = 'test'
     item = args.item
+    time_stamp_start = args.end - args.window
     time_stamp_end = args.end
 
-    bbox_path = "/data/lbd/ATIS_Automotive_Detection_Dataset/detection_dataset_duration_60s_ratio_1.0"
-    data_path = "/data/lbd/ATIS_taf_all"
-    final_path = os.path.join(bbox_path,data_folder)
+    if args.dataset == "gen1":
+        bbox_path = "/data/lbd/ATIS_Automotive_Detection_Dataset/detection_dataset_duration_60s_ratio_1.0"
+        data_path = "/data/lbd/ATIS_taf_all"
+        if not (args.exp_name is None):
+            result_path = "/home/lbd/100-fps-event-det/" + args.exp_name + "/summarise.npz"
+        shape = (240,304)
+        shape = (256,320)
+        LABELMAP = ["car", "pedestrian"]
+    else:
+        data_path = "/data/lbd/Large_Automotive_Detection_Dataset_sampling"
+        data_path = "/data/lbd/Large_taf"
+        if not (args.exp_name is None):
+            result_path = "/home/liubingde/100-fps-event-det/" + args.exp_name + "/summarise.npz"
+        ori_shape = (720,1280)
+        shape = (512,640)
+        LABELMAP = ['pedestrian', 'two wheeler', 'car', 'truck', 'bus', 'traffic sign', 'traffic light']
+
+    if not (args.exp_name is None):
+        bbox_file = result_path
+        f_bbox = np.load(bbox_file)
+        dt = f_bbox["dts"][f_bbox["file_names"]==item]
+    else:
+        dt = None
+
+    final_path = os.path.join(data_path,data_folder)
+    event_file = os.path.join(final_path, item+"_td.dat")
     bbox_file = os.path.join(final_path, item+"_bbox.npy")
     f_bbox = open(bbox_file, "rb")
     start, v_type, ev_size, size, _ = npy_events_tools.parse_header(f_bbox)
     dat_bbox = np.fromfile(f_bbox, dtype=v_type, count=-1)
     f_bbox.close()
+    #print(target)
 
     final_path = os.path.join(data_path,data_folder)
     event_file = os.path.join(final_path, item+"_"+str(time_stamp_end))
@@ -165,7 +201,5 @@ if __name__ == '__main__':
     t = np.zeros_like(c) + time_stamp_end
     events = np.stack([x, y, t, c, z, p, features], axis=1)
 
-    volumes = generate_event_volume(events,(256,320),(240,304))
-    gt_i = dat_bbox[dat_bbox['t']==time_stamp_end]
-    #for volume,typ in zip(volumes,["point1_transform","point001_transform","quantile_transform","minmax_transform"]):
-    visualizeVolume(volumes[0],gt_i,item,result_path,time_stamp_end)
+    volumes = generate_event_volume(events,shape,ori_shape)
+    visualizeVolume(volumes[0],dat_bbox,dt,item,result_path,time_stamp_end)

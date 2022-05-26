@@ -75,12 +75,12 @@ if __name__ == '__main__':
     mode = "test"
 
     if args.dataset == "gen1":
-        raw_dir = "/data2/lbd/ATIS_Automotive_Detection_Dataset/detection_dataset_duration_60s_ratio_1.0"
-        shape = [720,1280]
+        raw_dir = "/data/lbd/ATIS_Automotive_Detection_Dataset/detection_dataset_duration_60s_ratio_1.0"
+        shape = [240,304]
         events_window_abin = 800000
     else:
         raw_dir = "/data/lbd/Large_Automotive_Detection_Dataset_sampling"
-        shape = [240,304]
+        shape = [720,1280]
         events_window_abin = 10000000
     
     result_path = "statistics_result"
@@ -99,17 +99,8 @@ if __name__ == '__main__':
     pbar = tqdm.tqdm(total=len(files), unit='File', unit_scale=True)
 
     file_names = []
-    time_stamps = []
-    class_id = []
-    xs = []
-    ys = []
-    ws = []
-    hs = []
+    gt = []
     densitys = []
-    class_counts = [0, 0, 0, 0, 0, 0, 0]
-    small_counts = 0
-    medium_counts = 0
-    large_counts = 0
 
     for i_file, file_name in enumerate(files):
         # if i_file>5:
@@ -161,36 +152,18 @@ if __name__ == '__main__':
 
             for j in range(len(gt_trans)):
                 x, y, w, h = gt_trans['x'][j], gt_trans['y'][j], gt_trans['w'][j], gt_trans['h'][j]
-                area = w * h
-                if area < 32*32:
-                    small_counts+=1
-                elif area < 96*96:
-                    medium_counts+=1
-                else:
-                    large_counts+=1
-                class_counts[gt_trans[j][5]] += 1
-            
                 file_names.append(file_name)
-                time_stamps.append(unique_time)
-                class_id.append(gt_trans[j][5])
-                xs.append(x)
-                ys.append(y)
-                hs.append(h)
-                ws.append(w)
+                gt.append(gt_trans[j])
 
                 density = np.sum(np.sqrt(flow[x:x+w,y:y+h]**2)/w/h)
                 densitys.append(density)
 
         #h5.close()
         pbar.update(1)
-    print(class_counts, small_counts, medium_counts, large_counts)
     pbar.close()
-    csv_path = os.path.join(result_path,"density_"+mode+".npz")
+    csv_path = os.path.join(result_path,"gt_"+args.dataset+".npz")
+    print([np.percentile(densitys,q/100) for q in range(0,100,5)])
     np.savez(csv_path,
         file_names = file_names,
-        time_stamps = time_stamps,
-        class_id = class_id,
-        x = xs,
-        y = ys,
-        h = hs,
-        w = ws)
+        gts = gt,
+        densitys = densitys)
