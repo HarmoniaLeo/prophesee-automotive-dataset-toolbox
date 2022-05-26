@@ -146,6 +146,7 @@ if __name__ == '__main__':
             sampled_bboxes = []
             time_upperbound = -1e16
             for bbox_count,unique_time in enumerate(unique_ts):
+                print(i_file,unique_time)
                 if unique_time <= 500000:
                     continue
                 if (unique_time - time_upperbound < 1000000):
@@ -179,6 +180,7 @@ if __name__ == '__main__':
             #min_event_count = f_event.event_count()
 
             for bbox_count,unique_time in enumerate(unique_ts):
+                print(i_file,unique_time)
                 volume_save_path_l = os.path.join(target_root2, file_name+"_"+str(unique_time)+"_locations.npy")
                 volume_save_path_f = os.path.join(target_root2, file_name+"_"+str(unique_time)+"_features.npy")
                 if os.path.exists(volume_save_path_f) and os.path.exists(volume_save_path_l):

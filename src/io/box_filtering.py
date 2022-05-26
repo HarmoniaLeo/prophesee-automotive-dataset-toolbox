@@ -39,3 +39,8 @@ def filter_boxes(boxes, skip_ts=int(5e5), min_box_diag=60, min_box_side=20):
     mask = (ts>skip_ts)*(diag_square >= min_box_diag**2)*(width >= min_box_side)*(height >= min_box_side)
     return boxes[mask]
 
+def filter_boxes_gen1(boxes):
+    return filter_boxes(boxes, 5e5, 30, 10)
+
+def filter_boxes_large(boxes):
+    return filter_boxes(boxes, 5e5, 60, 20)
