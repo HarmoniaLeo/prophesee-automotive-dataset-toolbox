@@ -13,7 +13,7 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     if args.dataset == "gen1":
-        raw_dir = "/data2/lbd/ATIS_Automotive_Detection_Dataset/detection_dataset_duration_60s_ratio_1.0"
+        raw_dir = "/data/lbd/ATIS_Automotive_Detection_Dataset/detection_dataset_duration_60s_ratio_1.0"
     else:
         raw_dir = "/data/lbd/Large_Automotive_Detection_Dataset_sampling"
     
