@@ -32,6 +32,7 @@ if __name__ == '__main__':
         class_counts = [0, 0, 0, 0, 0, 0, 0]
         small_counts = 0
         medium_counts = 0
+        large_counts = 0
         for i_file, file_name in enumerate(files):
             # if i_file>5:
             #     break
