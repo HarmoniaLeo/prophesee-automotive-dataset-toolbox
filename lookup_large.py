@@ -162,7 +162,7 @@ if __name__ == '__main__':
     result_path = 'result_lookup_large'
     if not os.path.exists(result_path):
         os.mkdir(result_path)
-    data_folder = 'val'
+    data_folder = 'train'
     item = args.item
     time_stamp_start = args.end - args.window
     time_stamp_end = args.end
