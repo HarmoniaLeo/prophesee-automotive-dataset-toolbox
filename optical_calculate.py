@@ -79,11 +79,13 @@ if __name__ == '__main__':
     if args.dataset == "gen1":
         raw_dir = "/data/lbd/ATIS_Automotive_Detection_Dataset/detection_dataset_duration_60s_ratio_1.0"
         shape = [240,304]
-        events_window_abin = 200000
+        #events_window_abin = 200000
+        events_window_abin = 500000
     else:
         raw_dir = "/data/lbd/Large_Automotive_Detection_Dataset_sampling"
         shape = [720,1280]
-        events_window_abin = 2400000
+        #events_window_abin = 2400000
+        events_window_abin = 500000
     
     result_path = "optical_flow_buffer"
     if not os.path.exists(result_path):
@@ -125,21 +127,24 @@ if __name__ == '__main__':
             print(bbox_count,len(unique_ts))
             end_time = int(unique_time)
 
-            current_event = f_event.seek_time(end_time)
+            # current_event = f_event.seek_time(end_time)
 
-            start_event = current_event - events_window_abin
+            # start_event = current_event - events_window_abin
 
-            f_event.seek_event(start_event)
-            start_time = f_event.current_time
+            # f_event.seek_event(start_event)
+            # start_time = f_event.current_time
 
             dat_event = f_event
-            if start_time > time_upperbound:
-                dat_event.seek_time(start_time)
-                time_surface_buffer = None
-                true_start_time = start_time
-            else:
-                dat_event.seek_time(time_upperbound)
-                start_time = time_upperbound
+            # if start_time > time_upperbound:
+            #     dat_event.seek_time(start_time)
+            #     time_surface_buffer = None
+            #     true_start_time = start_time
+            # else:
+            #     dat_event.seek_time(time_upperbound)
+            #     start_time = time_upperbound
+
+            start_time = end_time - events_window_abin
+            dat_event.seek_time(start_time)
 
             events = dat_event.load_delta_t(int(end_time-start_time))
             events = rfn.structured_to_unstructured(events)[:, [1, 2, 0, 3]].astype(float)

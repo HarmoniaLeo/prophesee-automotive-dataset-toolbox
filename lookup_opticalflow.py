@@ -272,7 +272,7 @@ if __name__ == '__main__':
     #print(target)
     f_event = PSEELoader(event_file)
     end_count = f_event.seek_time(time_stamp_end)
-    f_event.seek_event(end_count - 800000)
+    f_event.seek_event(end_count - 200000)
     time_stamp_start = f_event.current_time
     events = f_event.load_delta_t(time_stamp_end-time_stamp_start)
     x,y,t,p = events['x'], events['y'], events['t'], events['p']
