@@ -212,8 +212,9 @@ if __name__ == '__main__':
     item = args.item
     #time_stamp_start = args.end - 50000
     time_stamp_end = args.end
-    data_path = "optical_flow_buffer"
-    final_path = data_path
+    data_path = "/data/lbd/ATIS_Automotive_Detection_Dataset/detection_dataset_duration_60s_ratio_1.0"
+    data_folder = 'test'
+    final_path = os.path.join(data_path,data_folder)
     bbox_file = os.path.join(final_path, item+"_bbox.npy")
     f_bbox = open(bbox_file, "rb")
     start, v_type, ev_size, size, _ = npy_events_tools.parse_header(f_bbox)
