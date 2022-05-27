@@ -144,6 +144,8 @@ if __name__ == '__main__':
             #     start_time = time_upperbound
 
             start_time = end_time - events_window_abin
+            true_start_time = start_time
+            
             dat_event.seek_time(start_time)
 
             events = dat_event.load_delta_t(int(end_time-start_time))
