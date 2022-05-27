@@ -70,8 +70,9 @@ def extract_flow(volume1, volume2):
 
 def generate_timesurface(events,shape,end_stamp):
     volume1, volume2 = np.zeros(shape), np.zeros(shape)
-    end_stamp = events[:,2].max()
-    start_stamp = events[:,2].min()
+    if len(events) > 0:
+        end_stamp = events[:,2].max()
+        start_stamp = events[:,2].min()
     for event in events:
         if event[2] < end_stamp - 50000:
             volume1[int(event[1])][int(event[0])] = event[2]
@@ -144,6 +145,9 @@ if __name__ == '__main__':
         time_surface_buffer = None
 
         for bbox_count,unique_time in enumerate(unique_ts):
+            csv_path = os.path.join(result_path,file_name + "_{0}.npy".format(unique_time))
+            if os.path.exists(csv_path):
+                continue
             print(bbox_count,len(unique_ts))
             end_time = int(unique_time)
 
@@ -180,7 +184,6 @@ if __name__ == '__main__':
             volume1, volume2 = generate_timesurface(events, shape, end_time)
             flow = extract_flow(volume1, volume2)
 
-            csv_path = os.path.join(result_path,file_name + "_{0}.npy".format(unique_time))
             np.save(csv_path,flow,allow_pickle = True)
 
         #h5.close()

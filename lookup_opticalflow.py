@@ -226,8 +226,9 @@ def extract_flow(volume1, volume2, gt,filename,path,time_stamp_end):
 
 def generate_timesurface(events,shape,end_stamp):
     volume1, volume2 = np.zeros(shape), np.zeros(shape)
-    end_stamp = events[:,2].max()
-    start_stamp = events[:,2].min()
+    if len(events) > 0:
+        end_stamp = events[:,2].max()
+        start_stamp = events[:,2].min()
     for event in events:
         if event[2] < end_stamp - 50000:
             volume1[event[1]][event[0]] = event[2]
