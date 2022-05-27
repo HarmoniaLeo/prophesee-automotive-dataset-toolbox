@@ -42,31 +42,51 @@ def extract_flow(volume1, volume2):
     flow = cal_for_frames(volume1, volume2)
     return flow
 
-def generate_timesurface(events,shape,start_stamp,end_stamp,buffer):
-    if not (buffer is None):
-        volume1 = buffer
-        volume2 = buffer
-    else:
-        volume1, volume2 = np.zeros(shape), np.zeros(shape)
-    # end_stamp = events[:,2].max()
-    # start_stamp = events[:,2].min()
+# def generate_timesurface(events,shape,start_stamp,end_stamp,buffer):
+#     if not (buffer is None):
+#         volume1 = buffer
+#         volume2 = buffer
+#     else:
+#         volume1, volume2 = np.zeros(shape), np.zeros(shape)
+#     # end_stamp = events[:,2].max()
+#     # start_stamp = events[:,2].min()
+#     for event in events:
+#         if event[2] < end_stamp - 50000:
+#             volume1[int(event[1])][int(event[0])] = event[2]
+#         volume2[int(event[1])][int(event[0])] = event[2]
+#     buffer = volume2
+#     volume2 = volume2 - 50000
+#     end_stamp = end_stamp - 50000
+#     volume2 = np.where(volume2 > start_stamp, volume2, start_stamp)
+#     volume1 = (volume1 - start_stamp) / (end_stamp - start_stamp) * 255
+#     volume2 = (volume2 - start_stamp) / (end_stamp - start_stamp) * 255
+#     # volume1 = volume1 - events[:,2].max() + 50000
+#     # volume2 = volume2 - events[:,2].max() + 40000
+#     # volume1 = volume1 / 50000 * 255
+#     # volume2 = volume2 / 50000 * 255
+#     # volume1 = np.where(volume1<0, 0, volume1)
+#     # volume2 = np.where(volume2<0, 0, volume2)
+#     return volume1.astype(np.uint8), volume2.astype(np.uint8), buffer
+
+def generate_timesurface(events,shape,end_stamp):
+    volume1, volume2 = np.zeros(shape), np.zeros(shape)
+    end_stamp = events[:,2].max()
+    start_stamp = events[:,2].min()
     for event in events:
         if event[2] < end_stamp - 50000:
-            volume1[int(event[1])][int(event[0])] = event[2]
-        volume2[int(event[1])][int(event[0])] = event[2]
-    buffer = volume2
-    volume2 = volume2 - 50000
-    end_stamp = end_stamp - 50000
-    volume2 = np.where(volume2 > start_stamp, volume2, start_stamp)
-    volume1 = (volume1 - start_stamp) / (end_stamp - start_stamp) * 255
-    volume2 = (volume2 - start_stamp) / (end_stamp - start_stamp) * 255
+            volume1[event[1]][event[0]] = event[2]
+        volume2[event[1]][event[0]] = event[2]
+    volume1 = volume1 - start_stamp
+    volume2 = volume2 - start_stamp - 50000
+    volume1 = volume1 / (end_stamp - 50000 - start_stamp) * 255
+    volume2 = volume2 / (end_stamp - 50000 - start_stamp) * 255
     # volume1 = volume1 - events[:,2].max() + 50000
     # volume2 = volume2 - events[:,2].max() + 40000
     # volume1 = volume1 / 50000 * 255
     # volume2 = volume2 / 50000 * 255
-    # volume1 = np.where(volume1<0, 0, volume1)
-    # volume2 = np.where(volume2<0, 0, volume2)
-    return volume1.astype(np.uint8), volume2.astype(np.uint8), buffer
+    volume1 = np.where(volume1<0, 0, volume1)
+    volume2 = np.where(volume2<0, 0, volume2)
+    return volume1.astype(np.uint8), volume2.astype(np.uint8)
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(
@@ -154,9 +174,10 @@ if __name__ == '__main__':
 
             del dat_event
 
-            time_surface_buffer = None
+            #time_surface_buffer = None
 
-            volume1, volume2, time_surface_buffer = generate_timesurface(events, shape, true_start_time, end_time, time_surface_buffer)
+            #volume1, volume2, time_surface_buffer = generate_timesurface(events, shape, true_start_time, end_time, time_surface_buffer)
+            volume1, volume2, time_surface_buffer = generate_timesurface(events, shape, end_time)
             flow = extract_flow(volume1, volume2)
 
             csv_path = os.path.join(result_path,file_name + "_{0}.npy".format(unique_time))
