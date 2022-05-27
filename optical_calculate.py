@@ -73,20 +73,20 @@ def generate_timesurface(events,shape,end_stamp):
     if len(events) > 0:
         end_stamp = events[:,2].max()
         start_stamp = events[:,2].min()
-    for event in events:
-        if event[2] < end_stamp - 50000:
-            volume1[int(event[1])][int(event[0])] = event[2]
-        volume2[int(event[1])][int(event[0])] = event[2]
-    volume1 = volume1 - start_stamp
-    volume2 = volume2 - start_stamp - 50000
-    volume1 = volume1 / (end_stamp - 50000 - start_stamp) * 255
-    volume2 = volume2 / (end_stamp - 50000 - start_stamp) * 255
-    # volume1 = volume1 - events[:,2].max() + 50000
-    # volume2 = volume2 - events[:,2].max() + 40000
-    # volume1 = volume1 / 50000 * 255
-    # volume2 = volume2 / 50000 * 255
-    volume1 = np.where(volume1<0, 0, volume1)
-    volume2 = np.where(volume2<0, 0, volume2)
+        for event in events:
+            if event[2] < end_stamp - 50000:
+                volume1[int(event[1])][int(event[0])] = event[2]
+            volume2[int(event[1])][int(event[0])] = event[2]
+        volume1 = volume1 - start_stamp
+        volume2 = volume2 - start_stamp - 50000
+        volume1 = volume1 / (end_stamp - 50000 - start_stamp) * 255
+        volume2 = volume2 / (end_stamp - 50000 - start_stamp) * 255
+        # volume1 = volume1 - events[:,2].max() + 50000
+        # volume2 = volume2 - events[:,2].max() + 40000
+        # volume1 = volume1 / 50000 * 255
+        # volume2 = volume2 / 50000 * 255
+        volume1 = np.where(volume1<0, 0, volume1)
+        volume2 = np.where(volume2<0, 0, volume2)
     return volume1.astype(np.uint8), volume2.astype(np.uint8)
 
 if __name__ == '__main__':
