@@ -118,6 +118,7 @@ if __name__ == '__main__':
         f_event = psee_loader.PSEELoader(event_file)
 
         time_upperbound = -1e16
+        true_start_time = 0
         time_surface_buffer = None
 
         for bbox_count,unique_time in enumerate(unique_ts):
@@ -134,6 +135,7 @@ if __name__ == '__main__':
             if start_time > time_upperbound:
                 dat_event.seek_time(start_time)
                 time_surface_buffer = None
+                true_start_time = start_time
             else:
                 dat_event.seek_time(time_upperbound)
                 start_time = time_upperbound
@@ -145,7 +147,7 @@ if __name__ == '__main__':
 
             gt_trans = dat_bbox[dat_bbox['t'] == unique_time]
 
-            volume1, volume2, time_surface_buffer = generate_timesurface(events, shape, end_time, time_surface_buffer)
+            volume1, volume2, time_surface_buffer = generate_timesurface(events, shape, true_start_time, end_time, time_surface_buffer)
             flow = extract_flow(volume1, volume2)
 
             csv_path = os.path.join(result_path,file_name + "_{0}.npy".format(unique_time))
