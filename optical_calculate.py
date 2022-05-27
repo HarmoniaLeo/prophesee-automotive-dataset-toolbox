@@ -122,6 +122,7 @@ if __name__ == '__main__':
         time_surface_buffer = None
 
         for bbox_count,unique_time in enumerate(unique_ts):
+            print(bbox_count,len(unique_ts))
             end_time = int(unique_time)
 
             current_event = f_event.seek_time(end_time)
@@ -142,6 +143,7 @@ if __name__ == '__main__':
 
             events = dat_event.load_delta_t(int(end_time-start_time))
             events = rfn.structured_to_unstructured(events)[:, [1, 2, 0, 3]].astype(float)
+            events = events[(events[:,0]<shape[1])&(events[:,1]<shape[0])]
 
             del dat_event
 
