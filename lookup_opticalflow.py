@@ -305,6 +305,6 @@ if __name__ == '__main__':
     events = f_event.load_delta_t(time_stamp_end-time_stamp_start)
     x,y,t,p = events['x'], events['y'], events['t'], events['p']
     events = np.stack([x.astype(int), y.astype(int), t, p], axis=-1)
-    volume1, volume2 = generate_timesurface(events,(240,304),time_stamp_start,time_stamp_end)
+    volume1, volume2, _ = generate_timesurface(events,(240,304),time_stamp_start,time_stamp_end,None)
     extract_flow(volume1, volume2, dat_bbox[(dat_bbox['t']==time_stamp_end)],item,result_path,time_stamp_end)
     visualize_timesuface(volume1,volume2,dat_bbox[(dat_bbox['t']==time_stamp_end)],item,result_path,time_stamp_end)
