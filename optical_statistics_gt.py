@@ -129,7 +129,7 @@ if __name__ == '__main__':
 
             start_event = current_event - events_window_abin
 
-            f_event.seek_time(start_event)
+            f_event.seek_event(start_event)
             start_time = f_event.current_time
 
             dat_event = f_event
