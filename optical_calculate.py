@@ -145,7 +145,7 @@ if __name__ == '__main__':
 
             start_time = end_time - events_window_abin
             true_start_time = start_time
-            
+
             dat_event.seek_time(start_time)
 
             events = dat_event.load_delta_t(int(end_time-start_time))
@@ -153,6 +153,8 @@ if __name__ == '__main__':
             events = events[(events[:,0]<shape[1])&(events[:,1]<shape[0])]
 
             del dat_event
+
+            time_surface_buffer = None
 
             volume1, volume2, time_surface_buffer = generate_timesurface(events, shape, true_start_time, end_time, time_surface_buffer)
             flow = extract_flow(volume1, volume2)
