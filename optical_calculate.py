@@ -145,8 +145,6 @@ if __name__ == '__main__':
 
             del dat_event
 
-            gt_trans = dat_bbox[dat_bbox['t'] == unique_time]
-
             volume1, volume2, time_surface_buffer = generate_timesurface(events, shape, true_start_time, end_time, time_surface_buffer)
             flow = extract_flow(volume1, volume2)
 
