@@ -51,10 +51,9 @@ def generate_timesurface(events,shape,end_stamp,buffer):
     # end_stamp = events[:,2].max()
     # start_stamp = events[:,2].min()
     for event in events:
-        print(event)
         if event[2] < end_stamp - 50000:
-            volume1[event[1]][event[0]] = event[2]
-        volume2[event[1]][event[0]] = event[2]
+            volume1[int(event[1])][int(event[0])] = event[2]
+        volume2[int(event[1])][int(event[0])] = event[2]
     buffer = volume2
     volume2 = volume2 - 50000
     volume1 = (volume1 - np.min(np.min(volume1))) / (np.max(np.max(volume1)) - np.min(np.min(volume1))) * 255
