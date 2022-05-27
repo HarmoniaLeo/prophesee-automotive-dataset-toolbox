@@ -177,7 +177,7 @@ if __name__ == '__main__':
             #time_surface_buffer = None
 
             #volume1, volume2, time_surface_buffer = generate_timesurface(events, shape, true_start_time, end_time, time_surface_buffer)
-            volume1, volume2, time_surface_buffer = generate_timesurface(events, shape, end_time)
+            volume1, volume2 = generate_timesurface(events, shape, end_time)
             flow = extract_flow(volume1, volume2)
 
             csv_path = os.path.join(result_path,file_name + "_{0}.npy".format(unique_time))
