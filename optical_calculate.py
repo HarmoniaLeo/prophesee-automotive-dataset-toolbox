@@ -74,8 +74,8 @@ def generate_timesurface(events,shape,end_stamp):
     start_stamp = events[:,2].min()
     for event in events:
         if event[2] < end_stamp - 50000:
-            volume1[event[1]][event[0]] = event[2]
-        volume2[event[1]][event[0]] = event[2]
+            volume1[int(event[1])][int(event[0])] = event[2]
+        volume2[int(event[1])][int(event[0])] = event[2]
     volume1 = volume1 - start_stamp
     volume2 = volume2 - start_stamp - 50000
     volume1 = volume1 / (end_stamp - 50000 - start_stamp) * 255
