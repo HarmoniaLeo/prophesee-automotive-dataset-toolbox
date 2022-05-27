@@ -155,7 +155,7 @@ if __name__ == '__main__':
                 file_names.append(file_name)
                 gt.append(gt_trans[j])
 
-                density = np.sum(np.sqrt(flow[x:x+w,y:y+h]**2)/w/h)
+                density = np.sum(np.sqrt(flow[int(x):int(x+w),int(y):int(y+h)]**2)/w/h)
                 densitys.append(density)
 
         #h5.close()
