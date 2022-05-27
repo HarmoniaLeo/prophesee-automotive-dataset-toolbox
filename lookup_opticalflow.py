@@ -271,9 +271,11 @@ if __name__ == '__main__':
     f_bbox.close()
     #print(target)
     f_event = PSEELoader(event_file)
+    #end_count = f_event.seek_time(time_stamp_end)
+    #f_event.seek_event(end_count - 200000)
+    #time_stamp_start = f_event.current_time
+    time_stamp_start = time_stamp_end - 500000
     end_count = f_event.seek_time(time_stamp_end)
-    f_event.seek_event(end_count - 200000)
-    time_stamp_start = f_event.current_time
     events = f_event.load_delta_t(time_stamp_end-time_stamp_start)
     x,y,t,p = events['x'], events['y'], events['t'], events['p']
     events = np.stack([x.astype(int), y.astype(int), t, p], axis=-1)
