@@ -40,6 +40,8 @@ if __name__ == '__main__':
     pbar = tqdm.tqdm(total=len(files), unit='File', unit_scale=True)
 
     densitys = []
+    file_names = []
+    gt = []
 
     bbox_file = result_path
     f_bbox = np.load(bbox_file)
@@ -63,6 +65,9 @@ if __name__ == '__main__':
 
                 density = np.sum(np.sqrt(flow[int(x):int(x+w),int(y):int(y+h),0]**2 + flow[int(x):int(x+w),int(y):int(y+h),1]**2))/(w*h + 1e-8)
                 densitys.append(density)
+
+                gt.append(gt_trans[j])
+                file_names.append(file_name)
 
         #h5.close()
         pbar.update(1)
