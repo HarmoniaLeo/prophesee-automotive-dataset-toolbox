@@ -54,10 +54,10 @@ if __name__ == '__main__':
         for file_name in np.unique(file_names_gt):
             dts_file = dts[file_names_dt == file_name]
             densitys_dt_file = densitys_dt[file_names_dt == file_name]
-            print(dts_file[:5], densitys_dt_file[:5])
+            #print(dts_file[:5], densitys_dt_file[:5])
             gts_file = gts[file_names_gt == file_name]
             densitys_gt_file = densitys_gt[file_names_gt == file_name]
-            print(gts_file[:5], densitys_gt_file[:5])
+            #print(gts_file[:5], densitys_gt_file[:5])
             for time_stamp in np.unique(gts_file[:,0]):
                 dts_to_eval = dts_file[(dts_file[:,0] >= time_stamp - args.tol) & (dts_file[:,0] <= time_stamp + args.tol) & (densitys_dt_file >= percentiles[i]) & (densitys_dt_file < percentiles[i+1])]
                 print(dts_to_eval[:5])
@@ -66,7 +66,7 @@ if __name__ == '__main__':
                 if len(gts_to_eval > 0):
                     dt.append(dts_to_eval)
                     gt.append(gts_to_eval)
-                raise Exception("break")
+                #raise Exception("break")
     
         gt_boxes_list = map(filter_boxes, gt)
         result_boxes_list = map(filter_boxes, dt)
