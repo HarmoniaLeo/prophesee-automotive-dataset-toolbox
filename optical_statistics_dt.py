@@ -18,11 +18,11 @@ if __name__ == '__main__':
 
     if args.dataset == "gen1":
         raw_dir = "/data/lbd/ATIS_Automotive_Detection_Dataset/detection_dataset_duration_60s_ratio_1.0"
-        result_path = "/home/lbd/100-fps-event-det/" + args.exp_name + "/summarise.npz"
+        result_path = "/home/lbd/100-fps-event-det/log" + args.exp_name + "/summarise.npz"
         shape = [240,304]
     else:
         raw_dir = "/data/lbd/Large_Automotive_Detection_Dataset_sampling"
-        result_path = "/home/liubingde/100-fps-event-det/" + args.exp_name + "/summarise.npz"
+        result_path = "/home/liubingde/100-fps-event-det/log" + args.exp_name + "/summarise.npz"
         shape = [720,1280]
     
     if not os.path.exists(result_path):
