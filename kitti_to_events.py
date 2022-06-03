@@ -17,6 +17,5 @@ for i in range(0,1):
     with h5py.File(file,'r') as f:
         events = f["events"]
         events = rfn.unstructured_to_structured(events, dtype = dtype([('t', '<u8'), ('x', '<f4'), ('y', '<f4'), ('p', '<i4')]))
-        print(events[:5])
         dat_events_tools.write_event_buffer(target, events)
     target.close()
