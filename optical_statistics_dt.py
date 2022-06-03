@@ -56,7 +56,7 @@ if __name__ == '__main__':
 
             gt_trans = dat_bbox[dat_bbox[:,0] == unique_time]
 
-            flow = np.load(os.path.join("optical_flow_buffer",file_name + "_{0}.npy".format(unique_time)))
+            flow = np.load(os.path.join("optical_flow_buffer",file_name + "_{0}.npy".format(int(unique_time))))
 
             for j in range(len(gt_trans)):
                 x, y, w, h = gt_trans[j,1], gt_trans[j,2], gt_trans[j,3], gt_trans[j,4]
