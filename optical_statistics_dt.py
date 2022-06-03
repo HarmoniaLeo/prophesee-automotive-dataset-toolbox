@@ -56,7 +56,6 @@ if __name__ == '__main__':
 
             gt_trans = dat_bbox[dat_bbox[:,0] == unique_time]
             print(gt_trans)
-            raise Exception("break")
 
             flow = np.load(os.path.join("optical_flow_buffer",file_name + "_{0}.npy".format(int(unique_time))))
 
