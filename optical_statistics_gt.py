@@ -56,7 +56,7 @@ if __name__ == '__main__':
 
         dat_bbox = rfn.structured_to_unstructured(dat_bbox)
 
-        unique_ts, unique_indices = np.unique(dat_bbox['t'], return_index=True)
+        unique_ts, unique_indices = np.unique(dat_bbox[:,0], return_index=True)
 
         for bbox_count,unique_time in enumerate(unique_ts):
 
