@@ -67,7 +67,7 @@ if __name__ == '__main__':
                 densitys.append(density)
 
                 dt.append(gt_trans[j])
-                file_names.append(file_name)
+                file_names2.append(file_name)
 
         #h5.close()
         pbar.update(1)
