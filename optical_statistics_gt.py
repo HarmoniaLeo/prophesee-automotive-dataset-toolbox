@@ -69,7 +69,10 @@ if __name__ == '__main__':
                 file_names.append(file_name)
                 gt.append(gt_trans[j])
 
-                density = np.sum(np.sqrt(flow[int(x):int(x+w),int(y):int(y+h)]**2)/w/h)
+                print(flow.shape)
+                raise Exception("break")
+
+                density = np.sum(np.sqrt(flow[int(x):int(x+w),int(y):int(y+h)]**2))/(w*h + 1e-8)
                 densitys.append(density)
 
         #h5.close()
