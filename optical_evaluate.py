@@ -66,6 +66,7 @@ if __name__ == '__main__':
                 if len(gts_to_eval > 0):
                     dt.append(dts_to_eval)
                     gt.append(gts_to_eval)
+                raise Exception("break")
     
         gt_boxes_list = map(filter_boxes, gt)
         result_boxes_list = map(filter_boxes, dt)
