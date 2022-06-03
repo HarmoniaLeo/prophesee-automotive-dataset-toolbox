@@ -15,5 +15,5 @@ for i in range(0,21):
         target = "/data2/lbd/kitti/test" + str(i).zfill(4) + "_td.dat"
     with h5py.File(file,'r') as f:
         events = f["events"]
-        bboxes = rfn.unstructured_to_structured(events, dat_events_tools.EV_TYPE)
+        events = rfn.unstructured_to_structured(events, dat_events_tools.EV_TYPE[0])
         dat_events_tools.write_event_buffer(target, events)
