@@ -8,7 +8,7 @@ from numpy import dtype
 # with h5py.File("/Users/harmonialeo/Downloads/0000-2/0000.h5",'r') as f:
 #     print(np.unique(f["events"][:73000,0]))
 
-for i in range(0,21):
+for i in range(1,21):
     file = "/home/lbd/v2e/output/" + str(i).zfill(4) + "/" + str(i).zfill(4) + ".h5"
     if i in [0, 3, 6, 7, 17, 18]:
         target = open("/data2/lbd/kitti/test/" + str(i).zfill(4) + "_td.dat", "wb")
