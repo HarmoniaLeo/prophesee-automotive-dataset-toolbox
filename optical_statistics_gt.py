@@ -54,16 +54,18 @@ if __name__ == '__main__':
         dat_bbox = np.fromfile(f_bbox, dtype=v_type, count=-1)
         f_bbox.close()
 
+        dat_bbox = rfn.structured_to_unstructured(dat_bbox)
+
         unique_ts, unique_indices = np.unique(dat_bbox['t'], return_index=True)
 
         for bbox_count,unique_time in enumerate(unique_ts):
 
-            gt_trans = dat_bbox[dat_bbox['t'] == unique_time]
+            gt_trans = dat_bbox[dat_bbox[:,0] == unique_time]
 
             flow = np.load(os.path.join("optical_flow_buffer",file_name + "_{0}.npy".format(unique_time)))
 
             for j in range(len(gt_trans)):
-                x, y, w, h = gt_trans['x'][j], gt_trans['y'][j], gt_trans['w'][j], gt_trans['h'][j]
+                x, y, w, h = gt_trans[j,1], gt_trans[j,2], gt_trans[j,3], gt_trans[j,4]
                 file_names.append(file_name)
                 gt.append(gt_trans[j])
 
