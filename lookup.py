@@ -169,6 +169,12 @@ if __name__ == '__main__':
             result_path = "/home/liubingde/100-fps-event-det/" + args.exp_name + "/summarise.npz"
         shape = (720,1280)
         LABELMAP = ['pedestrian', 'two wheeler', 'car', 'truck', 'bus', 'traffic sign', 'traffic light']
+    if args.dataset == "kitti":
+        data_path = "/data2/lbd/kitti"
+        if not (args.exp_name is None):
+            result_path = "/home/lbd/100-fps-event-det/" + args.exp_name + "/summarise.npz"
+        shape = (375,1242)
+        LABELMAP = ["car", "pedestrian"]
 
     if not (args.exp_name is None):
         bbox_file = result_path
