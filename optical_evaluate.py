@@ -23,12 +23,12 @@ if __name__ == '__main__':
     mode = "test"
 
     if args.dataset == "gen1":
-        result_path = "/home/lbd/100-fps-event-det/" + args.exp_name + "/summarise.npz"
+        result_path = "/home/lbd/100-fps-event-det/log" + args.exp_name + "/summarise.npz"
         shape = [240,304]
         filter_boxes = filter_boxes_gen1
         classes = ['Car', "Pedestrian"]
     else:
-        result_path = "/home/liubingde/100-fps-event-det/" + args.exp_name + "/summarise.npz"
+        result_path = "/home/liubingde/100-fps-event-det/log" + args.exp_name + "/summarise.npz"
         shape = [720,1280]
         filter_boxes = filter_boxes_large
         classes = ['pedestrian', 'two wheeler', 'car', 'truck', 'bus', 'traffic sign', 'traffic light']
