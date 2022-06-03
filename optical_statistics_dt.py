@@ -61,7 +61,7 @@ if __name__ == '__main__':
             for j in range(len(gt_trans)):
                 x, y, w, h = gt_trans[j,1], gt_trans[j,2], gt_trans[j,3], gt_trans[j,4]
 
-                density = np.sum(np.sqrt(flow[x:x+w,y:y+h]**2)/w/h)
+                density = np.sum(np.sqrt(flow[int(x):int(x+w),int(y):int(y+h)]**2)/w/h)
                 densitys.append(density)
 
         #h5.close()
