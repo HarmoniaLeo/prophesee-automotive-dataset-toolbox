@@ -46,8 +46,14 @@ if __name__ == '__main__':
     bbox_file = result_path
     f_bbox = np.load(bbox_file)
     dts = f_bbox["dts"]
-    file_names = f_bbox["file_names"]
-    file_names = np.array(["_".join(file_name.split("_")[:-1]) for file_name in file_names if ".npy" in file_names else file_name])
+    file_names_buf = f_bbox["file_names"]
+    file_names = []
+    for file_name in file_names:
+        if ".npy" in file_name:
+            file_names.append("_".join(file_name.split("_")[:-1]))
+        else:
+            file_names.append(file_name)
+    file_names = np.array(file_names)
 
     for i_file, file_name in enumerate(np.unique(files)):        
 
