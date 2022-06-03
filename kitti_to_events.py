@@ -2,6 +2,7 @@ import h5py
 import numpy as np
 import os
 from src.io import npy_events_tools, dat_events_tools
+from numpy.lib import recfunctions as rfn
 
 # with h5py.File("/Users/harmonialeo/Downloads/0000-2/0000.h5",'r') as f:
 #     print(np.unique(f["events"][:73000,0]))
@@ -14,4 +15,5 @@ for i in range(0,21):
         target = "/data2/lbd/kitti/test" + str(i).zfill(4) + "_td.dat"
     with h5py.File(file,'r') as f:
         events = f["events"]
+        bboxes = rfn.unstructured_to_structured(events, dat_events_tools.EV_TYPE)
         dat_events_tools.write_event_buffer(target, events)
