@@ -46,7 +46,7 @@ if __name__ == '__main__':
     dts = f_bbox["dts"]
     file_names = f_bbox["file_names"]
 
-    for i_file, file_name in enumerate(files):        
+    for i_file, file_name in enumerate(file_names):        
 
         dat_bbox = dts[file_names == file_name]
 
