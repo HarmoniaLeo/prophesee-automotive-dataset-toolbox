@@ -25,7 +25,7 @@ if __name__ == '__main__':
         shape = [240,304]
         filter_boxes = filter_boxes_gen1
         classes = ['Car', "Pedestrian"]
-        percentiles = [0, 0.002708115195855499, 0.026879342272877697, 0.06864213943481444, 0.23081630468368539]
+        percentiles = [0, 0.002708115195855499, 0.026879342272877697, 0.06864213943481444, 0.23081630468368539, 1000]
     else:
         result_path = "/home/liubingde/100-fps-event-det/log/" + args.exp_name + "/summarise.npz"
         shape = [720,1280]
