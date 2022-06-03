@@ -48,7 +48,7 @@ if __name__ == '__main__':
     dts = f_bbox["dts"]
     file_names = f_bbox["file_names"]
 
-    for i_file, file_name in enumerate(np.unique(file_names)):        
+    for i_file, file_name in enumerate(np.unique(files)):        
 
         dat_bbox = dts[file_names == file_name]
 
