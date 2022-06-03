@@ -154,7 +154,6 @@ if __name__ == '__main__':
         os.mkdir(result_path)
     data_folder = 'test'
     item = args.item
-    time_stamp_start = args.end - args.window
     time_stamp_end = args.end
 
     if args.dataset == "gen1":
@@ -192,10 +191,12 @@ if __name__ == '__main__':
     f_bbox.close()
     #print(target)
     f_event = PSEELoader(event_file)
-    f_event.seek_time(time_stamp_start)
-    events = f_event.load_delta_t(time_stamp_end - time_stamp_start)
-    x,y,t,p = events['x'], events['y'], events['t'], events['p']
-    events = np.stack([x.astype(int), y.astype(int), t, p], axis=-1)
-    volume = generate_event_volume(events,shape,5)
-    print(dat_bbox[:5])
-    visualizeVolume(volume,dat_bbox,dt,item,result_path,time_stamp_start,time_stamp_end,args.tol,LABELMAP)
+
+    for time_stamp_end in range(100000, 15300000, 100000):
+        time_stamp_start = time_stamp_end - args.window
+        f_event.seek_time(time_stamp_start)
+        events = f_event.load_delta_t(time_stamp_end - time_stamp_start)
+        x,y,t,p = events['x'], events['y'], events['t'], events['p']
+        events = np.stack([x.astype(int), y.astype(int), t, p], axis=-1)
+        volume = generate_event_volume(events,shape,5)
+        visualizeVolume(volume,dat_bbox,dt,item,result_path,time_stamp_start,time_stamp_end,args.tol,LABELMAP)
