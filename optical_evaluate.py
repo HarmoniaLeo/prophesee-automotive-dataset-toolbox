@@ -60,7 +60,8 @@ if __name__ == '__main__':
             for time_stamp in np.unique(gts_file[:,0]):
                 #dts_to_eval = dts_file[(dts_file[:,0] >= time_stamp - args.tol) & (dts_file[:,0] <= time_stamp + args.tol) & (densitys_dt_file >= percentiles[i]) & (densitys_dt_file < percentiles[i+1])]
                 dts_to_eval = dts_file[(dts_file[:,0] >= time_stamp - args.tol) & (dts_file[:,0] <= time_stamp + args.tol)]
-                gts_to_eval = gts_file[(gts_file[:,0] == time_stamp) & (densitys_gt_file >= percentiles[i]) & (densitys_gt_file < percentiles[i+1])]
+                #gts_to_eval = gts_file[(gts_file[:,0] == time_stamp) & (densitys_gt_file >= percentiles[i]) & (densitys_gt_file < percentiles[i+1])]
+                gts_to_eval = gts_file[(gts_file[:,0] == time_stamp)]
                 if len(gts_to_eval > 0):
                     dt.append(dts_to_eval)
                     gt.append(gts_to_eval)
