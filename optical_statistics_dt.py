@@ -6,6 +6,7 @@ import os
 from numpy.lib import recfunctions as rfn
 import argparse
 import cv2
+from src.io import npy_events_tools
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(
@@ -46,20 +47,24 @@ if __name__ == '__main__':
     bbox_file = result_path
     f_bbox = np.load(bbox_file)
     dts = f_bbox["dts"]
-    file_names_buf = f_bbox["file_names"]
-    file_names = []
-    for file_name in file_names:
-        if ".npy" in file_name:
-            file_names.append("_".join(file_name.split("_")[:-1]))
-        else:
-            file_names.append(file_name)
-    file_names = np.array(file_names)
+    file_names = f_bbox["file_names"]
 
     for i_file, file_name in enumerate(np.unique(files)):        
 
-        dat_bbox = dts[file_names == file_name]
+        bbox_file = os.path.join(root, file_name + '_bbox.npy')
+        # if os.path.exists(volume_save_path):
+        #     continue
+        #h5 = h5py.File(volume_save_path, "w")
+        f_bbox = open(bbox_file, "rb")
+        start, v_type, ev_size, size, dtype = npy_events_tools.parse_header(f_bbox)
+        dat_bbox = np.fromfile(f_bbox, dtype=v_type, count=-1)
+        f_bbox.close()
+
+        dat_bbox = rfn.structured_to_unstructured(dat_bbox)
 
         unique_ts, unique_indices = np.unique(dat_bbox[:,0], return_index=True)
+
+        dat_bbox = dts[file_names == file_name]
 
         for bbox_count,unique_time in enumerate(unique_ts):
 
