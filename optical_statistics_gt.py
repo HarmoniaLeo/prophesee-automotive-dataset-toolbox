@@ -68,13 +68,13 @@ if __name__ == '__main__':
                 gt.append(gt_trans[j])
 
                 density = np.sum(np.sqrt(flow[int(x):int(x+w),int(y):int(y+h)]**2)/w/h)
+                print(density)
                 densitys.append(density)
 
         #h5.close()
         pbar.update(1)
     pbar.close()
     csv_path = os.path.join(result_path,"gt_"+args.dataset+".npz")
-    print(densitys[:5])
     print([np.percentile(densitys,q/100) for q in range(0,100,5)])
     np.savez(csv_path,
         file_names = file_names,
