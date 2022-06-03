@@ -55,7 +55,6 @@ if __name__ == '__main__':
         for bbox_count,unique_time in enumerate(unique_ts):
 
             gt_trans = dat_bbox[dat_bbox[:,0] == unique_time]
-            print(gt_trans)
 
             flow = np.load(os.path.join("optical_flow_buffer",file_name + "_{0}.npy".format(int(unique_time))))
 
