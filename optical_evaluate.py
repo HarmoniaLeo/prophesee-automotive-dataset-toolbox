@@ -74,7 +74,7 @@ if __name__ == '__main__':
             dat_bbox = np.fromfile(f_bbox, dtype=v_type, count=-1)
             f_bbox.close()
 
-            unique_ts, unique_indices = np.unique(dat_bbox[:,0], return_index=True)
+            unique_ts, unique_indices = np.unique(dat_bbox["t"], return_index=True)
 
             dt_bbox = dts[file_names_dt == file_name]
             dt_buf = []
