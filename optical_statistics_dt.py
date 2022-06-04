@@ -13,6 +13,7 @@ if __name__ == '__main__':
         description='visualize one or several event files along with their boxes')
     parser.add_argument('-dataset', type=str)
     parser.add_argument('-exp_name', type=str)
+    parser.add_argument('-tol', type = int, default=4999)
 
     args = parser.parse_args()
     mode = "test"
@@ -44,12 +45,11 @@ if __name__ == '__main__':
     file_names2 = []
     dt = []
 
-    bbox_file = result_path
-    f_bbox = np.load(bbox_file)
+    f_bbox = np.load(result_path)
     dts = f_bbox["dts"]
     file_names = f_bbox["file_names"]
 
-    for i_file, file_name in enumerate(np.unique(files)):        
+    for i_file, file_name in enumerate(files):        
 
         bbox_file = os.path.join(root, file_name + '_bbox.npy')
         # if os.path.exists(volume_save_path):
@@ -57,28 +57,27 @@ if __name__ == '__main__':
         #h5 = h5py.File(volume_save_path, "w")
         f_bbox = open(bbox_file, "rb")
         start, v_type, ev_size, size, dtype = npy_events_tools.parse_header(f_bbox)
-        dat_bbox = np.fromfile(f_bbox, dtype=v_type, count=-1)
+        gt_bbox = np.fromfile(f_bbox, dtype=v_type, count=-1)
         f_bbox.close()
 
-        dat_bbox = rfn.structured_to_unstructured(dat_bbox)
+        gt_bbox = rfn.structured_to_unstructured(gt_bbox)
 
-        dat_bbox = dts[file_names == file_name]
-        
-        unique_ts, unique_indices = np.unique(dat_bbox[:,0], return_index=True)
+        unique_ts, unique_indices = np.unique(gt_bbox[:,0], return_index=True)
+
+        dt_bbox = dts[file_names == file_name]
 
         for bbox_count,unique_time in enumerate(unique_ts):
 
-            gt_trans = dat_bbox[dat_bbox[:,0] == unique_time]
+            dt_trans = dt_bbox[(dt_bbox[:,0] >= unique_time - args.tol) & (dt_bbox[:,0] <= unique_time + args.tol)]
 
             flow = np.load(os.path.join("optical_flow_buffer",file_name + "_{0}.npy".format(int(unique_time))))
 
-            for j in range(len(gt_trans)):
-                x, y, w, h = gt_trans[j,1], gt_trans[j,2], gt_trans[j,3], gt_trans[j,4]
+            for j in range(len(dt_trans)):
+                x, y, w, h = dt_trans[j,1], dt_trans[j,2], dt_trans[j,3], dt_trans[j,4]
 
                 density = np.sum(np.sqrt(flow[int(x):int(x+w),int(y):int(y+h),0]**2 + flow[int(x):int(x+w),int(y):int(y+h),1]**2))/(w*h + 1e-8)
                 densitys.append(density)
-
-                dt.append(gt_trans[j])
+                dt.append(dt_trans[j])
                 file_names2.append(file_name)
 
         #h5.close()
