@@ -36,15 +36,16 @@ if __name__ == '__main__':
     bbox_file = result_path
     f_bbox = np.load(bbox_file)
     dts = f_bbox["dts"]
-    file_names_dt = f_bbox["file_names"]
-    densitys_dt = f_bbox["densitys"]
-
-    result_path = "statistics_result"
-    bbox_file = os.path.join(result_path,"gt_"+args.dataset+".npz")
-    f_bbox = np.load(bbox_file)
+    file_names_dt = f_bbox["file_names_dt"]
     gts = f_bbox["gts"]
-    file_names_gt = f_bbox["file_names"]
-    densitys_gt = f_bbox["densitys"]
+    file_names_gt = f_bbox["file_names_gt"]
+
+    # result_path = "statistics_result"
+    # bbox_file = os.path.join(result_path,"gt_"+args.dataset+".npz")
+    # f_bbox = np.load(bbox_file)
+    # gts = f_bbox["gts"]
+    # file_names_gt = f_bbox["file_names"]
+    # densitys_gt = f_bbox["densitys"]
 
     results = []
 
@@ -53,21 +54,37 @@ if __name__ == '__main__':
         dt = []
         gt = []
         for file_name in np.unique(file_names_dt):
-            dts_file = dts[file_names_dt == file_name]
-            densitys_dt_file = densitys_dt[file_names_dt == file_name]
-            dts_file = dts_file[(densitys_dt_file >= percentiles[i]) & (densitys_dt_file < percentiles[i+1])]
-            gts_file = gts[file_names_gt == file_name]
-            densitys_gt_file = densitys_gt[file_names_gt == file_name]
-            gts_file = gts_file[(densitys_gt_file >= percentiles[i]) & (densitys_gt_file < percentiles[i+1])]
-            # for time_stamp in np.unique(dts_file[:,0]):
-            #     if time_stamp < 500000:
-            #         continue
-            #     #dts_to_eval = dts_file[(dts_file[:,0] >= time_stamp - args.tol) & (dts_file[:,0] <= time_stamp + args.tol) & (densitys_dt_file >= percentiles[i]) & (densitys_dt_file < percentiles[i+1])]
-            #     dts_to_eval = dts_file[(dts_file[:,0] >= time_stamp - args.tol) & (dts_file[:,0] <= time_stamp + args.tol)]
-            #     #gts_to_eval = gts_file[(gts_file[:,0] == time_stamp) & (densitys_gt_file >= percentiles[i]) & (densitys_gt_file < percentiles[i+1])]
-            #     gts_to_eval = gts_file[(gts_file[:,0] >= time_stamp - args.tol) & (gts_file[:,0] <= time_stamp + args.tol)]
-            dt.append(dts_file)
-            gt.append(gts_file)
+            dt_bbox = dts[file_names_dt == file_name]
+            dt_buf = []
+            gt_bbox = gts[file_names_gt == file_name]
+            gt_buf = []
+
+            unique_ts, unique_indices = np.unique(gt_bbox[:,0], return_index=True)
+
+            for bbox_count,unique_time in enumerate(unique_ts):
+
+                gt_trans = gt_bbox[gt_bbox[:,0] == unique_time]
+                dt_trans = dt_bbox[(dt_bbox[:,0] >= unique_time - args.tol) & (dt_bbox[:,0] <= unique_time + args.tol)]
+
+                flow = np.load(os.path.join("optical_flow_buffer",file_name + "_{0}.npy".format(int(unique_time))))
+
+                for j in range(len(dt_trans)):
+                    x, y, w, h = int(dt_trans[j,1]), int(dt_trans[j,2]), int(dt_trans[j,3]), int(dt_trans[j,4])
+                    density = np.sum(np.sqrt(flow[y:y+h,x:x+w,0]**2 + flow[y:y+h,x:x+w,1]**2))/(w * h + 1e-8)
+                    #if (density >= percentiles[i]) & (density < percentiles[i+1]):
+                    dt_buf.append(dt_trans[j])
+                
+                for j in range(len(gt_trans)):
+                    x, y, w, h = int(gt_trans[j,1]), int(gt_trans[j,2]), int(gt_trans[j,3]), int(gt_trans[j,4])
+                    density = np.sum(np.sqrt(flow[y:y+h,x:x+w,0]**2 + flow[y:y+h,x:x+w,1]**2))/(w * h + 1e-8)
+                    #if (density >= percentiles[i]) & (density < percentiles[i+1]):
+                    gt_buf.append(gt_trans[j])
+                
+            dt_buf = np.vstack(dt_buf)
+            gt_buf = np.vstack(gt_buf)
+
+            dt.append(dt_buf)
+            gt.append(gt_buf)
                 #raise Exception("break")
     
         gt_boxes_list = map(filter_boxes, gt)
@@ -83,5 +100,6 @@ if __name__ == '__main__':
                     result_boxes_list1.append(l2)
         
         evaluate_detection(gt_boxes_list1, result_boxes_list1, time_tol = args.tol, classes=classes,height=shape[0],width=shape[1])
+        break
     # print([(percentiles[i] + percentiles[i+1])/2 for i in range(0,len(percentiles)-1)])
     # print(results)
