@@ -65,18 +65,21 @@ if __name__ == '__main__':
             dt.append(dts_file)
             gt.append(gts_file)
                 #raise Exception("break")
-    
-        gt_boxes_list = map(filter_boxes, gt)
-        result_boxes_list = map(filter_boxes, dt)
-        gt_boxes_list1 = []
-        result_boxes_list1 = []
-        for l1,l2 in zip(gt_boxes_list,result_boxes_list):
-            if len(l1) > 0:
-                gt_boxes_list1.append(l1)
-                if len(l2) == 0:
-                    result_boxes_list1.append(np.array([[l1[0,0],0,0,0,0,0,0,0]]))
-                else:
-                    result_boxes_list1.append(l2)
+        
+        gt_boxes_list = dts_file
+        gt_boxes_list = gts_file
+
+        # gt_boxes_list = map(filter_boxes, gt)
+        # result_boxes_list = map(filter_boxes, dt)
+        # gt_boxes_list1 = []
+        # result_boxes_list1 = []
+        # for l1,l2 in zip(gt_boxes_list,result_boxes_list):
+        #     if len(l1) > 0:
+        #         gt_boxes_list1.append(l1)
+        #         if len(l2) == 0:
+        #             result_boxes_list1.append(np.array([[l1[0,0],0,0,0,0,0,0,0]]))
+        #         else:
+        #             result_boxes_list1.append(l2)
         
         evaluate_detection(gt_boxes_list1, result_boxes_list1, time_tol = args.tol, classes=classes,height=shape[0],width=shape[1])
         break
