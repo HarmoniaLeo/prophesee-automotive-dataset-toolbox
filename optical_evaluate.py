@@ -42,6 +42,14 @@ if __name__ == '__main__':
     gts = f_bbox["gts"]
     file_names_gt = f_bbox["file_names_gt"]
 
+    file_dir = os.path.join(raw_dir, mode)
+    root = file_dir
+    #h5 = h5py.File(raw_dir + '/ATIS_taf_'+mode+'.h5', 'w')
+    files = os.listdir(file_dir)
+
+    files = [time_seq_name[:-7] for time_seq_name in files
+                    if time_seq_name[-3:] == 'dat']
+
     # result_path = "statistics_result"
     # bbox_file = os.path.join(result_path,"gt_"+args.dataset+".npz")
     # f_bbox = np.load(bbox_file)
@@ -55,40 +63,53 @@ if __name__ == '__main__':
         print(i,percentiles[i],percentiles[i+1])
         dt = []
         gt = []
-        for file_name in np.unique(file_names_dt):
+
+        pbar = tqdm.tqdm(total=len(files), unit='File', unit_scale=True)
+
+        for i_file, file_name in enumerate(files):
+            
+            bbox_file = os.path.join(root, file_name + '_bbox.npy')
+            f_bbox = open(bbox_file, "rb")
+            start, v_type, ev_size, size, dtype = npy_events_tools.parse_header(f_bbox)
+            dat_bbox = np.fromfile(f_bbox, dtype=v_type, count=-1)
+            f_bbox.close()
+
+            unique_ts, unique_indices = np.unique(dat_bbox[:,0], return_index=True)
+
             dt_bbox = dts[file_names_dt == file_name]
             dt_buf = []
             gt_bbox = gts[file_names_gt == file_name]
             gt_buf = []
 
-            unique_ts, unique_indices = np.unique(gt_bbox[:,0], return_index=True)
-
             for bbox_count,unique_time in enumerate(unique_ts):
 
-                gt_trans = gt_bbox[gt_bbox[:,0] == unique_time]
+                gt_trans = gt_bbox[(gt_bbox[:,0] >= unique_time - args.tol) & (gt_bbox[:,0] <= unique_time + args.tol)]
                 dt_trans = dt_bbox[(dt_bbox[:,0] >= unique_time - args.tol) & (dt_bbox[:,0] <= unique_time + args.tol)]
 
-                #flow = np.load(os.path.join("optical_flow_buffer",file_name + "_{0}.npy".format(int(unique_time))))
+                flow = np.load(os.path.join("optical_flow_buffer",file_name + "_{0}.npy".format(int(unique_time))))
 
                 for j in range(len(dt_trans)):
                     x, y, w, h = int(dt_trans[j,1]), int(dt_trans[j,2]), int(dt_trans[j,3]), int(dt_trans[j,4])
-                    #density = np.sum(np.sqrt(flow[y:y+h,x:x+w,0]**2 + flow[y:y+h,x:x+w,1]**2))/(w * h + 1e-8)
-                    #if (density >= percentiles[i]) & (density < percentiles[i+1]):
-                    dt_buf.append(dt_trans[j])
+                    density = np.sum(np.sqrt(flow[y:y+h,x:x+w,0]**2 + flow[y:y+h,x:x+w,1]**2))/(w * h + 1e-8)
+                    if (density >= percentiles[i]) & (density < percentiles[i+1]):
+                        dt_buf.append(dt_trans[j])
                 
                 for j in range(len(gt_trans)):
                     x, y, w, h = int(gt_trans[j,1]), int(gt_trans[j,2]), int(gt_trans[j,3]), int(gt_trans[j,4])
-                    #density = np.sum(np.sqrt(flow[y:y+h,x:x+w,0]**2 + flow[y:y+h,x:x+w,1]**2))/(w * h + 1e-8)
-                    #if (density >= percentiles[i]) & (density < percentiles[i+1]):
-                    gt_buf.append(gt_trans[j])
+                    density = np.sum(np.sqrt(flow[y:y+h,x:x+w,0]**2 + flow[y:y+h,x:x+w,1]**2))/(w * h + 1e-8)
+                    if (density >= percentiles[i]) & (density < percentiles[i+1]):
+                        gt_buf.append(gt_trans[j])
                 
             dt_buf = np.vstack(dt_buf)
             gt_buf = np.vstack(gt_buf)
 
             dt.append(dt_buf)
             gt.append(gt_buf)
+
+            pbar.update(1)
                 #raise Exception("break")
-    
+        pbar.close()
+
         gt_boxes_list = map(filter_boxes, gt)
         result_boxes_list = map(filter_boxes, dt)
         gt_boxes_list1 = []
