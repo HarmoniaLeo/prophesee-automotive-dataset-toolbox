@@ -56,12 +56,6 @@ if __name__ == '__main__':
 
         dat_bbox = rfn.structured_to_unstructured(dat_bbox)
 
-        np.clip(dat_bbox[:, 1], 0, shape[1], out=dat_bbox[:, 1])
-        np.clip(dat_bbox[:, 2], 0, shape[0], out=dat_bbox[:, 2])
-        np.clip(dat_bbox[:, 3] + dat_bbox[:, 1], 0, shape[1], out=dat_bbox[:, 3])
-        np.clip(dat_bbox[:, 4] + dat_bbox[:, 2], 0, shape[0], out=dat_bbox[:, 4])
-        dat_bbox = dat_bbox[(dat_bbox[:, 3] - dat_bbox[:, 1] > 0)&(dat_bbox[:, 4] - dat_bbox[:, 2] > 0)]
-
         unique_ts, unique_indices = np.unique(dat_bbox[:,0], return_index=True)
 
         for bbox_count,unique_time in enumerate(unique_ts):
@@ -71,10 +65,27 @@ if __name__ == '__main__':
             flow = np.load(os.path.join("optical_flow_buffer",file_name + "_{0}.npy".format(int(unique_time))))
 
             for j in range(len(gt_trans)):
-                x1, y1, x2, y2 = int(gt_trans[j,1]), int(gt_trans[j,2]), int(gt_trans[j,3]), int(gt_trans[j,4])
+                x1, y1, x2, y2 = int(gt_trans[j,1]), int(gt_trans[j,2]), int(gt_trans[j,3] + gt_trans[j,1]), int(gt_trans[j,4] + gt_trans[j,2])
+
+                if x1 >= shape[0]:
+                    x1 = shape[0] - 1
+                if x1 < 0:
+                    x1 = 0
+                if x2 >= shape[0]:
+                    x2 = shape[0] - 1
+                if x2 < 0:
+                    x2 = 0
+                
+                if y1 >= shape[1]:
+                    y1 = shape[1] - 1
+                if y1 < 0:
+                    y1 = 0
+                if y2 >= shape[1]:
+                    y2 = shape[1] - 1
+                if y2 < 0:
+                    y2 = 0
+
                 file_names.append(file_name)
-                gt_trans[j,3] = gt_trans[j,3] - gt_trans[j,1]
-                gt_trans[j,4] = gt_trans[j,4] - gt_trans[j,2]
                 gt.append(gt_trans[j])
 
                 density = np.sum(np.sqrt(flow[y1:y2,x1:x2,0]**2 + flow[y1:y2,x1:x2,1]**2))/((y2 - y1)*(x2 - x1) + 1e-8)

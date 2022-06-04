@@ -22,7 +22,6 @@ if __name__ == '__main__':
 
     if args.dataset == "gen1":
         result_path = "/home/lbd/100-fps-event-det/log/" + args.exp_name + "/summarise.npz"
-        raw_dir = "/data/lbd/ATIS_Automotive_Detection_Dataset/detection_dataset_duration_60s_ratio_1.0"
         shape = [240,304]
         filter_boxes = filter_boxes_gen1
         classes = ['Car', "Pedestrian"]
@@ -30,7 +29,6 @@ if __name__ == '__main__':
         percentiles = [0.0, 0.09765842901836184, 0.2795803473626733, 0.7039533807928522, 1.8662489229530281, 1000]
     else:
         result_path = "/home/liubingde/100-fps-event-det/log/" + args.exp_name + "/summarise.npz"
-        raw_dir = "/data/lbd/Large_Automotive_Detection_Dataset_sampling"
         shape = [720,1280]
         filter_boxes = filter_boxes_large
         classes = ['pedestrian', 'two wheeler', 'car', 'truck', 'bus', 'traffic sign', 'traffic light']
@@ -38,24 +36,15 @@ if __name__ == '__main__':
     bbox_file = result_path
     f_bbox = np.load(bbox_file)
     dts = f_bbox["dts"]
-    file_names_dt = f_bbox["file_names_dt"]
+    file_names_dt = f_bbox["file_names_"]
+    densitys_dt = f_bbox["densitys"]
+
+    result_path = "statistics_result"
+    bbox_file = os.path.join(result_path,"gt_"+args.dataset+".npz")
+    f_bbox = np.load(bbox_file)
     gts = f_bbox["gts"]
-    file_names_gt = f_bbox["file_names_gt"]
-
-    file_dir = os.path.join(raw_dir, mode)
-    root = file_dir
-    #h5 = h5py.File(raw_dir + '/ATIS_taf_'+mode+'.h5', 'w')
-    files = os.listdir(file_dir)
-
-    files = [time_seq_name[:-7] for time_seq_name in files
-                    if time_seq_name[-3:] == 'dat']
-
-    # result_path = "statistics_result"
-    # bbox_file = os.path.join(result_path,"gt_"+args.dataset+".npz")
-    # f_bbox = np.load(bbox_file)
-    # gts = f_bbox["gts"]
-    # file_names_gt = f_bbox["file_names"]
-    # densitys_gt = f_bbox["densitys"]
+    file_names_gt = f_bbox["file_names"]
+    densitys_gt = f_bbox["densitys"]
 
     results = []
 
@@ -64,68 +53,26 @@ if __name__ == '__main__':
         dt = []
         gt = []
 
-        pbar = tqdm.tqdm(total=len(files), unit='File', unit_scale=True)
+        for i_file, file_name in enumerate(file_names_gt):
 
-        for i_file, file_name in enumerate(files):
-            
-            bbox_file = os.path.join(root, file_name + '_bbox.npy')
-            f_bbox = open(bbox_file, "rb")
-            start, v_type, ev_size, size, dtype = npy_events_tools.parse_header(f_bbox)
-            dat_bbox = np.fromfile(f_bbox, dtype=v_type, count=-1)
-            f_bbox.close()
+            dt_bbox = dts[(file_names_dt == file_name)&(densitys_dt >= percentiles[i])&(densitys_dt < percentiles[i+1])]
+            gt_bbox = gts[(file_names_gt == file_name)&(densitys_gt >= percentiles[i])&(densitys_gt < percentiles[i+1])]
 
-            unique_ts, unique_indices = np.unique(dat_bbox["t"], return_index=True)
-
-            dt_bbox = dts[file_names_dt == file_name]
-            dt_buf = []
-            gt_bbox = gts[file_names_gt == file_name]
-            gt_buf = []
-
-            for bbox_count,unique_time in enumerate(unique_ts):
-
-                gt_trans = gt_bbox[(gt_bbox[:,0] >= unique_time - args.tol) & (gt_bbox[:,0] <= unique_time + args.tol)]
-                dt_trans = dt_bbox[(dt_bbox[:,0] >= unique_time - args.tol) & (dt_bbox[:,0] <= unique_time + args.tol)]
-
-                flow = np.load(os.path.join("optical_flow_buffer",file_name + "_{0}.npy".format(int(unique_time))))
-
-                for j in range(len(dt_trans)):
-                    x, y, w, h = int(dt_trans[j,1]), int(dt_trans[j,2]), int(dt_trans[j,3]), int(dt_trans[j,4])
-                    density = np.sum(np.sqrt(flow[y:y+h,x:x+w,0]**2 + flow[y:y+h,x:x+w,1]**2))/(w * h + 1e-8)
-                    if (density >= percentiles[i]) & (density < percentiles[i+1]):
-                        dt_buf.append(dt_trans[j])
-                
-                for j in range(len(gt_trans)):
-                    x, y, w, h = int(gt_trans[j,1]), int(gt_trans[j,2]), int(gt_trans[j,3]), int(gt_trans[j,4])
-                    density = np.sum(np.sqrt(flow[y:y+h,x:x+w,0]**2 + flow[y:y+h,x:x+w,1]**2))/(w * h + 1e-8)
-                    if (density >= percentiles[i]) & (density < percentiles[i+1]):
-                        gt_buf.append(gt_trans[j])
-            
-            if len(gt_buf) > 0:
-                gt_buf = np.vstack(gt_buf)
-                if len(dt_buf) > 0:
-                    dt_buf = np.vstack(dt_buf)
-                else:
-                    dt_buf = np.array([[gt_buf[0,0],0,0,0,0,0,0,0]])
-
-                dt.append(dt_buf)
-                gt.append(gt_buf)
-
-            pbar.update(1)
-                #raise Exception("break")
-        pbar.close()
+            dt.append(dt_bbox)
+            gt.append(gt_bbox)
 
         gt_boxes_list = map(filter_boxes, gt)
         result_boxes_list = map(filter_boxes, dt)
-        gt_boxes_list1 = []
-        result_boxes_list1 = []
-        for l1,l2 in zip(gt_boxes_list,result_boxes_list):
-            if len(l1) > 0:
-                gt_boxes_list1.append(l1)
-                if len(l2) == 0:
-                    result_boxes_list1.append(np.array([[l1[0,0],0,0,0,0,0,0,0]]))
-                else:
-                    result_boxes_list1.append(l2)
+        # gt_boxes_list1 = []
+        # result_boxes_list1 = []
+        # for l1,l2 in zip(gt_boxes_list,result_boxes_list):
+        #     if len(l1) > 0:
+        #         gt_boxes_list1.append(l1)
+        #         if len(l2) == 0:
+        #             result_boxes_list1.append(np.array([[l1[0,0],0,0,0,0,0,0,0]]))
+        #         else:
+        #             result_boxes_list1.append(l2)
         
-        evaluate_detection(gt_boxes_list1, result_boxes_list1, time_tol = args.tol, classes=classes,height=shape[0],width=shape[1])
+        evaluate_detection(gt_boxes_list, result_boxes_list, time_tol = args.tol, classes=classes,height=shape[0],width=shape[1])
     # print([(percentiles[i] + percentiles[i+1])/2 for i in range(0,len(percentiles)-1)])
     # print(results)
