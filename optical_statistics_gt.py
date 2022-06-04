@@ -58,6 +58,12 @@ if __name__ == '__main__':
 
         unique_ts, unique_indices = np.unique(dat_bbox[:,0], return_index=True)
 
+        np.clip(dat_bbox[:, 0], 0, shape[1], out=dat_bbox[:, 0])
+        np.clip(dat_bbox[:, 1], 0, shape[0], out=dat_bbox[:, 1])
+        np.clip(dat_bbox[:, 2], 0, shape[1], out=dat_bbox[:, 2])
+        np.clip(dat_bbox[:, 3], 0, shape[0], out=dat_bbox[:, 3])
+        dat_bbox = dat_bbox[(dat_bbox[:, 2] - dat_bbox[:, 0] > 0)&(dat_bbox[:, 3] - dat_bbox[:, 1] > 0)]
+
         for bbox_count,unique_time in enumerate(unique_ts):
 
             gt_trans = dat_bbox[dat_bbox[:,0] == unique_time]
