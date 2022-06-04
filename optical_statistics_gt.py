@@ -75,7 +75,7 @@ if __name__ == '__main__':
                 file_names.append(file_name)
                 gt_trans[j,3] = gt_trans[j,3] - gt_trans[j,1]
                 gt_trans[j,4] = gt_trans[j,4] - gt_trans[j,2]
-                gt.append(gt_trans)
+                gt.append(gt_trans[j])
 
                 density = np.sum(np.sqrt(flow[y1:y2,x1:x2,0]**2 + flow[y1:y2,x1:x2,1]**2))/((y2 - y1)*(x2 - x1) + 1e-8)
                 densitys.append(density)
