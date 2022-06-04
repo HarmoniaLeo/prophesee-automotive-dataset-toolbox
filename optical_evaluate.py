@@ -127,6 +127,5 @@ if __name__ == '__main__':
                     result_boxes_list1.append(l2)
         
         evaluate_detection(gt_boxes_list1, result_boxes_list1, time_tol = args.tol, classes=classes,height=shape[0],width=shape[1])
-        break
     # print([(percentiles[i] + percentiles[i+1])/2 for i in range(0,len(percentiles)-1)])
     # print(results)
