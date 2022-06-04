@@ -58,8 +58,8 @@ if __name__ == '__main__':
 
         np.clip(dat_bbox[:, 1], 0, shape[1], out=dat_bbox[:, 1])
         np.clip(dat_bbox[:, 2], 0, shape[0], out=dat_bbox[:, 2])
-        np.clip(dat_bbox[:, 3], 0, shape[1], out=dat_bbox[:, 3])
-        np.clip(dat_bbox[:, 4], 0, shape[0], out=dat_bbox[:, 4])
+        np.clip(dat_bbox[:, 3] + dat_bbox[:, 1], 0, shape[1], out=dat_bbox[:, 3])
+        np.clip(dat_bbox[:, 4] + dat_bbox[:, 2], 0, shape[0], out=dat_bbox[:, 4])
         dat_bbox = dat_bbox[(dat_bbox[:, 3] - dat_bbox[:, 1] > 0)&(dat_bbox[:, 4] - dat_bbox[:, 2] > 0)]
 
         unique_ts, unique_indices = np.unique(dat_bbox[:,0], return_index=True)
@@ -71,11 +71,13 @@ if __name__ == '__main__':
             flow = np.load(os.path.join("optical_flow_buffer",file_name + "_{0}.npy".format(int(unique_time))))
 
             for j in range(len(gt_trans)):
-                x, y, w, h = gt_trans[j,1], gt_trans[j,2], gt_trans[j,3], gt_trans[j,4]
+                x1, y1, x2, y2 = int(gt_trans[j,1]), int(gt_trans[j,2]), int(gt_trans[j,3]), int(gt_trans[j,4])
                 file_names.append(file_name)
-                gt.append(gt_trans[j])
+                gt_trans[j,3] = gt_trans[j,3] - gt_trans[j,1]
+                gt_trans[j,4] = gt_trans[j,4] - gt_trans[j,2]
+                gt.append(gt_trans)
 
-                density = np.sum(np.sqrt(flow[int(x):int(x+w),int(y):int(y+h),0]**2 + flow[int(x):int(x+w),int(y):int(y+h),1]**2))/(w*h + 1e-8)
+                density = np.sum(np.sqrt(flow[y1:y2,x1:x2,0]**2 + flow[y1:y2,x1:x2,1]**2))/((y2 - y1)*(x2 - x1) + 1e-8)
                 densitys.append(density)
 
         #h5.close()
