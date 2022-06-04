@@ -66,11 +66,11 @@ if __name__ == '__main__':
 
         dt_bbox = dts[file_names == file_name]
 
-        np.clip(dt_bbox[:, 1], 0, shape[1], out=dt_bbox[:, 1])
-        np.clip(dt_bbox[:, 2], 0, shape[0], out=dt_bbox[:, 2])
-        np.clip(dt_bbox[:, 3] + dt_bbox[:, 1], 0, shape[1], out=dt_bbox[:, 3])
-        np.clip(dt_bbox[:, 4] + dt_bbox[:, 2], 0, shape[0], out=dt_bbox[:, 4])
-        dt_bbox = dt_bbox[(dt_bbox[:, 3] - dt_bbox[:, 1] > 0)&(dt_bbox[:, 4] - dt_bbox[:, 2] > 0)]
+        # np.clip(dt_bbox[:, 1], 0, shape[1], out=dt_bbox[:, 1])
+        # np.clip(dt_bbox[:, 2], 0, shape[0], out=dt_bbox[:, 2])
+        # np.clip(dt_bbox[:, 3] + dt_bbox[:, 1], 0, shape[1], out=dt_bbox[:, 3])
+        # np.clip(dt_bbox[:, 4] + dt_bbox[:, 2], 0, shape[0], out=dt_bbox[:, 4])
+        # dt_bbox = dt_bbox[(dt_bbox[:, 3] - dt_bbox[:, 1] > 0)&(dt_bbox[:, 4] - dt_bbox[:, 2] > 0)]
 
         for bbox_count,unique_time in enumerate(unique_ts):
 
@@ -79,13 +79,11 @@ if __name__ == '__main__':
             flow = np.load(os.path.join("optical_flow_buffer",file_name + "_{0}.npy".format(int(unique_time))))
 
             for j in range(len(dt_trans)):
-                x1, y1, x2, y2 = int(dt_trans[j,1]), int(dt_trans[j,2]), int(dt_trans[j,3]), int(dt_trans[j,4])
+                x, y, w, h = int(dt_trans[j,1]), int(dt_trans[j,2]), int(dt_trans[j,3]), int(dt_trans[j,4])
 
-                density = np.sum(np.sqrt(flow[y1:y2,x1:x2,0]**2 + flow[y1:y2,x1:x2,1]**2))/((y2 - y1)*(x2 - x1) + 1e-8)
+                density = np.sum(np.sqrt(flow[y:y+h,x:x+w,0]**2 + flow[y:y+h,x:x+w,1]**2))/(w * h + 1e-8)
                 densitys.append(density)
 
-                dt_trans[j,3] = dt_trans[j,3] - dt_trans[j,1]
-                dt_trans[j,4] = dt_trans[j,4] - dt_trans[j,2]
                 dt.append(dt_trans[j])
                 file_names2.append(file_name)
 
