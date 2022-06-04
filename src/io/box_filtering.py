@@ -40,7 +40,7 @@ def filter_boxes(boxes, skip_ts=int(5e5), min_box_diag=60, min_box_side=20):
     return boxes[mask]
 
 def filter_boxes_gen1(boxes):
-    return filter_boxes(boxes, 5e5, 30, 10)
+    return filter_boxes(boxes, 5e5, 30, 20)
 
 def filter_boxes_large(boxes):
     return filter_boxes(boxes, 5e5, 60, 20)
