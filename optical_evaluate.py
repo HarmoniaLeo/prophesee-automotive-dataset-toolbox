@@ -22,6 +22,7 @@ if __name__ == '__main__':
 
     if args.dataset == "gen1":
         result_path = "/home/lbd/100-fps-event-det/log/" + args.exp_name + "/summarise.npz"
+        raw_dir = "/data/lbd/ATIS_Automotive_Detection_Dataset/detection_dataset_duration_60s_ratio_1.0"
         shape = [240,304]
         filter_boxes = filter_boxes_gen1
         classes = ['Car', "Pedestrian"]
@@ -29,6 +30,7 @@ if __name__ == '__main__':
         percentiles = [0.0, 0.09765842901836184, 0.2795803473626733, 0.7039533807928522, 1.8662489229530281, 1000]
     else:
         result_path = "/home/liubingde/100-fps-event-det/log/" + args.exp_name + "/summarise.npz"
+        raw_dir = "/data/lbd/Large_Automotive_Detection_Dataset_sampling"
         shape = [720,1280]
         filter_boxes = filter_boxes_large
         classes = ['pedestrian', 'two wheeler', 'car', 'truck', 'bus', 'traffic sign', 'traffic light']
@@ -66,17 +68,17 @@ if __name__ == '__main__':
                 gt_trans = gt_bbox[gt_bbox[:,0] == unique_time]
                 dt_trans = dt_bbox[(dt_bbox[:,0] >= unique_time - args.tol) & (dt_bbox[:,0] <= unique_time + args.tol)]
 
-                flow = np.load(os.path.join("optical_flow_buffer",file_name + "_{0}.npy".format(int(unique_time))))
+                #flow = np.load(os.path.join("optical_flow_buffer",file_name + "_{0}.npy".format(int(unique_time))))
 
                 for j in range(len(dt_trans)):
                     x, y, w, h = int(dt_trans[j,1]), int(dt_trans[j,2]), int(dt_trans[j,3]), int(dt_trans[j,4])
-                    density = np.sum(np.sqrt(flow[y:y+h,x:x+w,0]**2 + flow[y:y+h,x:x+w,1]**2))/(w * h + 1e-8)
+                    #density = np.sum(np.sqrt(flow[y:y+h,x:x+w,0]**2 + flow[y:y+h,x:x+w,1]**2))/(w * h + 1e-8)
                     #if (density >= percentiles[i]) & (density < percentiles[i+1]):
                     dt_buf.append(dt_trans[j])
                 
                 for j in range(len(gt_trans)):
                     x, y, w, h = int(gt_trans[j,1]), int(gt_trans[j,2]), int(gt_trans[j,3]), int(gt_trans[j,4])
-                    density = np.sum(np.sqrt(flow[y:y+h,x:x+w,0]**2 + flow[y:y+h,x:x+w,1]**2))/(w * h + 1e-8)
+                    #density = np.sum(np.sqrt(flow[y:y+h,x:x+w,0]**2 + flow[y:y+h,x:x+w,1]**2))/(w * h + 1e-8)
                     #if (density >= percentiles[i]) & (density < percentiles[i+1]):
                     gt_buf.append(gt_trans[j])
                 
