@@ -66,8 +66,8 @@ if __name__ == '__main__':
             gt.append(gts_file)
                 #raise Exception("break")
         
-        gt_boxes_list = dts_file
-        gt_boxes_list = gts_file
+        gt_boxes_list1 = dts_file
+        gt_boxes_list1 = gts_file
 
         # gt_boxes_list = map(filter_boxes, gt)
         # result_boxes_list = map(filter_boxes, dt)
