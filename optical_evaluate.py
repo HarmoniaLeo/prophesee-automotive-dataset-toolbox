@@ -56,7 +56,7 @@ if __name__ == '__main__':
             densitys_dt_file = densitys_dt[file_names_dt == file_name]
             gts_file = gts[file_names_gt == file_name]
             densitys_gt_file = densitys_gt[file_names_gt == file_name]
-            print(gts_file[:5], dts_file[:5])
+            print(gts_file[:10], dts_file[:10])
             raise Exception("break")
             for time_stamp in np.unique(dts_file[:,0]):
                 #dts_to_eval = dts_file[(dts_file[:,0] >= time_stamp - args.tol) & (dts_file[:,0] <= time_stamp + args.tol) & (densitys_dt_file >= percentiles[i]) & (densitys_dt_file < percentiles[i+1])]
