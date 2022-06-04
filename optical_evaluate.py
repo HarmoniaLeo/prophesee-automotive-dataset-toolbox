@@ -36,7 +36,7 @@ if __name__ == '__main__':
     bbox_file = result_path
     f_bbox = np.load(bbox_file)
     dts = f_bbox["dts"]
-    file_names_dt = f_bbox["file_names_"]
+    file_names_dt = f_bbox["file_names"]
     densitys_dt = f_bbox["densitys"]
 
     result_path = "statistics_result"
