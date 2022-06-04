@@ -56,16 +56,15 @@ if __name__ == '__main__':
             densitys_dt_file = densitys_dt[file_names_dt == file_name]
             gts_file = gts[file_names_gt == file_name]
             densitys_gt_file = densitys_gt[file_names_gt == file_name]
-            for time_stamp in np.unique(dts_file[:,0]):
-                if time_stamp < 500000:
-                    continue
-                #dts_to_eval = dts_file[(dts_file[:,0] >= time_stamp - args.tol) & (dts_file[:,0] <= time_stamp + args.tol) & (densitys_dt_file >= percentiles[i]) & (densitys_dt_file < percentiles[i+1])]
-                dts_to_eval = dts_file[(dts_file[:,0] >= time_stamp - args.tol) & (dts_file[:,0] <= time_stamp + args.tol)]
-                #gts_to_eval = gts_file[(gts_file[:,0] == time_stamp) & (densitys_gt_file >= percentiles[i]) & (densitys_gt_file < percentiles[i+1])]
-                gts_to_eval = gts_file[(gts_file[:,0] >= time_stamp - args.tol) & (gts_file[:,0] <= time_stamp + args.tol)]
-                print(gts_to_eval - dts_to_eval)
-                dt.append(dts_to_eval)
-                gt.append(gts_to_eval)
+            # for time_stamp in np.unique(dts_file[:,0]):
+            #     if time_stamp < 500000:
+            #         continue
+            #     #dts_to_eval = dts_file[(dts_file[:,0] >= time_stamp - args.tol) & (dts_file[:,0] <= time_stamp + args.tol) & (densitys_dt_file >= percentiles[i]) & (densitys_dt_file < percentiles[i+1])]
+            #     dts_to_eval = dts_file[(dts_file[:,0] >= time_stamp - args.tol) & (dts_file[:,0] <= time_stamp + args.tol)]
+            #     #gts_to_eval = gts_file[(gts_file[:,0] == time_stamp) & (densitys_gt_file >= percentiles[i]) & (densitys_gt_file < percentiles[i+1])]
+            #     gts_to_eval = gts_file[(gts_file[:,0] >= time_stamp - args.tol) & (gts_file[:,0] <= time_stamp + args.tol)]
+            dt.append(dts_file)
+            gt.append(gts_file)
                 #raise Exception("break")
     
         gt_boxes_list = map(filter_boxes, gt)
