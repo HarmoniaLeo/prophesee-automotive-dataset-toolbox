@@ -99,9 +99,12 @@ if __name__ == '__main__':
                     density = np.sum(np.sqrt(flow[y:y+h,x:x+w,0]**2 + flow[y:y+h,x:x+w,1]**2))/(w * h + 1e-8)
                     if (density >= percentiles[i]) & (density < percentiles[i+1]):
                         gt_buf.append(gt_trans[j])
-                
-            dt_buf = np.vstack(dt_buf)
+            
             gt_buf = np.vstack(gt_buf)
+            if len(dt_buf) > 0:
+                dt_buf = np.vstack(dt_buf)
+            else:
+                dt_buf = np.array([[gt_buf[0,0],0,0,0,0,0,0,0]])
 
             dt.append(dt_buf)
             gt.append(gt_buf)
