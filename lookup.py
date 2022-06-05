@@ -192,10 +192,11 @@ if __name__ == '__main__':
     #print(target)
     f_event = PSEELoader(event_file)
 
-    time_stamp_start = time_stamp_end - args.window
-    f_event.seek_time(time_stamp_start)
-    events = f_event.load_delta_t(time_stamp_end - time_stamp_start)
-    x,y,t,p = events['x'], events['y'], events['t'], events['p']
-    events = np.stack([x.astype(int), y.astype(int), t, p], axis=-1)
-    volume = generate_event_volume(events,shape,5)
-    visualizeVolume(volume,dat_bbox,dt,item,result_path,time_stamp_start,time_stamp_end,args.tol,LABELMAP)
+    for time_stamp_end in np.unique(dat_bbox[:,0]):
+        time_stamp_start = time_stamp_end - args.window
+        f_event.seek_time(time_stamp_start)
+        events = f_event.load_delta_t(time_stamp_end - time_stamp_start)
+        x,y,t,p = events['x'], events['y'], events['t'], events['p']
+        events = np.stack([x.astype(int), y.astype(int), t, p], axis=-1)
+        volume = generate_event_volume(events,shape,5)
+        visualizeVolume(volume,dat_bbox,dt,item,result_path,time_stamp_start,time_stamp_end,args.tol,LABELMAP)
