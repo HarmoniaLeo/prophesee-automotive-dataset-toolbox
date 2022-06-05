@@ -192,7 +192,7 @@ if __name__ == '__main__':
     #print(target)
     f_event = PSEELoader(event_file)
 
-    for time_stamp_end in np.unique(dat_bbox[:,0]):
+    for time_stamp_end in np.unique(dat_bbox["t"]):
         time_stamp_start = time_stamp_end - args.window
         f_event.seek_time(time_stamp_start)
         events = f_event.load_delta_t(time_stamp_end - time_stamp_start)
