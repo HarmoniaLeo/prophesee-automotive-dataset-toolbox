@@ -40,9 +40,9 @@ def taf_cuda(x, y, t, p, shape, volume_bins, past_volume):
         for i in range(1,img_ecd.shape[1])[::-1]:
             img_ecd[:,i-1,:,1] = img_ecd[:,i-1,:,1] - 1
             img_ecd[:,i:i+1] = torch.where(forward, img_ecd[:,i-1:i],img_ecd[:,i:i+1])
-        img_ecd[:,:1] = torch.where(forward, torch.cat([torch.zeros_like(forward).float(),torch.zeros_like(forward).float() -1e6],dim=3), img_ecd[:,:1])
+        img_ecd[:,:1] = torch.where(forward, torch.cat([torch.zeros_like(forward).float(),torch.zeros_like(forward).float() -1e8],dim=3), img_ecd[:,:1])
     else:
-        ecd = torch.where(forward, torch.zeros_like(forward).float() -1e6, torch.zeros_like(forward).float())   #ecd: hw, 1, 2, 1
+        ecd = torch.where(forward, torch.zeros_like(forward).float() -1e8, torch.zeros_like(forward).float())   #ecd: hw, 1, 2, 1
         img_ecd = torch.cat([img, torch.cat([ecd,ecd],dim=1)],dim=3)    #img_ecd: hw, 2, 2, 2
     if img_ecd.shape[1] > volume_bins:
         img_ecd = img_ecd[:,1:]
@@ -92,6 +92,10 @@ if __name__ == '__main__':
         # min_event_count = 800000
         shape = [720,1280]
         target_shape = [512, 640]
+    elif dataset == "kitti":
+        # min_event_count = 800000
+        shape = [375,1242]
+        target_shape = [256, 640]
     else:
         # min_event_count = 200000
         shape = [240,304]
@@ -247,7 +251,7 @@ if __name__ == '__main__':
                         total_taf_time.append(generate_volume_time + generate_encode_time)
                     #print(total_time/generate_times)
                 volume_ = volume.cpu().numpy().copy()
-                volume_[...,1] = np.where(volume_[...,1]>-1e6, volume_[...,1] - 1, 0)
+                volume_[...,1] = np.where(volume_[...,1]>-1e8, volume_[...,1] - 1, 0)
                 locations, features = denseToSparse(volume_)
                 c, y, x, p = locations
                 
@@ -263,7 +267,7 @@ if __name__ == '__main__':
             #h5.close()
             pbar.update(1)
         pbar.close()
-        if mode == "test":
-            np.save(os.path.join(root, 'total_volume_time.npy'),np.array(total_volume_time))
-            np.save(os.path.join(root, 'total_taf_time.npy'),np.array(total_taf_time))
+        # if mode == "test":
+        #     np.save(os.path.join(root, 'total_volume_time.npy'),np.array(total_volume_time))
+        #     np.save(os.path.join(root, 'total_taf_time.npy'),np.array(total_taf_time))
         #h5.close()
