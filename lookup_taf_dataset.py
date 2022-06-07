@@ -211,4 +211,4 @@ if __name__ == '__main__':
     events = np.stack([x, y, t, c, z, p, features], axis=1)
 
     volumes = generate_event_volume(events,shape,ori_shape)
-    visualizeVolume(volumes[0],dat_bbox,dt,item,result_path,time_stamp_end)
+    visualizeVolume(volumes[0],dat_bbox,dt,item,result_path,time_stamp_end,args.tol,LABELMAP)
