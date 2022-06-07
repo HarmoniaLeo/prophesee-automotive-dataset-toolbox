@@ -32,23 +32,23 @@ def minmax_transform(volume):
 
 def quantile_transform(volume):
     volume = volume.copy()
-    for i in range(len(volume)):
-        ecd_view = volume[i,...,1][volume[i,...,1] > -1e8]
-        q90 = np.quantile(ecd_view, 0.9)
-        q10 = np.quantile(ecd_view, 0.10)
-        volume[i,...,1] = np.where(volume[i,...,1] > -1e8, volume[i,...,1] - q90, volume[i,...,1])
-        volume[i,...,1] = np.where((volume[i,...,1] > -1e8) & (volume[i,...,1] < 0), volume[i,...,1]/(q90 - q10 + 1e-8) * 6, volume[i,...,1])
-        ecd_view = volume[i,...,1][volume[i,...,1] > -1e8] 
-        q100 = np.max(ecd_view)
-        volume[i,...,1] = np.where(volume[i,...,1] > 0, volume[i,...,1] / (q100 + 1e-8) * 2, volume[i,...,1])
-    # ecd_view = volume[...,1][volume[...,1] > -1e8]
-    # q90 = np.quantile(ecd_view, 0.9)
-    # q10 = np.quantile(ecd_view, 0.10)
-    # volume[...,1] = np.where(volume[...,1] > -1e8, volume[...,1] - q90, volume[...,1])
-    # volume[...,1] = np.where((volume[...,1] > -1e8) & (volume[...,1] < 0), volume[...,1]/(q90 - q10 + 1e-8) * 6, volume[...,1])
-    # ecd_view = volume[...,1][volume[...,1] > -1e8] 
-    # q100 = np.max(ecd_view)
-    # volume[...,1] = np.where(volume[...,1] > 0, volume[...,1] / (q100 + 1e-8) * 2, volume[...,1])
+    # for i in range(len(volume)):
+    #     ecd_view = volume[i,...,1][volume[i,...,1] > -1e8]
+    #     q90 = np.quantile(ecd_view, 0.9)
+    #     q10 = np.quantile(ecd_view, 0.10)
+    #     volume[i,...,1] = np.where(volume[i,...,1] > -1e8, volume[i,...,1] - q90, volume[i,...,1])
+    #     volume[i,...,1] = np.where((volume[i,...,1] > -1e8) & (volume[i,...,1] < 0), volume[i,...,1]/(q90 - q10 + 1e-8) * 6, volume[i,...,1])
+    #     ecd_view = volume[i,...,1][volume[i,...,1] > -1e8] 
+    #     q100 = np.max(ecd_view)
+    #     volume[i,...,1] = np.where(volume[i,...,1] > 0, volume[i,...,1] / (q100 + 1e-8) * 2, volume[i,...,1])
+    ecd_view = volume[...,1][volume[...,1] > -1e8]
+    q90 = np.quantile(ecd_view, 0.9)
+    q10 = np.quantile(ecd_view, 0.10)
+    volume[...,1] = np.where(volume[...,1] > -1e8, volume[...,1] - q90, volume[...,1])
+    volume[...,1] = np.where((volume[...,1] > -1e8) & (volume[...,1] < 0), volume[...,1]/(q90 - q10 + 1e-8) * 6, volume[...,1])
+    ecd_view = volume[...,1][volume[...,1] > -1e8] 
+    q100 = np.max(ecd_view)
+    volume[...,1] = np.where(volume[...,1] > 0, volume[...,1] / (q100 + 1e-8) * 2, volume[...,1])
     return volume
 
 def generate_event_volume(events,shape,ori_shape):
