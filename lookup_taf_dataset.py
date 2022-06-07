@@ -35,11 +35,14 @@ def quantile_transform(volume):
     ecd_view = volume[-1,...,1][volume[-1,...,1] > -1e8]
     q90 = np.quantile(ecd_view, 0.9)
     q10 = np.quantile(ecd_view, 0.10)
+    print(q90,q10)
     volume[-1,...,1] = np.where(volume[-1,...,1] > -1e8, volume[-1,...,1] - q90, volume[-1,...,1])
     volume[-1,...,1] = np.where((volume[-1,...,1] > -1e8) & (volume[-1,...,1] < 0), volume[-1,...,1]/(q90 - q10 + 1e-8) * 6, volume[-1,...,1])
     ecd_view = volume[-1,...,1][volume[-1,...,1] > -1e8] 
     q100 = np.max(ecd_view)
+    print(q100)
     volume[-1,...,1] = np.where(volume[-1,...,1] > 0, volume[-1,...,1] / (q100 + 1e-8) * 2, volume[-1,...,1])
+    print(np.max(volume[-1,...,1]))
     return volume
 
 def generate_event_volume(events,shape,ori_shape):
