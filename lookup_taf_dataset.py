@@ -172,7 +172,7 @@ if __name__ == '__main__':
         shape = (192,640)
         LABELMAP = ["car", "pedestrian"]
     else:
-        data_path = "/data/lbd/Large_Automotive_Detection_Dataset_sampling"
+        bbox_path = "/data/lbd/Large_Automotive_Detection_Dataset_sampling"
         data_path = "/data/lbd/Large_taf"
         if not (args.exp_name is None):
             result_path = "/home/liubingde/100-fps-event-det/" + args.exp_name + "/summarise.npz"
@@ -187,7 +187,7 @@ if __name__ == '__main__':
     else:
         dt = None
 
-    final_path = os.path.join(data_path,data_folder)
+    final_path = os.path.join(bbox_path,data_folder)
     event_file = os.path.join(final_path, item+"_td.dat")
     bbox_file = os.path.join(final_path, item+"_bbox.npy")
     f_bbox = open(bbox_file, "rb")
