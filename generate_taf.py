@@ -183,6 +183,7 @@ if __name__ == '__main__':
                 if end_count is None:
                     continue
                 start_count = end_count - min_event_count
+                print(start_count, count_upperbound)
                 if start_count < 0:
                     start_count = 0
                 f_event.seek_event(start_count)
