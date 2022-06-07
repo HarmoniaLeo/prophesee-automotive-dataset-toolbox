@@ -100,6 +100,7 @@ def draw_bboxes(img, boxes, dt, labelmap):
             cv2.putText(img, class_name[:3], (pt1[0]+3, pt1[1] - 5), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0,0,0), 1)
 
 def visualizeVolume(volume_,gt,dt,filename,path,time_stamp_end,tol,LABELMAP):
+    img_list = []
     for i in range(1, len(volume_)+1, 2):
         ecd = np.exp(volume_[i])
         #ecd = volume[-1]
@@ -135,6 +136,15 @@ def visualizeVolume(volume_,gt,dt,filename,path,time_stamp_end,tol,LABELMAP):
         # if not(os.path.exists(path_t)):
         #     os.mkdir(path_t)
         cv2.imwrite(path_t,img_s)
+        img_list.append(img_s)
+    img_all = np.stack(img_list).mean(0).astype(np.uint8)
+    if not (dt is None):
+        dt = dt[(dt['t']>time_stamp_end-tol)&(dt['t']<time_stamp_end+tol)]
+        draw_bboxes(img_all,dt,1,LABELMAP)
+        path_t = os.path.join(path,filename+"_{0}_result_all.png".format(int(time_stamp_end)))
+    else:
+        path_t = os.path.join(path,filename+"_{0}_all.png".format(int(time_stamp_end),i))
+    cv2.imwrite(path_t,img_all)
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(
