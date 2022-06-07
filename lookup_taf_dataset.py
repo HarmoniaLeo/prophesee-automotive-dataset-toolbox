@@ -32,7 +32,7 @@ def minmax_transform(volume):
 
 def quantile_transform(volume):
     volume = volume.copy()
-    for i in range(1, len(volume)+1, 2):
+    for i in range(len(volume)):
         ecd_view = volume[i,...,1][volume[i,...,1] > -1e8]
         q90 = np.quantile(ecd_view, 0.9)
         q10 = np.quantile(ecd_view, 0.10)
