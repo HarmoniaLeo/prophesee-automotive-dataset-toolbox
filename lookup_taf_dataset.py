@@ -163,8 +163,8 @@ if __name__ == '__main__':
         shape = (256,320)
         LABELMAP = ["car", "pedestrian"]
     elif args.dataset == "kitti":
-        bbox_path = "/home/lbd/kitti"
-        data_path = "/home/lbd/kitti_taf"
+        bbox_path = "/home/liubingde/kitti"
+        data_path = "/home/liubingde/kitti_taf"
         data_folder = 'val'
         if not (args.exp_name is None):
             result_path = "/home/lbd/100-fps-event-det/" + args.exp_name + "/summarise.npz"
