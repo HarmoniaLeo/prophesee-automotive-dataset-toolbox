@@ -32,17 +32,15 @@ def minmax_transform(volume):
 
 def quantile_transform(volume):
     volume = volume.copy()
-    ecd_view = volume[-1,...,1][volume[-1,...,1] > -1e8]
-    q90 = np.quantile(ecd_view, 0.9)
-    q10 = np.quantile(ecd_view, 0.10)
-    print(q90,q10)
-    volume[-1,...,1] = np.where(volume[-1,...,1] > -1e8, volume[-1,...,1] - q90, volume[-1,...,1])
-    volume[-1,...,1] = np.where((volume[-1,...,1] > -1e8) & (volume[-1,...,1] < 0), volume[-1,...,1]/(q90 - q10 + 1e-8) * 6, volume[-1,...,1])
-    ecd_view = volume[-1,...,1][volume[-1,...,1] > -1e8] 
-    q100 = np.max(ecd_view)
-    print(q100)
-    volume[-1,...,1] = np.where(volume[-1,...,1] > 0, volume[-1,...,1] / (q100 + 1e-8) * 2, volume[-1,...,1])
-    print(np.max(volume[-1,...,1]))
+    for i in range(1, len(volume)+1, 2):
+        ecd_view = volume[i,...,1][volume[i,...,1] > -1e8]
+        q90 = np.quantile(ecd_view, 0.9)
+        q10 = np.quantile(ecd_view, 0.10)
+        volume[i,...,1] = np.where(volume[i,...,1] > -1e8, volume[i,...,1] - q90, volume[i,...,1])
+        volume[i,...,1] = np.where((volume[i,...,1] > -1e8) & (volume[i,...,1] < 0), volume[i,...,1]/(q90 - q10 + 1e-8) * 6, volume[i,...,1])
+        ecd_view = volume[i,...,1][volume[i,...,1] > -1e8] 
+        q100 = np.max(ecd_view)
+        volume[i,...,1] = np.where(volume[i,...,1] > 0, volume[i,...,1] / (q100 + 1e-8) * 2, volume[i,...,1])
     return volume
 
 def generate_event_volume(events,shape,ori_shape):
@@ -101,41 +99,42 @@ def draw_bboxes(img, boxes, dt, labelmap):
             cv2.rectangle(img, (pt1[0], pt1[1] - 15), (pt1[0] + 35, pt1[1]), color, -1)
             cv2.putText(img, class_name[:3], (pt1[0]+3, pt1[1] - 5), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0,0,0), 1)
 
-def visualizeVolume(volume,gt,dt,filename,path,time_stamp_end,tol,LABELMAP):
-    ecd = np.exp(volume[-1])
-    #ecd = volume[-1]
-    #ecd = volume[-1]
-    volume = volume[-2]
-    img_s = 255 * np.ones((volume.shape[0], volume.shape[1], 3), dtype=np.uint8)
-    #tar = volume[-1] - volume[-2]
-    #tar = ecd * 2
-    tar = ecd / 4
-    #tar = np.where(tar > 1, (tar - 1) / 7 + 1, tar)
-    #tar = tar
-    #tar = np.where(tar<0,0,tar)
-    #tar = np.where(tar * 10 > 1, 1, tar)
-    img_0 = (60 * tar).astype(np.uint8) + 119
-    #img_1 = (255 * tar).astype(np.uint8)
-    #img_2 = (255 * tar).astype(np.uint8)
-    img_s[:,:,0] = img_0
-    #img_s[:,:,1] = img_1
-    #img_s[:,:,2] = img_2
-    img_s = cv2.cvtColor(img_s, cv2.COLOR_HSV2BGR)
-    mask = np.where(volume[:,:,None] * 8 > 1, 1, volume[:,:,None] * 8)
-    #mask = np.where(volume[:,:,None] > 1, 1, volume[:,:,None])
-    img_s = (mask * img_s).astype(np.uint8)
-    gt = gt[gt['t']==time_stamp_end]
-    draw_bboxes(img_s,gt,0,LABELMAP)
-    if not (dt is None):
-        dt = dt[(dt['t']>time_stamp_end-tol)&(dt['t']<time_stamp_end+tol)]
-        draw_bboxes(img_s,dt,1,LABELMAP)
-        path_t = os.path.join(path,filename+"_{0}_result.png".format(int(time_stamp_end)))
-    else:
-        path_t = os.path.join(path,filename+"_{0}.png".format(int(time_stamp_end)))
-    cv2.imwrite(path_t,img_s)
-    # if not(os.path.exists(path_t)):
-    #     os.mkdir(path_t)
-    cv2.imwrite(path_t,img_s)
+def visualizeVolume(volume_,gt,dt,filename,path,time_stamp_end,tol,LABELMAP):
+    for i in range(1, len(volume_)+1, 2):
+        ecd = np.exp(volume_[i])
+        #ecd = volume[-1]
+        #ecd = volume[-1]
+        volume = volume_[i-1]
+        img_s = 255 * np.ones((volume.shape[0], volume.shape[1], 3), dtype=np.uint8)
+        #tar = volume[-1] - volume[-2]
+        #tar = ecd * 2
+        tar = ecd / 4
+        #tar = np.where(tar > 1, (tar - 1) / 7 + 1, tar)
+        #tar = tar
+        #tar = np.where(tar<0,0,tar)
+        #tar = np.where(tar * 10 > 1, 1, tar)
+        img_0 = (60 * tar).astype(np.uint8) + 119
+        #img_1 = (255 * tar).astype(np.uint8)
+        #img_2 = (255 * tar).astype(np.uint8)
+        img_s[:,:,0] = img_0
+        #img_s[:,:,1] = img_1
+        #img_s[:,:,2] = img_2
+        img_s = cv2.cvtColor(img_s, cv2.COLOR_HSV2BGR)
+        mask = np.where(volume[:,:,None] * 8 > 1, 1, volume[:,:,None] * 8)
+        #mask = np.where(volume[:,:,None] > 1, 1, volume[:,:,None])
+        img_s = (mask * img_s).astype(np.uint8)
+        gt = gt[gt['t']==time_stamp_end]
+        draw_bboxes(img_s,gt,0,LABELMAP)
+        if not (dt is None):
+            dt = dt[(dt['t']>time_stamp_end-tol)&(dt['t']<time_stamp_end+tol)]
+            draw_bboxes(img_s,dt,1,LABELMAP)
+            path_t = os.path.join(path,filename+"_{0}_result.png".format(int(time_stamp_end)))
+        else:
+            path_t = os.path.join(path,filename+"_{0}_{1}.png".format(int(time_stamp_end, i)))
+        cv2.imwrite(path_t,img_s)
+        # if not(os.path.exists(path_t)):
+        #     os.mkdir(path_t)
+        cv2.imwrite(path_t,img_s)
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(
