@@ -130,7 +130,7 @@ def visualizeVolume(volume_,gt,dt,filename,path,time_stamp_end,tol,LABELMAP):
             draw_bboxes(img_s,dt,1,LABELMAP)
             path_t = os.path.join(path,filename+"_{0}_result.png".format(int(time_stamp_end)))
         else:
-            path_t = os.path.join(path,filename+"_{0}_{1}.png".format(int(time_stamp_end, i)))
+            path_t = os.path.join(path,filename+"_{0}_{1}.png".format(int(time_stamp_end),i))
         cv2.imwrite(path_t,img_s)
         # if not(os.path.exists(path_t)):
         #     os.mkdir(path_t)
