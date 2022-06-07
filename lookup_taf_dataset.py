@@ -32,22 +32,22 @@ def minmax_transform(volume):
 
 def quantile_transform(volume):
     volume = volume.copy()
-    ecd_view = volume[...,1][volume[...,1] > -1e8]
+    ecd_view = volume[-1,...,1][volume[-1,...,1] > -1e8]
     q90 = np.quantile(ecd_view, 0.9)
     q10 = np.quantile(ecd_view, 0.10)
-    volume[...,1] = np.where(volume[...,1] > -1e8, volume[...,1] - q90, volume[...,1])
-    volume[...,1] = np.where((volume[...,1] > -1e8) & (volume[...,1] < 0), volume[...,1]/(q90 - q10 + 1e-8) * 6, volume[...,1])
-    ecd_view = volume[...,1][volume[...,1] > -1e8]
+    volume[-1,...,1] = np.where(volume[-1,...,1] > -1e8, volume[-1,...,1] - q90, volume[-1,...,1])
+    volume[-1,...,1] = np.where((volume[-1,...,1] > -1e8) & (volume[-1,...,1] < 0), volume[-1,...,1]/(q90 - q10 + 1e-8) * 6, volume[-1,...,1])
+    ecd_view = volume[-1,...,1][volume[-1,...,1] > -1e8]
     q100 = np.max(ecd_view)
-    volume[...,1] = np.where(volume[...,1] > 0, volume[...,1] / (q100 + 1e-8) * 2, volume[...,1])
+    volume[-1,...,1] = np.where(volume[-1,...,1] > 0, volume[-1,...,1] / (q100 + 1e-8) * 2, volume[-1,...,1])
     return volume
 
 def generate_event_volume(events,shape,ori_shape):
 
     volumes = []
     #transforms = [point1_transform,point01_transform,quantile_transform,minmax_transform]
-    transforms = [minmax_transform]
-    #transforms = [quantile_transform]
+    #transforms = [minmax_transform]
+    transforms = [quantile_transform]
 
     x, y, t, c, z, p, features = events.T
 
