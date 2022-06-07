@@ -137,7 +137,7 @@ def visualizeVolume(volume_,gt,dt,filename,path,time_stamp_end,tol,LABELMAP):
         #     os.mkdir(path_t)
         cv2.imwrite(path_t,img_s)
         img_list.append(img_s)
-    img_all = np.stack(img_list).mean(0).astype(np.uint8)
+    img_all = np.stack(img_list).max(0).astype(np.uint8)
     if not (dt is None):
         dt = dt[(dt['t']>time_stamp_end-tol)&(dt['t']<time_stamp_end+tol)]
         draw_bboxes(img_all,dt,1,LABELMAP)
