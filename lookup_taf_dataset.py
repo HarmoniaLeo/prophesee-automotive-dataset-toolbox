@@ -159,8 +159,17 @@ if __name__ == '__main__':
         data_path = "/data/lbd/ATIS_taf_all"
         if not (args.exp_name is None):
             result_path = "/home/lbd/100-fps-event-det/" + args.exp_name + "/summarise.npz"
-        shape = (240,304)
+        ori_shape = (240,304)
         shape = (256,320)
+        LABELMAP = ["car", "pedestrian"]
+    elif args.dataset == "kitti":
+        bbox_path = "/home/lbd/kitti"
+        data_path = "/home/lbd/kitti_taf"
+        data_folder = 'val'
+        if not (args.exp_name is None):
+            result_path = "/home/lbd/100-fps-event-det/" + args.exp_name + "/summarise.npz"
+        ori_shape = (375,1242)
+        shape = (192,640)
         LABELMAP = ["car", "pedestrian"]
     else:
         data_path = "/data/lbd/Large_Automotive_Detection_Dataset_sampling"
