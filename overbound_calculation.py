@@ -60,7 +60,7 @@ for mode in ["train","test","val"]:
             if ((y+h >= 240) and (h not in over_bound_y)):
                 over_bound_y.append(y+h)
         for w in ws:
-            if ((w+x >= 240) and (w not in over_bound_x)):
+            if ((w+x >= 304) and (w not in over_bound_x)):
                 over_bound_x.append(x+w)
         pbar.update()
     pbar.close()
