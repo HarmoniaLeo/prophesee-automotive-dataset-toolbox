@@ -12,7 +12,7 @@ import torch
 import time
 import math
 
-raw_dir = "/data/lbd/ATIS_Automotive_Detection_Dataset/detection_dataset_duration_60s_ratio_1.0"
+raw_dir = "/data2/lbd/ATIS_Automotive_Detection_Dataset/detection_dataset_duration_60s_ratio_1.0"
 
 under_zero_x = []
 under_zero_y = []
@@ -62,7 +62,7 @@ for mode in ["train","test","val"]:
         for w in ws:
             if ((w+x >= 240) and (w not in over_bound_x)):
                 over_bound_x.append(x+w)
-        break
+        
     pbar.close()
 print(under_zero_x,under_zero_y,over_bound_x,over_bound_y)
 #print(under_zero_x.min(),under_zero_y.min(),over_bound_x.max(),over_bound_y.max())
