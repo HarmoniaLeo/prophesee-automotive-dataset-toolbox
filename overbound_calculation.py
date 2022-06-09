@@ -49,10 +49,13 @@ for mode in ["test"]:
         ys = dat_bbox['y']
         hs = dat_bbox['h']
         ws = dat_bbox['w']
+        ts = dat_bbox['t']
 
-        for x in xs:
+        for i,x in enumerate(xs):
             if ((x<0) and (x not in under_zero_x)):
                 under_zero_x.append(x)
+                print(file_name,ts[i])
+                break
         for y in ys:
             if ((y<0) and (y not in under_zero_y)):
                 under_zero_y.append(y)
