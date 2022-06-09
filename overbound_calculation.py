@@ -19,7 +19,7 @@ under_zero_y = []
 over_bound_x = []
 over_bound_y = []
 
-for mode in ["train","test","val"]:
+for mode in ["test"]:
     
     file_dir = os.path.join(raw_dir, mode)
     root = file_dir
