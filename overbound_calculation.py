@@ -62,7 +62,8 @@ for mode in ["train","test","val"]:
         for w in ws:
             if ((w+x >= 240) and (w not in over_bound_x)):
                 over_bound_x.append(x+w)
-        
+        pbar.update()
+        break
     pbar.close()
 print(under_zero_x,under_zero_y,over_bound_x,over_bound_y)
 #print(under_zero_x.min(),under_zero_y.min(),over_bound_x.max(),over_bound_y.max())
