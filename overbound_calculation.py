@@ -57,7 +57,7 @@ for mode in ["test"]:
         for y in ys:
             if ((y<0) and (y not in under_zero_y)):
                 under_zero_y.append(y)
-        for h in hs:
+        for i,h in enumerate(hs):
             if ((y+h >= 240) and (h not in over_bound_y)):
                 over_bound_y.append(y+h)
             if y+h == 376:
