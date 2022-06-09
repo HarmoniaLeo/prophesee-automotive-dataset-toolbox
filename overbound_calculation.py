@@ -54,8 +54,8 @@ for mode in ["test"]:
         for i,x in enumerate(xs):
             if ((x<0) and (x not in under_zero_x)):
                 under_zero_x.append(x)
-                print(file_name,ts[i])
-                break
+                if x == -76:
+                    print(file_name,ts[i])
         for y in ys:
             if ((y<0) and (y not in under_zero_y)):
                 under_zero_y.append(y)
