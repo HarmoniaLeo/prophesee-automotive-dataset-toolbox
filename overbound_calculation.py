@@ -64,4 +64,5 @@ for mode in ["train","test","val"]:
                 over_bound_x.append(x+w)
         break
     pbar.close()
-print(under_zero_x.min(),under_zero_y.min(),over_bound_x.max(),over_bound_y.max())
+print(under_zero_x,under_zero_y,over_bound_x,over_bound_y)
+#print(under_zero_x.min(),under_zero_y.min(),over_bound_x.max(),over_bound_y.max())
