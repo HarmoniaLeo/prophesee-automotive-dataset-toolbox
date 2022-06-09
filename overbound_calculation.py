@@ -54,14 +54,14 @@ for mode in ["test"]:
         for i,x in enumerate(xs):
             if ((x<0) and (x not in under_zero_x)):
                 under_zero_x.append(x)
-                if x == -76:
-                    print(file_name,ts[i])
         for y in ys:
             if ((y<0) and (y not in under_zero_y)):
                 under_zero_y.append(y)
         for h in hs:
             if ((y+h >= 240) and (h not in over_bound_y)):
                 over_bound_y.append(y+h)
+            if y+h == 376:
+                print(file_name,ts[i])
         for w in ws:
             if ((w+x >= 304) and (w not in over_bound_x)):
                 over_bound_x.append(x+w)
