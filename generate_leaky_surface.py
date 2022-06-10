@@ -92,7 +92,6 @@ def generate_a_file(modeAndfile_name):
 
 
     for bbox_count,unique_time in enumerate(unique_ts):
-        print(mode,file_name, unique_time)
         volume_save_path_l_short = os.path.join(target_root_short, file_name+"_"+str(unique_time)+"_locations.npy")
         volume_save_path_f_short = os.path.join(target_root_short, file_name+"_"+str(unique_time)+"_features.npy")
         volume_save_path_l_long = os.path.join(target_root_long, file_name+"_"+str(unique_time)+"_locations.npy")
@@ -154,6 +153,8 @@ def generate_a_file(modeAndfile_name):
 
         time_upperbound = end_time
         count_upperbound = end_count
+
+        print(mode,file_name, unique_time)
 
 if __name__ == '__main__':
     
