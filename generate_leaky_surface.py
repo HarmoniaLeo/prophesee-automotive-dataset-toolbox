@@ -15,11 +15,11 @@ import argparse
 from numba import jit
 
 @jit(nopython=True)
-def generate_leakysurface(events,shape,memory,lamda):
-    if memory is None:
-        q, p = np.zeros(shape), np.zeros(shape)
-    else:
-        q, p = memory
+def generate_leakysurface(events, q, p, lamda):
+    # if memory is None:
+    #     q, p = np.zeros(shape), np.zeros(shape)
+    # else:
+    #     q, p = memory
     t_prev = 0
     for event in events:
         if event[3] == 1:
@@ -28,7 +28,7 @@ def generate_leakysurface(events,shape,memory,lamda):
             p = q
             p[event[1]][event[0]] += 1
         t_prev = event[2]
-    return q, (q, p)
+    return q, p
 
 def denseToSparse(dense_tensor):
     """
@@ -168,13 +168,13 @@ if __name__ == '__main__':
                 events[:,1] = events[:,1] * rh
 
                 if start_time > time_upperbound:
-                    memory = None
+                    q, p = np.zeros(shape), np.zeros(shape)
 
-                volume, memory = generate_leakysurface(events, target_shape, memory, args.lamda)
+                q, p = generate_leakysurface(events, q, p, args.lamda)
 
                 #volume_ = volume.cpu().numpy().copy()
 
-                locations, features = denseToSparse(volume)
+                locations, features = denseToSparse(q)
                 y, x = locations
                 
                 locations = x.astype(np.uint32) + np.left_shift(y.astype(np.uint32), 10)
