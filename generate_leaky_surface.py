@@ -23,7 +23,7 @@ def generate_leakysurface(events, q, p, lamda):
     t_prev = 0
     for event in events:
         if event[3] == 1:
-            delta = event[2] - t_prev
+            delta = float(event[2] - t_prev)
             q = np.where(p - lamda * delta < 0, 0, p - lamda * delta)
             p = q
             p[event[1]][event[0]] += 1
@@ -168,7 +168,7 @@ if __name__ == '__main__':
                 events[:,1] = events[:,1] * rh
 
                 if start_time > time_upperbound:
-                    q, p = np.zeros(shape), np.zeros(shape)
+                    q, p = np.zeros(shape, dtype = float), np.zeros(shape, dtype = float)
 
                 q, p = generate_leakysurface(events, q, p, args.lamda)
 
