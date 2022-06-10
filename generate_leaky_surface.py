@@ -26,7 +26,7 @@ def generate_leakysurface(events, q, p, lamda):
             delta = float(events[i,2] - t_prev)
             q = np.where(p - lamda * delta < 0, 0, p - lamda * delta)
             p = q
-            p[int(events[i,1])][int(event[i,0])] += 1
+            p[int(events[i,1])][int(events[i,0])] += 1
         t_prev = events[i,2]
     return q, p
 
