@@ -16,14 +16,14 @@ import argparse
 
 def generate_leakysurface(events,shape,memory,lamda):
     if memory is None:
-        q, p = torch.zeros(shape), torch.zeros(shape)
+        q, p = np.zeros(shape), np.zeros(shape)
     else:
         q, p = memory
     t_prev = 0
     for event in events:
         if event[3] == 1:
             delta = event[2] - t_prev
-            q = torch.where(p - lamda * delta < 0, 0, p - lamda * delta)
+            q = np.where(p - lamda * delta < 0, 0, p - lamda * delta)
             p = q
             p[event[1]][event[0]] += 1
         t_prev = event[2]
@@ -160,7 +160,8 @@ if __name__ == '__main__':
 
                 events = dat_event.load_n_events(int(end_count - start_count))
                 del dat_event
-                events = torch.from_numpy(rfn.structured_to_unstructured(events)[:, [1, 2, 0, 3]].astype(float)).cuda()
+                #events = torch.from_numpy(rfn.structured_to_unstructured(events)[:, [1, 2, 0, 3]].astype(float)).cuda()
+                rfn.structured_to_unstructured(events)[:, [1, 2, 0, 3]].astype(float)
                 events[:,0] = events[:,0] * rw
                 events[:,1] = events[:,1] * rh
 
@@ -169,9 +170,9 @@ if __name__ == '__main__':
 
                 volume, memory = generate_leakysurface(events, target_shape, memory, 1e-4)
 
-                volume_ = volume.cpu().numpy().copy()
+                #volume_ = volume.cpu().numpy().copy()
 
-                locations, features = denseToSparse(volume_)
+                locations, features = denseToSparse(volume)
                 y, x = locations
                 
                 locations = x.astype(np.uint32) + np.left_shift(y.astype(np.uint32), 10)
