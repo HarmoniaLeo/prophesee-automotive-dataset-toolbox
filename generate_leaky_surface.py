@@ -191,4 +191,4 @@ if __name__ == '__main__':
                         if time_seq_name[-3:] == 'dat']
         file_list = file_list + files
 
-Parallel(n_jobs=-1)(delayed(generate_a_file)(file) for file in file_list)
+    Parallel(n_jobs=-1)(delayed(generate_a_file)(file) for file in file_list)
