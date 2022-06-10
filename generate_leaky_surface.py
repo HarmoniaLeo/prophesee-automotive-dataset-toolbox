@@ -14,7 +14,7 @@ import math
 import argparse
 from numba import jit
 
-#@jit(nopython=True)
+@jit(nopython=True)
 def generate_leakysurface(events, q, p, lamda):
     # if memory is None:
     #     q, p = np.zeros(shape), np.zeros(shape)
