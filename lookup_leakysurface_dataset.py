@@ -107,7 +107,7 @@ if __name__ == '__main__':
         if args.short == "True":
             data_path_short = "/data2/lbd/ATIS_leaky"
         else:
-            data_path_long = "/data2/lbd/ATIS_leaky_long"
+            data_path_short = "/data2/lbd/ATIS_leaky_long"
         if not (args.exp_name is None):
             result_path = "/home/lbd/100-fps-event-det/" + args.exp_name + "/summarise.npz"
         ori_shape = (240,304)
@@ -118,7 +118,7 @@ if __name__ == '__main__':
         if args.short == "True":
             data_path_short = "/data2/lbd/Large_leaky"
         else:
-            data_path_long = "/data2/lbd/Large_leaky_long"
+            data_path_short = "/data2/lbd/Large_leaky_long"
         if not (args.exp_name is None):
             result_path = "/home/lbd/100-fps-event-det/" + args.exp_name + "/summarise.npz"
         ori_shape = (720,1280)
