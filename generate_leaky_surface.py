@@ -141,16 +141,16 @@ def generate_a_file(modeAndfile_name):
         
         locations = x.astype(np.uint32) + np.left_shift(y.astype(np.uint32), 10)
         locations.tofile(volume_save_path_l_short)
-        features.tofile(volume_save_path_f_short)
+        features.astype(np.float32).tofile(volume_save_path_f_short)
         
         locations, features = denseToSparse(q_long)
         assert(len(locations) == len(features))
-        
+
         y, x = locations
         
         locations = x.astype(np.uint32) + np.left_shift(y.astype(np.uint32), 10)
         locations.tofile(volume_save_path_l_long)
-        features.tofile(volume_save_path_f_long)
+        features.astype(np.float32).tofile(volume_save_path_f_long)
 
         time_upperbound = end_time
         count_upperbound = end_count
