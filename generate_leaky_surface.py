@@ -49,6 +49,7 @@ if __name__ == '__main__':
     parser.add_argument('-raw_dir', type=str)
     parser.add_argument('-target_dir', type=str)
     parser.add_argument('-dataset', type=str, default="gen4")
+    parser.add_argument('-lamda', type=float)
 
     args = parser.parse_args()
     raw_dir = args.raw_dir
@@ -168,7 +169,7 @@ if __name__ == '__main__':
                 if start_time > time_upperbound:
                     memory = None
 
-                volume, memory = generate_leakysurface(events, target_shape, memory, 1e-4)
+                volume, memory = generate_leakysurface(events, target_shape, memory, args.lamda)
 
                 #volume_ = volume.cpu().numpy().copy()
 
