@@ -168,7 +168,7 @@ if __name__ == '__main__':
                 events[:,1] = events[:,1] * rh
 
                 if start_time > time_upperbound:
-                    q, p = np.zeros(shape, dtype = float), np.zeros(shape, dtype = float)
+                    q, p = np.zeros(target_shape, dtype = float), np.zeros(target_shape, dtype = float)
 
                 q, p = generate_leakysurface(events, q, p, args.lamda)
 
