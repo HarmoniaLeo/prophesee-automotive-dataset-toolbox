@@ -104,7 +104,7 @@ if __name__ == '__main__':
 
     if args.dataset == "gen1":
         bbox_path = "/data2/lbd/ATIS_Automotive_Detection_Dataset/detection_dataset_duration_60s_ratio_1.0"
-        if args.short:
+        if args.short == "True":
             data_path_short = "/data2/lbd/ATIS_leaky"
         else:
             data_path_long = "/data2/lbd/ATIS_leaky_long"
@@ -115,7 +115,7 @@ if __name__ == '__main__':
         LABELMAP = ["car", "pedestrian"]
     else:
         bbox_path = "/data2/lbd/Large_Automotive_Detection_Dataset_sampling"
-        if args.short:
+        if args.short == "True":
             data_path_short = "/data2/lbd/Large_leaky"
         else:
             data_path_long = "/data2/lbd/Large_leaky_long"
