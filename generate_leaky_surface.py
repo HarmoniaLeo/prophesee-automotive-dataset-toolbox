@@ -130,7 +130,6 @@ if __name__ == '__main__':
             #min_event_count = f_event.event_count()
 
             for bbox_count,unique_time in enumerate(unique_ts):
-                print(file_name, unique_time)
                 volume_save_path_l = os.path.join(target_root, file_name+"_"+str(unique_time)+"_locations.npy")
                 volume_save_path_f = os.path.join(target_root, file_name+"_"+str(unique_time)+"_features.npy")
                 if os.path.exists(volume_save_path_f) and os.path.exists(volume_save_path_l):
@@ -172,6 +171,8 @@ if __name__ == '__main__':
                     q, p = np.zeros(shape, dtype = float), np.zeros(shape, dtype = float)
 
                 q, p = generate_leakysurface(events, q, p, args.lamda)
+
+                print("generated")
 
                 #volume_ = volume.cpu().numpy().copy()
 
