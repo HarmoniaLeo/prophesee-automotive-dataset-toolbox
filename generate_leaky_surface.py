@@ -12,8 +12,9 @@ import torch
 import time
 import math
 import argparse
+from numba import jit
 
-
+@jit(nopython=True)
 def generate_leakysurface(events,shape,memory,lamda):
     if memory is None:
         q, p = np.zeros(shape), np.zeros(shape)
