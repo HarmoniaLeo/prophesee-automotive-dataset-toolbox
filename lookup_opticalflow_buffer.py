@@ -221,4 +221,4 @@ if __name__ == '__main__':
     dat_bbox = np.fromfile(f_bbox, dtype=v_type, count=-1)
     f_bbox.close()
     #print(target)
-    flow = extract_flow(np.load(os.path.join("optical_flow_buffer",item + "_{0}.npy".format(time_stamp_end))), dat_bbox[(dat_bbox['t']==time_stamp_end)],item,result_path,time_stamp_end)
+    extract_flow(np.load(os.path.join("optical_flow_buffer",item + "_{0}.npy".format(time_stamp_end))), dat_bbox[(dat_bbox['t']==time_stamp_end)],item,result_path,time_stamp_end)
