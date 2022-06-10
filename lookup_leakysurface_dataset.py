@@ -89,7 +89,7 @@ if __name__ == '__main__':
     parser.add_argument('-window', type=int, default=50000)
     parser.add_argument('-exp_name', type=str, default=None)
     parser.add_argument('-tol', type = int, default=4999)
-    parser.add_argument('-short', type = bool, default=True)
+    parser.add_argument('-short', type = str, default="True")
     parser.add_argument('-dataset', type = str, default="gen1")
 
     args = parser.parse_args()
@@ -157,7 +157,7 @@ if __name__ == '__main__':
     events = np.stack([x, y, t, c, z, p, features], axis=1)
 
     volume = generate_event_volume(events,shape,ori_shape)
-    if args.short:
+    if args.short == "True":
         lamda = 0.0001
     else:
         lamda = 0.000001
