@@ -134,6 +134,8 @@ def generate_a_file(modeAndfile_name):
         q_short, p_short, q_long, p_long = generate_leakysurface(events, q_short, p_short, q_long, p_long)
 
         locations, features = denseToSparse(q_short)
+        if len(locations) != len(features):
+            print(locations.shape, features.shape)
         assert(len(locations) == len(features))
 
         y, x = locations
