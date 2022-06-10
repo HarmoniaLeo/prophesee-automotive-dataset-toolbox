@@ -11,6 +11,7 @@ import time
 import math
 import argparse
 import cv2
+from numba import jit
 
 def compute_TVL1(prev, curr, bound=1):
     """Compute the TV-L1 optical flow."""
@@ -68,8 +69,9 @@ def extract_flow(volume1, volume2):
 #     # volume2 = np.where(volume2<0, 0, volume2)
 #     return volume1.astype(np.uint8), volume2.astype(np.uint8), buffer
 
-def generate_timesurface(events,shape,end_stamp):
-    volume1, volume2 = np.zeros(shape), np.zeros(shape)
+@jit(nopython=True)
+def generate_timesurface(events,volume1, volume2,end_stamp):
+    #volume1, volume2 = np.zeros(shape), np.zeros(shape)
     if len(events) > 0:
         end_stamp = events[:,2].max()
         start_stamp = events[:,2].min()
@@ -87,7 +89,7 @@ def generate_timesurface(events,shape,end_stamp):
         # volume2 = volume2 / 50000 * 255
         volume1 = np.where(volume1<0, 0, volume1)
         volume2 = np.where(volume2<0, 0, volume2)
-    return volume1.astype(np.uint8), volume2.astype(np.uint8)
+    return volume1, volume2
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(
@@ -181,8 +183,9 @@ if __name__ == '__main__':
             #time_surface_buffer = None
 
             #volume1, volume2, time_surface_buffer = generate_timesurface(events, shape, true_start_time, end_time, time_surface_buffer)
-            volume1, volume2 = generate_timesurface(events, shape, end_time)
-            flow = extract_flow(volume1, volume2)
+            volume1, volume2 = np.zeros(shape), np.zeros(shape)
+            volume1, volume2 = generate_timesurface(events, volume1, volume2, end_time)
+            flow = extract_flow(volume1.astype(np.uint8), volume2.astype(np.uint8))
 
             np.save(csv_path,flow,allow_pickle = True)
 
