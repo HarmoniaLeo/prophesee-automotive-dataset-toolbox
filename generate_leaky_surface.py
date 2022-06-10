@@ -21,13 +21,13 @@ def generate_leakysurface(events, q, p, lamda):
     # else:
     #     q, p = memory
     t_prev = 0
-    for event in events:
-        if event[3] == 1:
-            delta = float(event[2] - t_prev)
+    for i in range(len(events)):
+        if events[i,3] == 1:
+            delta = float(events[i,2] - t_prev)
             q = np.where(p - lamda * delta < 0, 0, p - lamda * delta)
             p = q
-            p[int(event[1])][int(event[0])] += 1
-        t_prev = event[2]
+            p[int(events[i,1])][int(event[i,0])] += 1
+        t_prev = events[i,2]
     return q, p
 
 def denseToSparse(dense_tensor):
