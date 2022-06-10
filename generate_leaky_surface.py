@@ -9,7 +9,7 @@ from numba import jit
 from joblib import Parallel, delayed
 
 @jit(nopython=True)
-def generate_leakysurface(events, q, p, lamda):
+def generate_leakysurface(events, q_short, p_short, q_long, p_long):
     # if memory is None:
     #     q, p = np.zeros(shape), np.zeros(shape)
     # else:
@@ -18,11 +18,14 @@ def generate_leakysurface(events, q, p, lamda):
     for i in range(len(events)):
         if events[i,3] == 1:
             delta = float(events[i,2] - t_prev)
-            q = np.where(p - lamda * delta < 0, 0, p - lamda * delta)
-            p = q
-            p[int(events[i,1])][int(events[i,0])] += 1
+            q_short = np.where(p_short - 0.0001 * delta < 0, 0, p_short - 0.0001 * delta)
+            q_long = np.where(p_long - 0.000001 * delta < 0, 0, p_long - 0.000001 * delta)
+            p_short = q_short
+            p_long = q_long
+            p_short[int(events[i,1])][int(events[i,0])] += 1
+            p_long[int(events[i,1])][int(events[i,0])] += 1
         t_prev = events[i,2]
-    return q, p
+    return q_short, p_short, q_long, p_long
 
 def denseToSparse(dense_tensor):
     """
