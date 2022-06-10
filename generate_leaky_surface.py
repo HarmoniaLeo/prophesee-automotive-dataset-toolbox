@@ -3,15 +3,8 @@ import numpy as np
 from sklearn import datasets
 from src.io import npy_events_tools
 from src.io import psee_loader
-import tqdm
 import os
 from numpy.lib import recfunctions as rfn
-import h5py
-import pickle
-import torch
-import time
-import math
-import argparse
 from numba import jit
 from joblib import Parallel, delayed
 
@@ -195,5 +188,4 @@ if __name__ == '__main__':
                         if time_seq_name[-3:] == 'dat']
         file_list = file_list + files
 
-
-    
+Parallel(n_jobs=-1)(delayed(generate_a_file)(file) for file in file_list)
