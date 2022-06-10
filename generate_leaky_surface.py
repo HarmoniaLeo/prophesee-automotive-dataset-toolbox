@@ -135,6 +135,8 @@ def generate_a_file(modeAndfile_name):
         q_short, p_short, q_long, p_long = generate_leakysurface(events, q_short, p_short, q_long, p_long)
 
         locations, features = denseToSparse(q_short)
+        assert(len(locations) == len(features))
+
         y, x = locations
         
         locations = x.astype(np.uint32) + np.left_shift(y.astype(np.uint32), 10)
@@ -142,6 +144,8 @@ def generate_a_file(modeAndfile_name):
         features.tofile(volume_save_path_f_short)
         
         locations, features = denseToSparse(q_long)
+        assert(len(locations) == len(features))
+        
         y, x = locations
         
         locations = x.astype(np.uint32) + np.left_shift(y.astype(np.uint32), 10)

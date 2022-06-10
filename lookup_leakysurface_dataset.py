@@ -151,9 +151,6 @@ if __name__ == '__main__':
     p = np.right_shift(np.bitwise_and(locations, 8388608), 23).astype(np.float32)
     features = np.fromfile(event_file + "_features.npy", dtype=np.float32)
 
-    print(x.max(),y.max(),c.max(),p.max())
-    print(x.shape, y.shape, c.shape, p.shape, features.shape)
-
     z = np.zeros_like(c)
     t = np.zeros_like(c) + time_stamp_end
     events = np.stack([x, y, t, c, z, p, features], axis=1)
