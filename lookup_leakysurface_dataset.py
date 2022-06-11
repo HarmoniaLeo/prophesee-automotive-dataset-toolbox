@@ -71,6 +71,7 @@ def visualizeVolume(volume,gt,dt,filename,path,time_stamp_end,tol,LABELMAP,lamda
     #img_s[:,:,1] = img_1
     #img_s[:,:,2] = img_2
     img_s = cv2.cvtColor(img_s, cv2.COLOR_HSV2BGR)
+    gt = gt[(gt['t']>time_stamp_end-tol)&(gt['t']<time_stamp_end+tol)]
     draw_bboxes(img_s,gt,0,LABELMAP)
     print(lamda)
     if not (dt is None):
