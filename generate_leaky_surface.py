@@ -68,7 +68,7 @@ def generate_a_file(modeAndfile_name):
     # shape = [720,1280]
     # target_shape = [512, 640]
 
-    min_event_count = 2400000
+    min_event_count = 1200000
 
     rh = target_shape[0] / shape[0]
     rw = target_shape[1] / shape[1]
