@@ -2,7 +2,7 @@ import pylzma
 import py7zlib
 
 for i in range(0,15):
-    fp = open("/data/lbd/Large_Automotive_Detection_Dataset/train/trainfilelist" +  str(i).zfill(2) + ".7z",'rb')
+    fp = open("/data/lbd/Large_Automotive_Detection_Dataset/trainfilelist" +  str(i).zfill(2) + ".7z",'rb')
     #生成一个archive对象
     archive = py7zlib.Archive7z(fp)
 
