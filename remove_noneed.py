@@ -1,7 +1,7 @@
 import os
 
 
-files = os.listdir("/data/lbd/Large_Automotive_Detection_Dataset_sampling/train")
+files = os.listdir("/data/lbd/Large_Automotive_Detection_Dataset/train")
 
 files_skip = [
     "moorea_2019-06-17_test_02_000_1037500000_1097500000",
@@ -24,4 +24,4 @@ files_skip = [
 for file in files:
     for file_skip in files_skip:
         if not (file_skip in file):
-            os.remove(os.path.join("/data/lbd/Large_Automotive_Detection_Dataset_sampling/train", file))
+            os.remove(os.path.join("/data/lbd/Large_Automotive_Detection_Dataset/train", file))
