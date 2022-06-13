@@ -56,6 +56,7 @@ for mode in ["train"]:
     pbar = tqdm.tqdm(total=len(files), unit='File', unit_scale=True)
 
     for i_file, file_name in enumerate(files):
+        print(file_name)
         if file_name not in files_skip:
             continue
         event_file = os.path.join(root, file_name + '_td.dat')
