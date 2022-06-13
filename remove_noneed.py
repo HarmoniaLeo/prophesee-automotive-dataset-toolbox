@@ -24,4 +24,4 @@ files_skip = [
 for file in files:
     for file_skip in files_skip:
         if not (file_skip in file):
-            os.remove(os.path.join("/data/lbd/Large_Automotive_Detection_Dataset_sampling/train", file_skip))
+            os.remove(os.path.join("/data/lbd/Large_Automotive_Detection_Dataset_sampling/train", file))
