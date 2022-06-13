@@ -22,6 +22,7 @@ files_skip = [
 ]
 
 for file in files:
+    print(file)
     for file_skip in files_skip:
         if not (file_skip in file):
             os.remove(os.path.join("/data/lbd/Large_Automotive_Detection_Dataset/train", file))
