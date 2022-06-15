@@ -52,7 +52,7 @@ def draw_bboxes(img, boxes, dt, labelmap):
             cv2.rectangle(img, (pt1[0], pt1[1] - 15), (pt1[0] + 35, pt1[1]), color, -1)
             cv2.putText(img, class_name[:3], (pt1[0]+3, pt1[1] - 5), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0,0,0), 1)
 
-def visualizeVolume(volume_,gt,dt,filename,path,time_stamp_end,tol,LABELMAP):
+def visualizeVolume(volume_,gt,dt,filename,path,time_stamp_end,tol,LABELMAP,typ):
     img_list = []
     for i in range(0, len(volume_)):
         img_s = volume_[i].astype(np.uint8)
@@ -60,9 +60,9 @@ def visualizeVolume(volume_,gt,dt,filename,path,time_stamp_end,tol,LABELMAP):
         if not (dt is None):
             dt = dt[(dt['t']>time_stamp_end-tol)&(dt['t']<time_stamp_end+tol)]
             draw_bboxes(img_s,dt,1,LABELMAP)
-            path_t = os.path.join(path,filename+"_{0}_result.png".format(int(time_stamp_end)))
+            path_t = os.path.join(path,filename+"_{0}_{1}_result_"+typ+".png".format(int(time_stamp_end,i)))
         else:
-            path_t = os.path.join(path,filename+"_{0}_{1}.png".format(int(time_stamp_end),i))
+            path_t = os.path.join(path,filename+"_{0}_{1}_"+typ+".png".format(int(time_stamp_end),i))
         cv2.imwrite(path_t,img_s)
         # if not(os.path.exists(path_t)):
         #     os.mkdir(path_t)
@@ -153,4 +153,4 @@ if __name__ == '__main__':
     if args.type == "normal":
         C = 5
     volumes = generate_event_volume(events,shape,ori_shape,C)
-    visualizeVolume(volumes,dat_bbox,dt,item,result_path,time_stamp_end,args.tol,LABELMAP)
+    visualizeVolume(volumes,dat_bbox,dt,item,result_path,time_stamp_end,args.tol,LABELMAP,arges.type)
