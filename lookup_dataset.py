@@ -148,7 +148,7 @@ if __name__ == '__main__':
     features = np.right_shift(np.bitwise_and(locations, 2139095040), 23).astype(int)
 
     events = np.stack([x, y, c, p, features], axis=1)
-    print(x.max(),y.max(),c.max(),p.max())
+    print(x.max(),y.max(),c.max(),p.max(),features.max())
 
     if args.type == "normal":
         C = 5
