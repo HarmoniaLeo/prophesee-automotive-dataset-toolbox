@@ -166,7 +166,7 @@ if __name__ == '__main__':
 
                 volume = volume.cpu().numpy().astype(np.uint8)
                 locations, features = denseToSparse(volume)
-                print(torch.quantile(features,0.05),torch.quantile(features,0.2),torch.quantile(features,0.5),torch.quantile(features,0.75),torch.quantile(features,0.95))
+                print(np.quantile(features,0.05),np.quantile(features,0.2),np.quantile(features,0.5),np.quantile(features,0.75),np.quantile(features,0.95))
 
                 c, y, x = locations
                 p = c%2
