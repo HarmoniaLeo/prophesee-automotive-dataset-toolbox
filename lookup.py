@@ -198,4 +198,5 @@ if __name__ == '__main__':
     x,y,t,p = events['x'], events['y'], events['t'], events['p']
     events = np.stack([x.astype(int), y.astype(int), t, p], axis=-1)
     volume = generate_event_volume(events,shape,5)
+    print(len(volume[volume>0]))
     visualizeVolume(volume,dat_bbox,dt,item,result_path,time_stamp_start,time_stamp_end,args.tol,LABELMAP)
