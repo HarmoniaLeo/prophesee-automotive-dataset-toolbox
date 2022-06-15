@@ -162,7 +162,7 @@ if __name__ == '__main__':
                     volume = generate_agile_event_volume_cuda(events, target_shape, time_window, event_volume_bins)
                 else:
                     volume = generate_agile_event_volume_cuda(events, shape, time_window, event_volume_bins)
-                    volume = torch.nn.functional.interpolate(volume, size = target_shape, mode='nearest')
+                    volume = torch.nn.functional.interpolate(volume[None,:,:,:], size = target_shape, mode='nearest')[0]
 
                 features, locations = denseToSparse(volume.cpu().numpy())
 
