@@ -60,7 +60,7 @@ def visualizeVolume(volume_,gt,dt,filename,path,time_stamp_end,tol,LABELMAP,typ)
         if not (dt is None):
             dt = dt[(dt['t']>time_stamp_end-tol)&(dt['t']<time_stamp_end+tol)]
             draw_bboxes(img_s,dt,1,LABELMAP)
-            path_t = os.path.join(path,filename+"_{0}_{1}_result_".format(int(time_stamp_end),i))+typ+".png")
+            path_t = os.path.join(path,filename+"_{0}_{1}_result_".format(int(time_stamp_end),i)+typ+".png")
         else:
             path_t = os.path.join(path,filename+"_{0}_{1}_".format(int(time_stamp_end),i)+typ+".png")
         cv2.imwrite(path_t,img_s)
