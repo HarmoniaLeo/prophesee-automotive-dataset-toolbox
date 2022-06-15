@@ -147,7 +147,7 @@ if __name__ == '__main__':
     p = np.right_shift(np.bitwise_and(locations, 4194304), 22).astype(int)
     features = np.right_shift(np.bitwise_and(locations, 2139095040), 23).astype(int)
 
-    print(np.quantile(features,0.05),np.quantile(features,0.2),np.quantile(features,0.5),np.quantile(features,0.75),np.quantile(features,0.95))
+    print(np.quantile(features,0.05),np.quantile(features,0.2),np.quantile(features,0.5),np.quantile(features,0.75),np.quantile(features,0.95),len(features))
 
     events = np.stack([x, y, c, p, features], axis=1)
 
