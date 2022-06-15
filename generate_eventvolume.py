@@ -33,7 +33,7 @@ def generate_agile_event_volume_cuda(events, shape, events_window = 50000, volum
 
     img_viewed = img_viewed / 5 * 255
 
-    print(np.quantile(img_viewed[img_viewed>0],0.05),np.quantile(img_viewed[img_viewed>0],0.2),np.quantile(img_viewed[img_viewed>0],0.5),np.quantile(img_viewed[img_viewed>0],0.75),np.quantile(img_viewed[img_viewed>0],0.95))
+    print(torch.quantile(img_viewed[img_viewed>0],0.05),torch.quantile(img_viewed[img_viewed>0],0.2),torch.quantile(img_viewed[img_viewed>0],0.5),torch.quantile(img_viewed[img_viewed>0],0.75),torch.quantile(img_viewed[img_viewed>0],0.95))
 
     return img_viewed
 
