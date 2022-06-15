@@ -89,14 +89,13 @@ if __name__ == '__main__':
 
     #target_dirs = [os.path.join(target_dir, cat) for cat in ["normal", "long", "short", "ts_short", "ts_long"]]
     #target_dirs = [os.path.join(target_dir, cat) for cat in ["normal"]]
-    os.path.join(target_dir, "normal")
+    target_dir = os.path.join(target_dir, "normal")
 
 
     if not os.path.exists(raw_dir):
         os.makedirs(raw_dir)
-    for target_dir in target_dirs:
-        if not os.path.exists(target_dir):
-            os.makedirs(target_dir)
+    if not os.path.exists(target_dir):
+        os.makedirs(target_dir)
 
     for mode in ["train","val","test"]:
         file_dir = os.path.join(raw_dir, mode)
@@ -134,9 +133,6 @@ if __name__ == '__main__':
             unique_ts, unique_indices = np.unique(dat_bbox['t'], return_index=True)
 
             f_event = psee_loader.PSEELoader(event_file)
-
-            time_upperbound = -1e16
-            count_upperbound = -1
 
             for bbox_count,unique_time in enumerate(unique_ts):
                 volume_save_path = os.path.join(target_root, file_name+"_"+str(unique_time)+".npy")
@@ -183,8 +179,6 @@ if __name__ == '__main__':
                 #np.savez(volume_save_path, locations = locations, features = features)
                 #h5.create_dataset(str(unique_time)+"/locations", data=locations)
                 #h5.create_dataset(str(unique_time)+"/features", data=features)
-                time_upperbound = end_time
-                count_upperbound = end_count
                 torch.cuda.empty_cache()
             #h5.close()
             pbar.update(1)
