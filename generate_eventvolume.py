@@ -33,8 +33,6 @@ def generate_agile_event_volume_cuda(events, shape, events_window = 50000, volum
 
     img_viewed = img_viewed / 10 * 255
 
-    img_viewed = torch.where(img_viewed > 255, 255, img_viewed)
-
     return img_viewed
 
 def denseToSparse(dense_tensor):
@@ -171,6 +169,8 @@ if __name__ == '__main__':
                 c, y, x = locations
                 p = c%2
                 c = c.astype(int)/2
+
+                features = np.where(features > 255, 255, features)
 
                 volume = x.astype(np.uint32) + np.left_shift(y.astype(np.uint32), 10) + np.left_shift(c.astype(np.uint32), 19) + np.left_shift(p.astype(np.uint32), 22) + np.left_shift(features.astype(np.uint8), 23)
 
