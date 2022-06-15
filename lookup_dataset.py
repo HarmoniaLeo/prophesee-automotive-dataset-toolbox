@@ -140,7 +140,7 @@ if __name__ == '__main__':
     final_path = os.path.join(data_path,data_folder)
     event_file = os.path.join(final_path, item+"_"+str(time_stamp_end) + ".npy")
     #print(target)
-    locations = np.fromfile(event_file, dtype=np.int32)
+    locations = np.fromfile(event_file, dtype=np.uint32)
     x = np.bitwise_and(locations, 1023).astype(int)
     y = np.right_shift(np.bitwise_and(locations, 523264), 10).astype(int)
     c = np.right_shift(np.bitwise_and(locations, 3670016), 19).astype(int)
