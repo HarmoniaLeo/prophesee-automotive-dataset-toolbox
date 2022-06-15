@@ -164,15 +164,15 @@ if __name__ == '__main__':
                     volume = generate_agile_event_volume_cuda(events, shape, time_window, event_volume_bins)
                     volume = torch.nn.functional.interpolate(volume[None,:,:,:], size = target_shape, mode='nearest')[0]
 
-                volume = volume.cpu().numpy().astype(np.uint8)
+                volume = volume.cpu().numpy()
+                volume = np.where(volume > 255, 255, volume)
+                volume = volume.astype(np.uint8)
                 locations, features = denseToSparse(volume)
                 print(np.quantile(features,0.05),np.quantile(features,0.2),np.quantile(features,0.5),np.quantile(features,0.75),np.quantile(features,0.95))
 
                 c, y, x = locations
                 p = c%2
                 c = (c/2).astype(int)
-
-                features = np.where(features > 255, 255, features)
 
                 volume = x.astype(np.uint32) + np.left_shift(y.astype(np.uint32), 10) + np.left_shift(c.astype(np.uint32), 19) + np.left_shift(p.astype(np.uint32), 22) + np.left_shift(features.astype(np.uint32), 23)
 
