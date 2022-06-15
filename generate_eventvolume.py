@@ -181,7 +181,6 @@ if __name__ == '__main__':
                 features = np.right_shift(np.bitwise_and(volume, 2139095040), 23).astype(int)
 
                 events = np.stack([x, y, c, p, features], axis=1)
-                print(x.max(),y.max(),c.max(),p.max(),features.max())
 
                 volume.tofile(volume_save_path)
                 #features.tofile(volume_save_path_f)
