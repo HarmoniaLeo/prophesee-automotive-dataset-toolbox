@@ -168,17 +168,17 @@ if __name__ == '__main__':
 
                 c, y, x = locations
                 p = c%2
-                c = c.astype(int)/2
+                c = (c/2).astype(int)
 
                 features = np.where(features > 255, 255, features)
 
-                volume = x.astype(np.uint32) + np.left_shift(y.astype(np.uint32), 10) + np.left_shift(c.astype(np.uint32), 19) + np.left_shift(p.astype(np.uint32), 22) + np.left_shift(features.astype(np.uint8), 23)
+                volume = x.astype(np.uint32) + np.left_shift(y.astype(np.uint32), 10) + np.left_shift(c.astype(np.uint32), 19) + np.left_shift(p.astype(np.uint32), 22) + np.left_shift(features.astype(np.uint32), 23)
 
-                # x = np.bitwise_and(volume, 1023).astype(int)
-                # y = np.right_shift(np.bitwise_and(volume, 523264), 10).astype(int)
-                # c = np.right_shift(np.bitwise_and(volume, 3670016), 19).astype(int)
-                # p = np.right_shift(np.bitwise_and(volume, 4194304), 22).astype(int)
-                # features = np.right_shift(np.bitwise_and(volume, 2139095040), 23).astype(int)
+                x = np.bitwise_and(volume, 1023).astype(int)
+                y = np.right_shift(np.bitwise_and(volume, 523264), 10).astype(int)
+                c = np.right_shift(np.bitwise_and(volume, 3670016), 19).astype(int)
+                p = np.right_shift(np.bitwise_and(volume, 4194304), 22).astype(int)
+                features = np.right_shift(np.bitwise_and(volume, 2139095040), 23).astype(int)
 
                 events = np.stack([x, y, c, p, features], axis=1)
                 print(x.max(),y.max(),c.max(),p.max(),features.max())
