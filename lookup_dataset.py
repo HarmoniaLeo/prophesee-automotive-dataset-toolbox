@@ -147,10 +147,9 @@ if __name__ == '__main__':
     p = np.right_shift(np.bitwise_and(locations, 4194304), 22).astype(int)
     features = np.right_shift(np.bitwise_and(locations, 2139095040), 23).astype(int)
 
-    features = np.where(features >0, 255, 0)
+    print(np.quantile(features,0.05),np.quantile(features,0.2),np.quantile(features,0.5),np.quantile(features,0.75),np.quantile(features,0.95))
 
     events = np.stack([x, y, c, p, features], axis=1)
-    print(x.max(),y.max(),c.max(),p.max(),features.max())
 
     if args.type == "normal":
         C = 5
