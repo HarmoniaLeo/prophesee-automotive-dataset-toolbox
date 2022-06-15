@@ -94,7 +94,6 @@ if __name__ == '__main__':
         os.mkdir(result_path)
     data_folder = 'test'
     item = args.item
-    time_stamp_start = args.end - args.window
     time_stamp_end = args.end
 
     if args.dataset == "gen1":
