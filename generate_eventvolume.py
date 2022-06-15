@@ -168,7 +168,6 @@ if __name__ == '__main__':
                 volume = np.where(volume > 255, 255, volume)
                 volume = volume.astype(np.uint8)
                 locations, features = denseToSparse(volume)
-                print(np.quantile(features,0.05),np.quantile(features,0.2),np.quantile(features,0.5),np.quantile(features,0.75),np.quantile(features,0.95))
 
                 c, y, x = locations
                 p = c%2
@@ -181,6 +180,7 @@ if __name__ == '__main__':
                 c = np.right_shift(np.bitwise_and(volume, 3670016), 19).astype(int)
                 p = np.right_shift(np.bitwise_and(volume, 4194304), 22).astype(int)
                 features = np.right_shift(np.bitwise_and(volume, 2139095040), 23).astype(int)
+                print(np.quantile(features,0.05),np.quantile(features,0.2),np.quantile(features,0.5),np.quantile(features,0.75),np.quantile(features,0.95))
 
                 events = np.stack([x, y, c, p, features], axis=1)
 
