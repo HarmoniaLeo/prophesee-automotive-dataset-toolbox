@@ -33,8 +33,6 @@ def generate_agile_event_volume_cuda(events, shape, events_window = 50000, volum
 
     img_viewed = img_viewed / 5 * 255
 
-    print(torch.quantile(img_viewed[img_viewed>0],0.05),torch.quantile(img_viewed[img_viewed>0],0.2),torch.quantile(img_viewed[img_viewed>0],0.5),torch.quantile(img_viewed[img_viewed>0],0.75),torch.quantile(img_viewed[img_viewed>0],0.95))
-
     return img_viewed
 
 def denseToSparse(dense_tensor):
@@ -166,7 +164,9 @@ if __name__ == '__main__':
                     volume = generate_agile_event_volume_cuda(events, shape, time_window, event_volume_bins)
                     volume = torch.nn.functional.interpolate(volume[None,:,:,:], size = target_shape, mode='nearest')[0]
 
+                volume = volume.astype(np.uint8)
                 locations, features = denseToSparse(volume.cpu().numpy())
+                print(torch.quantile(features,0.05),torch.quantile(features,0.2),torch.quantile(features,0.5),torch.quantile(features,0.75),torch.quantile(features,0.95))
 
                 c, y, x = locations
                 p = c%2
