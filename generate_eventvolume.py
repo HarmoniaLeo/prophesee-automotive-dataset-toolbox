@@ -29,7 +29,7 @@ def generate_agile_event_volume_cuda(events, shape, events_window = 50000, volum
     img.index_add_(0, x + W * y, adder)
     img = img.view(H * W, volume_bins, 2)
 
-    img_viewed = img.view((H, W, img.shape[1] * 2)).permute(2, 0, 1).contiguous()
+    img_viewed = img.view((H, W, img.shape[1], 2))
 
     img_viewed = img_viewed / 5 * 255
 
@@ -45,7 +45,7 @@ def denseToSparse(dense_tensor):
     """
     non_zero_indices = np.nonzero(dense_tensor)
 
-    features = dense_tensor[non_zero_indices[0],non_zero_indices[1],non_zero_indices[2]]
+    features = dense_tensor[non_zero_indices[0],non_zero_indices[1],non_zero_indices[2],non_zero_indices[3]]
 
     return np.stack(non_zero_indices), features
 
@@ -166,9 +166,7 @@ if __name__ == '__main__':
 
                 locations, features = denseToSparse(volume.cpu().numpy())
 
-                c, y, x = locations
-                p = c%2
-                c = (c/2).astype(int)
+                y, x, c, p = locations
 
                 features = np.where(features > 255, 255, features)
 
