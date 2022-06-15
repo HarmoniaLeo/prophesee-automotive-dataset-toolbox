@@ -30,8 +30,8 @@ def generate_agile_event_volume_cuda(events, shape, events_window = 50000, volum
     img = img.view(H * W, volume_bins, 2)
 
     img_viewed = img.view((H, W, img.shape[1] * 2)).permute(2, 0, 1).contiguous()
-    
-    img_viewed = img_viewed / 20 * 255
+
+    img_viewed = img_viewed / 8 * 255
 
     return img_viewed
 
