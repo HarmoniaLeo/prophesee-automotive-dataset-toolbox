@@ -18,7 +18,7 @@ def generate_agile_event_volume_cuda(events, shape, events_window = 50000, volum
 
     x, y, p = x.long(), y.long(), p.long()
 
-    t_star = (volume_bins * t.float() / events_window)[:,None,None]
+    t_star = (volume_bins * t.float())[:,None,None]
     channels = volume_bins
 
     adder = torch.stack([torch.arange(channels),torch.arange(channels)],dim = 1).to(x.device)[None,:,:]   #1, 2, 2
@@ -29,7 +29,7 @@ def generate_agile_event_volume_cuda(events, shape, events_window = 50000, volum
     img.index_add_(0, x + W * y, adder)
     img = img.view(H * W, volume_bins, 2)
 
-    img_viewed = img.view((H, W, img.shape[1], 2))
+    img_viewed = img.view((H, W, img.shape[1] * 2)).permute(2, 0, 1).contiguous()
 
     img_viewed = img_viewed / 5 * 255
 
@@ -45,7 +45,7 @@ def denseToSparse(dense_tensor):
     """
     non_zero_indices = np.nonzero(dense_tensor)
 
-    features = dense_tensor[non_zero_indices[0],non_zero_indices[1],non_zero_indices[2],non_zero_indices[3]]
+    features = dense_tensor[non_zero_indices[0],non_zero_indices[1],non_zero_indices[2]]
 
     return np.stack(non_zero_indices), features
 
@@ -166,7 +166,9 @@ if __name__ == '__main__':
 
                 locations, features = denseToSparse(volume.cpu().numpy())
 
-                y, x, c, p = locations
+                c, y, x = locations
+                p = c%2
+                c = (c/2).astype(int)
 
                 features = np.where(features > 255, 255, features)
 
