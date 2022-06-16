@@ -55,6 +55,9 @@ if __name__ == '__main__':
     parser.add_argument('-raw_dir', type=str)
     parser.add_argument('-target_dir', type=str)
     parser.add_argument('-dataset', type=str, default="gen1")
+    parser.add_argument('-time_window', type=int, default=50000)
+    parser.add_argument('-event_volume_bins', type=int, default=5)
+
 
     args = parser.parse_args()
     raw_dir = args.raw_dir
@@ -80,14 +83,14 @@ if __name__ == '__main__':
     rh = target_shape[0] / shape[0]
     rw = target_shape[1] / shape[1]
 
-    time_window = 50000
+    time_window = args.time_window
     #time_steps = [[1]]
-    event_volume_bins = 5
+    event_volume_bins = args.event_volume_bins
     time_step = 10000
 
     #target_dirs = [os.path.join(target_dir, cat) for cat in ["normal", "long", "short", "ts_short", "ts_long"]]
     #target_dirs = [os.path.join(target_dir, cat) for cat in ["normal"]]
-    target_dir = os.path.join(target_dir, "normal")
+    #target_dir = os.path.join(target_dir, "normal")
 
 
     if not os.path.exists(raw_dir):
