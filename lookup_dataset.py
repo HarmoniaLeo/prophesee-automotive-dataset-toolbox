@@ -175,6 +175,8 @@ if __name__ == '__main__':
 
     if args.type == "normal":
         C = 5
+    if args.type == "long":
+        C = 5
     volumes = generate_event_volume(events,shape,ori_shape,C)
     #print(np.quantile(volumes[volumes>0],0.05),np.quantile(volumes[volumes>0],0.2),np.quantile(volumes[volumes>0],0.5),np.quantile(volumes[volumes>0],0.75),np.quantile(volumes[volumes>0],0.95))
     visualizeVolume(volumes,dat_bbox,dt,item,result_path,time_stamp_end,args.tol,LABELMAP,args.type)
