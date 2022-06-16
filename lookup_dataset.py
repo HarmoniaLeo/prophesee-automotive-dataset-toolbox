@@ -139,7 +139,7 @@ if __name__ == '__main__':
         LABELMAP = ["car", "pedestrian"]
     else:
         bbox_path = "/data/lbd/Large_Automotive_Detection_Dataset_sampling"
-        data_path = "/data/lbd/Large_taf"
+        data_path = "/data/lbd/Large_Automotive_Detection_Datasett_processed/" + args.type
         if not (args.exp_name is None):
             result_path = "/home/liubingde/100-fps-event-det/" + args.exp_name + "/summarise.npz"
         ori_shape = (720,1280)
