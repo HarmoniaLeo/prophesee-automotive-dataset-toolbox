@@ -31,7 +31,7 @@ def generate_agile_event_volume_cuda(events, shape, events_window = 50000, volum
 
     img_viewed = img.view((H, W, img.shape[1] * 2)).permute(2, 0, 1).contiguous()
 
-    print(torch.quantile(img_viewed[img_viewed>0],0.95))
+    # print(torch.quantile(img_viewed[img_viewed>0],0.95))
 
     img_viewed = img_viewed / 5 * 255
 
@@ -141,8 +141,8 @@ if __name__ == '__main__':
 
             for bbox_count,unique_time in enumerate(unique_ts):
                 volume_save_path = os.path.join(target_root, file_name+"_"+str(unique_time)+".npy")
-                #if os.path.exists(volume_save_path):
-                #    continue
+                if os.path.exists(volume_save_path):
+                   continue
                 end_time = int(unique_time)
                 end_count = f_event.seek_time(end_time)
                 if end_count is None:
