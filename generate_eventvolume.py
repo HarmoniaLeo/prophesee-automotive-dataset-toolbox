@@ -123,7 +123,7 @@ if __name__ == '__main__':
             
 
         for i_file, file_name in enumerate(files):
-            if not file_name == "moorea_2019-06-14_000_427500000_487500000":
+            if not file_name == "moorea_2019-02-19_004_td_2013500000_2073500000":
                 continue
             event_file = os.path.join(root, file_name + '_td.dat')
             bbox_file = os.path.join(root, file_name + '_bbox.npy')
