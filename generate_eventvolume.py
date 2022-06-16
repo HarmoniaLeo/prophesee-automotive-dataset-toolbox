@@ -31,7 +31,7 @@ def generate_agile_event_volume_cuda(events, shape, events_window = 50000, volum
 
     img_viewed = img.view((H, W, img.shape[1] * 2)).permute(2, 0, 1).contiguous()
 
-    print(torch.quantile(img_viewed,0.95))
+    print(torch.quantile(img_viewed[img_viewed>0],0.95))
 
     img_viewed = img_viewed / 5 * 255
 
