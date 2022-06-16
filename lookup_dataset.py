@@ -52,30 +52,54 @@ def draw_bboxes(img, boxes, dt, labelmap):
             cv2.rectangle(img, (pt1[0], pt1[1] - 15), (pt1[0] + 35, pt1[1]), color, -1)
             cv2.putText(img, class_name[:3], (pt1[0]+3, pt1[1] - 5), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0,0,0), 1)
 
-def visualizeVolume(volume_,gt,dt,filename,path,time_stamp_end,tol,LABELMAP,typ):
-    img_list = []
-    for i in range(0, len(volume_)):
-        img_s = volume_[i].astype(np.uint8)
-        draw_bboxes(img_s,gt,0,LABELMAP)
-        if not (dt is None):
-            dt = dt[(dt['t']>time_stamp_end-tol)&(dt['t']<time_stamp_end+tol)]
-            draw_bboxes(img_s,dt,1,LABELMAP)
-            path_t = os.path.join(path,filename+"_{0}_{1}_result_".format(int(time_stamp_end),i)+typ+".png")
-        else:
-            path_t = os.path.join(path,filename+"_{0}_{1}_".format(int(time_stamp_end),i)+typ+".png")
-        cv2.imwrite(path_t,img_s)
-        # if not(os.path.exists(path_t)):
-        #     os.mkdir(path_t)
-        cv2.imwrite(path_t,img_s)
-        img_list.append(img_s)
-    # img_all = np.stack(img_list).max(0).astype(np.uint8)
-    # if not (dt is None):
-    #     dt = dt[(dt['t']>time_stamp_end-tol)&(dt['t']<time_stamp_end+tol)]
-    #     draw_bboxes(img_all,dt,1,LABELMAP)
-    #     path_t = os.path.join(path,filename+"_{0}_result_all.png".format(int(time_stamp_end)))
-    # else:
-    #     path_t = os.path.join(path,filename+"_{0}_all.png".format(int(time_stamp_end),i))
-    # cv2.imwrite(path_t,img_all)
+# def visualizeVolume(volume_,gt,dt,filename,path,time_stamp_end,tol,LABELMAP,typ):
+#     img_list = []
+#     for i in range(0, len(volume_)):
+#         img_s = volume_[i].astype(np.uint8)
+#         draw_bboxes(img_s,gt,0,LABELMAP)
+#         if not (dt is None):
+#             dt = dt[(dt['t']>time_stamp_end-tol)&(dt['t']<time_stamp_end+tol)]
+#             draw_bboxes(img_s,dt,1,LABELMAP)
+#             path_t = os.path.join(path,filename+"_{0}_{1}_result_".format(int(time_stamp_end),i)+typ+".png")
+#         else:
+#             path_t = os.path.join(path,filename+"_{0}_{1}_".format(int(time_stamp_end),i)+typ+".png")
+#         cv2.imwrite(path_t,img_s)
+#         # if not(os.path.exists(path_t)):
+#         #     os.mkdir(path_t)
+#         cv2.imwrite(path_t,img_s)
+#         img_list.append(img_s)
+#     # img_all = np.stack(img_list).max(0).astype(np.uint8)
+#     # if not (dt is None):
+#     #     dt = dt[(dt['t']>time_stamp_end-tol)&(dt['t']<time_stamp_end+tol)]
+#     #     draw_bboxes(img_all,dt,1,LABELMAP)
+#     #     path_t = os.path.join(path,filename+"_{0}_result_all.png".format(int(time_stamp_end)))
+#     # else:
+#     #     path_t = os.path.join(path,filename+"_{0}_all.png".format(int(time_stamp_end),i))
+#     # cv2.imwrite(path_t,img_all)
+
+def visualizeVolume(volume,gt,dt,filename,path,time_stamp_end,tol,LABELMAP, typ):
+    img = 127 * np.ones((volume.shape[1], volume.shape[2], 3), dtype=np.uint8)
+    c_p = volume[5:]
+    c_p = c_p.sum(axis=0)
+    c_n = volume[:5]
+    c_n = c_n.sum(axis=0)
+    c_p = np.where(c_p>c_n,c_p,0)
+    c_p = c_p/5
+    c_p = np.where(c_p>1.0,127.0,c_p*127)
+    c_n = np.where(c_n>c_p,c_n,0)
+    c_n = c_n/5
+    c_n = np.where(c_n>1.0,-127.0,-c_n*127)
+    c_map = c_p+c_n
+    img_s = img + c_map.astype(np.uint8)[:,:,None]
+    gt = gt[gt['t']==time_stamp_end]
+    draw_bboxes(img_s,gt,0,LABELMAP)
+    if not (dt is None):
+        dt = dt[(dt['t']>time_stamp_end-tol)&(dt['t']<time_stamp_end+tol)]
+        draw_bboxes(img_s,dt,1,LABELMAP)
+        path_t = os.path.join(path,filename+"_{0}_result.png".format(int(time_stamp_end)))
+    else:
+        path_t = os.path.join(path,filename+"_{0}.png".format(int(time_stamp_end)))
+    cv2.imwrite(path_t,img_s)
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(
