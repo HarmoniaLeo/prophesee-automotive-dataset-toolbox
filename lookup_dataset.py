@@ -172,12 +172,9 @@ if __name__ == '__main__':
     features = np.right_shift(np.bitwise_and(locations, 2139095040), 23).astype(int)
 
     events = np.stack([x, y, c, p, features], axis=1)
-    print(len(features))
 
     if args.type == "normal":
         C = 5
     volumes = generate_event_volume(events,shape,ori_shape,C)
-    print(len(volumes[volumes>0]))
     #print(np.quantile(volumes[volumes>0],0.05),np.quantile(volumes[volumes>0],0.2),np.quantile(volumes[volumes>0],0.5),np.quantile(volumes[volumes>0],0.75),np.quantile(volumes[volumes>0],0.95))
-    volumes = np.where(volumes>0, 255, 0)
     visualizeVolume(volumes,dat_bbox,dt,item,result_path,time_stamp_end,args.tol,LABELMAP,args.type)
