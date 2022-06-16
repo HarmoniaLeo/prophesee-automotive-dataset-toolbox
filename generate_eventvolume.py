@@ -21,7 +21,7 @@ def generate_agile_event_volume_cuda(events, shape, events_window = 50000, volum
     t_star = (volume_bins * t.float())[:,None,None]
     channels = volume_bins
 
-    adder = torch.stack([torch.arange(channels),torch.arange(channels)],dim = 1).to(x.device)[None,:,:]   #1, 2, 2
+    adder = torch.stack([torch.arange(channels),torch.arange(channels)],dim = 1).to(x.device)[None,:,:] + 1   #1, 2, 2
     adder = (1 - torch.abs(adder-t_star)) * torch.stack([p,1 - p],dim=1)[:,None,:]  #n, 2, 2
     adder = torch.where(adder>=0,adder,torch.zeros_like(adder)).view(adder.shape[0], channels * 2) #n, 4
 
@@ -30,6 +30,8 @@ def generate_agile_event_volume_cuda(events, shape, events_window = 50000, volum
     img = img.view(H * W, volume_bins, 2)
 
     img_viewed = img.view((H, W, img.shape[1] * 2)).permute(2, 0, 1).contiguous()
+
+    print(torch.quantile(img_viewed[img_viewed>0],0.95))
 
     img_viewed = img_viewed / 5 * 255
 
