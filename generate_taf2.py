@@ -157,28 +157,29 @@ if __name__ == '__main__':
                 end_count = f_event.seek_time(end_time)
                 if end_count is None:
                     continue
-                locations = np.fromfile(volume_save_path_l, dtype=np.int32)
-                x = np.bitwise_and(locations, 1023).astype(np.float32)
-                y = np.right_shift(np.bitwise_and(locations, 523264), 10).astype(np.float32)
-                c = np.right_shift(np.bitwise_and(locations, 7864320), 19).astype(np.float32)
-                p = np.right_shift(np.bitwise_and(locations, 8388608), 23).astype(np.float32)
+                if os.path.exists(volume_save_path_l):
+                    locations = np.fromfile(volume_save_path_l, dtype=np.int32)
+                    x = np.bitwise_and(locations, 1023).astype(np.float32)
+                    y = np.right_shift(np.bitwise_and(locations, 523264), 10).astype(np.float32)
+                    c = np.right_shift(np.bitwise_and(locations, 7864320), 19).astype(np.float32)
+                    p = np.right_shift(np.bitwise_and(locations, 8388608), 23).astype(np.float32)
 
-                features = np.fromfile(volume_save_path_f, dtype=np.float32)
+                    features = np.fromfile(volume_save_path_f, dtype=np.float32)
 
-                x = x * rw
-                y = y * rh
+                    x = x * rw
+                    y = y * rh
 
-                features, ecd_quantile, ecd_minmax, ecd_leaky = generate_taf_cuda(torch.from_numpy(x).cuda(),torch.from_numpy(y).cuda(),torch.from_numpy(c).cuda(),torch.from_numpy(p).cuda(),torch.from_numpy(features).cuda(),event_volume_bins,shape)
-                if target_shape[0] != shape[0]:
-                    features = torch.nn.functional.interpolate(features[None,:,:,:], size = target_shape, mode='nearest')[0]
-                    ecd_quantile = torch.nn.functional.interpolate(ecd_quantile[None,:,:,:], size = target_shape, mode='nearest')[0]
-                    ecd_minmax = torch.nn.functional.interpolate(ecd_minmax[None,:,:,:], size = target_shape, mode='nearest')[0]
-                    ecd_leaky = torch.nn.functional.interpolate(ecd_leaky[None,:,:,:], size = target_shape, mode='nearest')[0]
-                features, ecd_quantile, ecd_minmax, ecd_leaky = features.cpu().numpy(), ecd_quantile.cpu().numpy(), ecd_minmax.cpu().numpy(), ecd_leaky.cpu().numpy()
-                for i in range(len(features)):
-                    cv2.imwrite(os.path.join(os.path.join(target_root,"feature"),file_name+"_"+str(unique_time)+"_{0}.jpg".format(i)),features[i].astype(np.uint8))
-                    cv2.imwrite(os.path.join(os.path.join(target_root,"quantile"),file_name+"_"+str(unique_time)+"_{0}.jpg".format(i)),ecd_quantile[i].astype(np.uint8))
-                    cv2.imwrite(os.path.join(os.path.join(target_root,"minmax"),file_name+"_"+str(unique_time)+"_{0}.jpg".format(i)),ecd_minmax[i].astype(np.uint8))
-                    cv2.imwrite(os.path.join(os.path.join(target_root,"leaky"),file_name+"_"+str(unique_time)+"_{0}.jpg".format(i)),ecd_leaky[i].astype(np.uint8))
+                    features, ecd_quantile, ecd_minmax, ecd_leaky = generate_taf_cuda(torch.from_numpy(x).cuda(),torch.from_numpy(y).cuda(),torch.from_numpy(c).cuda(),torch.from_numpy(p).cuda(),torch.from_numpy(features).cuda(),event_volume_bins,shape)
+                    if target_shape[0] != shape[0]:
+                        features = torch.nn.functional.interpolate(features[None,:,:,:], size = target_shape, mode='nearest')[0]
+                        ecd_quantile = torch.nn.functional.interpolate(ecd_quantile[None,:,:,:], size = target_shape, mode='nearest')[0]
+                        ecd_minmax = torch.nn.functional.interpolate(ecd_minmax[None,:,:,:], size = target_shape, mode='nearest')[0]
+                        ecd_leaky = torch.nn.functional.interpolate(ecd_leaky[None,:,:,:], size = target_shape, mode='nearest')[0]
+                    features, ecd_quantile, ecd_minmax, ecd_leaky = features.cpu().numpy(), ecd_quantile.cpu().numpy(), ecd_minmax.cpu().numpy(), ecd_leaky.cpu().numpy()
+                    for i in range(len(features)):
+                        cv2.imwrite(os.path.join(os.path.join(target_root,"feature"),file_name+"_"+str(unique_time)+"_{0}.jpg".format(i)),features[i].astype(np.uint8))
+                        cv2.imwrite(os.path.join(os.path.join(target_root,"quantile"),file_name+"_"+str(unique_time)+"_{0}.jpg".format(i)),ecd_quantile[i].astype(np.uint8))
+                        cv2.imwrite(os.path.join(os.path.join(target_root,"minmax"),file_name+"_"+str(unique_time)+"_{0}.jpg".format(i)),ecd_minmax[i].astype(np.uint8))
+                        cv2.imwrite(os.path.join(os.path.join(target_root,"leaky"),file_name+"_"+str(unique_time)+"_{0}.jpg".format(i)),ecd_leaky[i].astype(np.uint8))
             pbar.update(1)
         pbar.close()
