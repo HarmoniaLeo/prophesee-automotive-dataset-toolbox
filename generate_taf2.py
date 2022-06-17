@@ -187,7 +187,7 @@ if __name__ == '__main__':
                     x = np.where(x%19!=0, x+1, x)
                     y = np.where(y%15!=0, y+1, y)
 
-                    features, ecd_quantile, ecd_minmax, ecd_leaky = generate_taf_cuda(torch.from_numpy(x).cuda(),torch.from_numpy(y).cuda(),torch.from_numpy(c).cuda(),torch.from_numpy(p).cuda(),torch.from_numpy(features).cuda(),event_volume_bins,shape)
+                    features, ecd_quantile, ecd_quantile2, ecd_minmax, ecd_leaky = generate_taf_cuda(torch.from_numpy(x).cuda(),torch.from_numpy(y).cuda(),torch.from_numpy(c).cuda(),torch.from_numpy(p).cuda(),torch.from_numpy(features).cuda(),event_volume_bins,shape)
                     if target_shape[0] != shape[0]:
                         features = torch.nn.functional.interpolate(features[None,:,:,:], size = target_shape, mode='nearest')[0]
                         ecd_quantile = torch.nn.functional.interpolate(ecd_quantile[None,:,:,:], size = target_shape, mode='nearest')[0]
