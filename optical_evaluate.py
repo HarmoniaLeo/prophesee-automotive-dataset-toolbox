@@ -37,7 +37,7 @@ if __name__ == '__main__':
     f_bbox = np.load(bbox_file)
     dts = f_bbox["dts"]
     file_names_dt = f_bbox["file_names"]
-    densitys_dt = f_bbox["densitys"]
+    #densitys_dt = f_bbox["densitys"]
 
     result_path = "statistics_result"
     bbox_file = os.path.join(result_path,"gt_"+args.dataset+".npz")
