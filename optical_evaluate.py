@@ -53,6 +53,9 @@ if __name__ == '__main__':
         dt = []
         gt = []
 
+        print(dts[:5])
+        print(gts[:5])
+
         for i_file, file_name in enumerate(np.unique(file_names_gt)):
 
             dt_bbox = dts[(file_names_dt == file_name)&(densitys_dt >= percentiles[i])&(densitys_dt < percentiles[i+1])]
