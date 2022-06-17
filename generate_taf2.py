@@ -43,6 +43,17 @@ def generate_taf_cuda(x, y, c, p, features, volume_bins, shape):
             ecd_quantile[i] = torch.exp(ecd_quantile[i]) / 7.389 * 255
         except Exception:
             pass
+    
+    ecd_quantile2 = volume[:,:,:,1].clone()
+    ecd_view = volume[:,:,:,1] [volume[:,:,:,1]  > - 1e8]
+    try:
+        q10, q90 = torch.quantile(ecd_view, torch.tensor([0.1,0.9]).to(x.device))
+        q100 = torch.max(ecd_view)
+        ecd_quantile = torch.where(ecd_quantile > q90, (ecd_quantile - q90) / (q100 - q90 + 1e-8) * 2, ecd_quantile)
+        ecd_quantile = torch.where((ecd_quantile <= q90)&(ecd_quantile > - 1e8), (ecd_quantile - q90) / (q90 - q10 + 1e-8) * 6, ecd_quantile)
+        ecd_quantile = torch.exp(ecd_quantile) / 7.389 * 255
+    except Exception:
+        pass
         
     ecd_minmax = volume[:,:,:,1].clone()
     ecd_view = volume[:,:,:,1] [volume[:,:,:,1]  > - 1e8]
@@ -172,6 +183,9 @@ if __name__ == '__main__':
 
                     x = x * rw
                     y = y * rh
+
+                    x = np.where(x%19!=0, x+1, x)
+                    y = np.where(y%15!=0, y+1, y)
 
                     features, ecd_quantile, ecd_minmax, ecd_leaky = generate_taf_cuda(torch.from_numpy(x).cuda(),torch.from_numpy(y).cuda(),torch.from_numpy(c).cuda(),torch.from_numpy(p).cuda(),torch.from_numpy(features).cuda(),event_volume_bins,shape)
                     if target_shape[0] != shape[0]:
