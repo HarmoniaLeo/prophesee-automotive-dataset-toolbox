@@ -66,11 +66,11 @@ def visualizeVolume(volumes,ecds,gt,dt,filename,path,time_stamp_end,tol,LABELMAP
         img_0 = (60 * tar).astype(np.uint8) + 119
         #img_1 = (255 * tar).astype(np.uint8)
         #img_2 = (255 * tar).astype(np.uint8)
-        img_s[:,:,0] = img_0[:,:,None]
+        img_s = img_0
         #img_s[:,:,1] = img_1
         #img_s[:,:,2] = img_2
         img_s = cv2.cvtColor(img_s, cv2.COLOR_HSV2BGR)
-        mask = np.where(volume[:,:,None] * 8 > 255, 1, volume[:,:,None] * 8 / 255)
+        mask = np.where(volume * 8 > 255, 1, volume * 8 / 255)
         #mask = np.where(volume[:,:,None] > 1, 1, volume[:,:,None])
         img_s = (mask * img_s).astype(np.uint8)
         gt = gt[gt['t']==time_stamp_end]
