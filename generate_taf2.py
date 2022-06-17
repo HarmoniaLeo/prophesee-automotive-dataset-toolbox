@@ -29,8 +29,8 @@ def generate_taf_cuda(x, y, c, p, features, volume_bins, shape):
 
     features = volume[:,:,:,0] / 5 * 255
 
-    ecd_quantile = volume[:,:,:,1] 
-    ecd_minmax = volume[:,:,:,1]
+    ecd_quantile = volume[:,:,:,1].copy()
+    ecd_minmax = volume[:,:,:,1].copy()
 
     for i in range(len(features)):
 
@@ -54,7 +54,7 @@ def generate_taf_cuda(x, y, c, p, features, volume_bins, shape):
         except Exception:
             pass
 
-    ecd_leaky = volume[:,:,:,1] * 0.1
+    ecd_leaky = volume[:,:,:,1].copy() * 0.1
     ecd_leaky = torch.exp(ecd_leaky) * 255
 
     return features, ecd_quantile, ecd_minmax, ecd_leaky
