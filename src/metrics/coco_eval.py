@@ -41,7 +41,7 @@ def evaluate_detection(gt_boxes_list, dt_boxes_list, classes=("car", "pedestrian
         gt_win, dt_win = _match_times(all_ts, gt_boxes, dt_boxes, time_tol)
         flattened_gt = flattened_gt + gt_win
         flattened_dt = flattened_dt + dt_win
-    _coco_eval(flattened_gt, flattened_dt, height, width, labelmap=classes)
+    return _coco_eval(flattened_gt, flattened_dt, height, width, labelmap=classes)
 
 
 def _match_times(all_ts, gt_boxes, dt_boxes, time_tol):
@@ -109,7 +109,7 @@ def _coco_eval(gts, detections, height, width, labelmap=("car", "pedestrian")):
     coco_eval.evaluate()
     coco_eval.accumulate()
     coco_eval.summarize()
-
+    return coco_eval.stats[0], coco_eval.stats[1], coco_eval.stats[2], coco_eval.stats[3], coco_eval.stats[4], coco_eval.stats[5]
 
 def _to_coco_format(gts, detections, categories, height=240, width=304):
     """
