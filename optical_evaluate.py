@@ -53,8 +53,8 @@ if __name__ == '__main__':
         dt = []
         gt = []
 
-        print(dts[:5])
-        print(gts[:5])
+        print(dts[:5],file_names_dt[:5],densitys_dt[:5])
+        print(gts[:5],file_names_gt[:5],densitys_gt[:5])
 
         for i_file, file_name in enumerate(np.unique(file_names_gt)):
 
