@@ -118,7 +118,8 @@ if __name__ == '__main__':
     if not os.path.exists(target_dir):
         os.makedirs(target_dir)
 
-    for mode in ["train","val","test"]:
+    #for mode in ["train","val","test"]:
+    for mode in ["test"]:
         file_dir = os.path.join(bbox_dir, mode)
         if not os.path.exists(file_dir):
             os.makedirs(file_dir)
@@ -149,6 +150,9 @@ if __name__ == '__main__':
         for i_file, file_name in enumerate(files):
             # if not file_name == "17-04-13_15-05-43_3599500000_3659500000":
             #     continue
+            if not file_name == "moorea_2019-06-26_test_02_000_1708500000_1768500000":
+                continue
+
             event_file = os.path.join(root, file_name + '_td.dat')
             bbox_file = os.path.join(root, file_name + '_bbox.npy')
             # if os.path.exists(volume_save_path):
@@ -184,8 +188,9 @@ if __name__ == '__main__':
                     x = x * rw
                     y = y * rh
 
-                    x = np.where(x%19!=0, x+1, x)
-                    y = np.where(y%15!=0, y+1, y)
+                    if target_shape[0] != shape[0]:
+                        x = np.where(x%19!=0, x+1, x)
+                        y = np.where(y%15!=0, y+1, y)
 
                     features, ecd_quantile, ecd_quantile2, ecd_minmax, ecd_leaky = generate_taf_cuda(torch.from_numpy(x).cuda(),torch.from_numpy(y).cuda(),torch.from_numpy(c).cuda(),torch.from_numpy(p).cuda(),torch.from_numpy(features).cuda(),event_volume_bins,shape)
                     if target_shape[0] != shape[0]:
