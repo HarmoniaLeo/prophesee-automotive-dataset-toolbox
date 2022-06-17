@@ -79,7 +79,7 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
     bbox_dir = args.bbox_dir
-    raw_dir = args.raw_dir
+    data_dir = args.raw_dir
     target_dir = args.target_dir
     dataset = args.dataset
 
