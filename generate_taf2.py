@@ -29,26 +29,30 @@ def generate_taf_cuda(x, y, c, p, features, volume_bins, shape):
 
     features = volume[:,:,:,0] / 5 * 255
 
-    ecd_view = volume[:,:,:,1] [volume[:,:,:,1]  > - 1e8]
-
     ecd_quantile = volume[:,:,:,1] 
-    try:
-        q10, q90 = torch.quantile(ecd_view, torch.tensor([0.1,0.9]).to(x.device))
-        q100 = torch.max(ecd_view)
-        ecd_quantile = torch.where(ecd_quantile > q90, (ecd_quantile - q90) / (q100 - q90 + 1e-8) * 2, ecd_quantile)
-        ecd_quantile = torch.where((ecd_quantile <= q90)&(ecd_quantile > - 1e8), (ecd_quantile - q90) / (q90 - q10 + 1e-8) * 6, ecd_quantile)
-        ecd_quantile = torch.exp(ecd_quantile) / 7.389 * 255
-    except Exception:
-        pass
-    
-    ecd_minmax = volume[:,:,:,1] 
-    try:
-        q100 = torch.max(ecd_view)
-        q0 = torch.min(ecd_view)
-        ecd_minmax = torch.where(ecd_minmax > -1e8, (ecd_minmax - q100) / (q100 - q0 + 1e-8) * 6, ecd_minmax)
-        ecd_minmax = torch.exp(ecd_minmax) * 255
-    except Exception:
-        pass
+    ecd_minmax = volume[:,:,:,1]
+
+    for i in range(len(features)):
+
+        ecd_view = volume[i,:,:,1] [volume[i,:,:,1]  > - 1e8]
+        
+        try:
+            q10, q90 = torch.quantile(ecd_view, torch.tensor([0.1,0.9]).to(x.device))
+            q100 = torch.max(ecd_view)
+            ecd_quantile[i] = torch.where(ecd_quantile[i] > q90, (ecd_quantile[i] - q90) / (q100 - q90 + 1e-8) * 2, ecd_quantile[i])
+            ecd_quantile[i] = torch.where((ecd_quantile[i] <= q90)&(ecd_quantile[i] > - 1e8), (ecd_quantile[i] - q90) / (q90 - q10 + 1e-8) * 6, ecd_quantile[i])
+            ecd_quantile[i] = torch.exp(ecd_quantile[i]) / 7.389 * 255
+        except Exception:
+            pass
+        
+        
+        try:
+            q100 = torch.max(ecd_view)
+            q0 = torch.min(ecd_view)
+            ecd_minmax[i] = torch.where(ecd_minmax[i] > -1e8, (ecd_minmax[i] - q100) / (q100 - q0 + 1e-8) * 6, ecd_minmax[i])
+            ecd_minmax[i] = torch.exp(ecd_minmax[i]) * 255
+        except Exception:
+            pass
 
     ecd_leaky = volume[:,:,:,1] * 0.1
     ecd_leaky = torch.exp(ecd_leaky) * 255
