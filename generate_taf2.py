@@ -119,7 +119,8 @@ if __name__ == '__main__':
         os.makedirs(target_dir)
 
     #for mode in ["train","val","test"]:
-    for mode in ["train"]:
+    #for mode in ["train"]:
+    for mode in ["test"]:
         file_dir = os.path.join(bbox_dir, mode)
         if not os.path.exists(file_dir):
             os.makedirs(file_dir)
@@ -148,10 +149,10 @@ if __name__ == '__main__':
         pbar = tqdm.tqdm(total=len(files), unit='File', unit_scale=True)
 
         for i_file, file_name in enumerate(files):
-            # if not file_name == "17-04-13_15-05-43_3599500000_3659500000":
-            #     continue
-            if not file_name == "moorea_2019-06-26_test_02_000_976500000_1036500000":
+            if not file_name == "17-04-13_15-05-43_3599500000_3659500000":
                 continue
+            # if not file_name == "moorea_2019-06-26_test_02_000_976500000_1036500000":
+            #     continue
             bbox_file = os.path.join(root, file_name + '_bbox.npy')
             # if os.path.exists(volume_save_path):
             #     continue
@@ -200,6 +201,11 @@ if __name__ == '__main__':
                     # ecd_quantile.astype(np.uint8).tofile(os.path.join(os.path.join(target_root,"quantile"),file_name+"_"+str(unique_time)+".npy"))
                     # ecd_minmax.astype(np.uint8).tofile(os.path.join(os.path.join(target_root,"minmax"),file_name+"_"+str(unique_time)+".npy"))
                     # ecd_leaky.astype(np.uint8).tofile(os.path.join(os.path.join(target_root,"leaky"),file_name+"_"+str(unique_time)+".npy"))
+                    features = np.where(features >255, 255, features)
+                    ecd_quantile = np.where(ecd_quantile >255, 255, ecd_quantile)
+                    ecd_quantile2 = np.where(ecd_quantile2 >255, 255, ecd_quantile2)
+                    ecd_minmax = np.where(ecd_minmax >255, 255, ecd_minmax)
+                    ecd_leaky = np.where(ecd_leaky >255, 255, ecd_leaky)
                     for i in range(len(features)):
                         cv2.imwrite(os.path.join(os.path.join(target_root,"feature"),file_name+"_"+str(unique_time)+"_{0}.jpg".format(i)),features[i].astype(np.uint8))
                         cv2.imwrite(os.path.join(os.path.join(target_root,"quantile"),file_name+"_"+str(unique_time)+"_{0}.jpg".format(i)),ecd_quantile[i].astype(np.uint8))
