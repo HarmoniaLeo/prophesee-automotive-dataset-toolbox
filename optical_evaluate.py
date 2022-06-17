@@ -55,27 +55,27 @@ if __name__ == '__main__':
 
         for i_file, file_name in enumerate(np.unique(file_names_gt)):
 
-            #dt_bbox = dts[(file_names_dt == file_name)&(densitys_dt >= percentiles[i])&(densitys_dt < percentiles[i+1])]
-            #gt_bbox = gts[(file_names_gt == file_name)&(densitys_gt >= percentiles[i])&(densitys_gt < percentiles[i+1])]
-            dt_bbox = dts[(file_names_dt == file_name)]
-            gt_bbox = gts[(file_names_gt == file_name)]
+            dt_bbox = dts[(file_names_dt == file_name)&(densitys_dt >= percentiles[i])&(densitys_dt < percentiles[i+1])]
+            gt_bbox = gts[(file_names_gt == file_name)&(densitys_gt >= percentiles[i])&(densitys_gt < percentiles[i+1])]
+            # dt_bbox = dts[(file_names_dt == file_name)]
+            # gt_bbox = gts[(file_names_gt == file_name)]
 
             dt.append(dt_bbox)
             gt.append(gt_bbox)
 
         gt_boxes_list = map(filter_boxes, gt)
         result_boxes_list = map(filter_boxes, dt)
-        # gt_boxes_list1 = []
-        # result_boxes_list1 = []
-        # for l1,l2 in zip(gt_boxes_list,result_boxes_list):
-        #     if len(l1) > 0:
-        #         gt_boxes_list1.append(l1)
-        #         if len(l2) == 0:
-        #             result_boxes_list1.append(np.array([[l1[0,0],0,0,0,0,0,0,0]]))
-        #         else:
-        #             result_boxes_list1.append(l2)
+        gt_boxes_list1 = []
+        result_boxes_list1 = []
+        for l1,l2 in zip(gt_boxes_list,result_boxes_list):
+            if len(l1) > 0:
+                gt_boxes_list1.append(l1)
+                if len(l2) == 0:
+                    result_boxes_list1.append(np.array([[l1[0,0],0,0,0,0,0,0,0]]))
+                else:
+                    result_boxes_list1.append(l2)
         
         evaluate_detection(gt_boxes_list, result_boxes_list, time_tol = args.tol, classes=classes,height=shape[0],width=shape[1])
         break
-    # print([(percentiles[i] + percentiles[i+1])/2 for i in range(0,len(percentiles)-1)])
-    # print(results)
+    print([(percentiles[i] + percentiles[i+1])/2 for i in range(0,len(percentiles)-1)])
+    print(results)
