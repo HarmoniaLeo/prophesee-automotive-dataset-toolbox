@@ -21,14 +21,14 @@ if __name__ == '__main__':
     mode = "test"
 
     if args.dataset == "gen1":
-        result_path = "/home/lbd/100-fps-event-det/log/" + args.exp_name + "/summarise.npz"
+        result_path = "/home/lbd/100-fps-event-det/log/" + args.exp_name + "/summarise_stats.npz"
         shape = [240,304]
         filter_boxes = filter_boxes_gen1
         classes = ['Car', "Pedestrian"]
         #percentiles = [0.0, 0.022496978317470943, 0.03584141107151823, 0.06461365563824012, 0.09765842901836184, 0.13363889435484622, 0.17335709874840652, 0.21913896857877602, 0.2795803473626733, 0.34990456407260045, 0.44142171223006244, 0.557804203925751, 0.7039533807928522, 0.8876761367290176, 1.1264612928414415, 1.4447705627987673, 1.8662489229530281, 2.4500051802140845, 3.242211733282628, 4.436053050035189, 1000]
         percentiles = [0.0, 0.022090551140021526, 0.03307005296535371, 0.05671614855808474, 0.08410216123034962, 0.11406982861849572, 0.14831617911666944, 0.18462005594938136, 0.22870882848611626, 0.2853853858727559, 0.3554077913283515, 0.44819659632660175, 0.5715129938105777, 0.7367699321420207, 0.9613864329222702, 1.2917300269541516, 1.7416549267996466, 2.4035640687750264, 3.302250419545379, 4.655760829519853, 1000]
     else:
-        result_path = "/home/liubingde/100-fps-event-det/log/" + args.exp_name + "/summarise.npz"
+        result_path = "/home/liubingde/100-fps-event-det/log/" + args.exp_name + "/summarise_stats.npz"
         shape = [720,1280]
         filter_boxes = filter_boxes_large
         classes = ['pedestrian', 'two wheeler', 'car', 'truck', 'bus', 'traffic sign', 'traffic light']
@@ -37,7 +37,7 @@ if __name__ == '__main__':
     f_bbox = np.load(bbox_file)
     dts = f_bbox["dts"]
     file_names_dt = f_bbox["file_names"]
-    #densitys_dt = f_bbox["densitys"]
+    densitys_dt = f_bbox["densitys"]
 
     result_path = "statistics_result"
     bbox_file = os.path.join(result_path,"gt_"+args.dataset+".npz")
