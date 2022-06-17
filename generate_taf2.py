@@ -79,7 +79,7 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
     bbox_dir = args.bbox_dir
-    data_dir = args.raw_dir
+    raw_dir = args.raw_dir
     target_dir = args.target_dir
     dataset = args.dataset
 
@@ -108,7 +108,7 @@ if __name__ == '__main__':
         if not os.path.exists(file_dir):
             os.makedirs(file_dir)
         root = file_dir
-        data_dir = os.path.join(data_dir, mode)
+        data_dir = os.path.join(raw_dir, mode)
         if not os.path.exists(data_dir):
             os.makedirs(data_dir)
         data_root = data_dir
