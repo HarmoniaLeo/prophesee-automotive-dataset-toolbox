@@ -8,6 +8,39 @@ from numpy.lib import recfunctions as rfn
 import pandas as pd
 import argparse
 
+def nms(dets):
+    """"Pure Python NMS baseline."""
+    x1 = dets[:, 1]  #xmin
+    y1 = dets[:, 2]  #ymin
+    x2 = dets[:, 3]  #xmax
+    y2 = dets[:, 4]  #ymax
+
+    areas = (x2 - x1) * (y2 - y1)                 # the size of bbox
+    order = np.arange(len(dets))                        # sort bounding boxes by decreasing order
+
+    keep = []                                             # store the final bounding boxes
+    while order.size > 0:
+        i = order[0]                                      #the index of the bbox with highest confidence
+        keep.append(i)                                    #save it to keep
+        xx1 = np.maximum(x1[i], x1[order[1:]])
+        yy1 = np.maximum(y1[i], y1[order[1:]])
+        xx2 = np.minimum(x2[i], x2[order[1:]])
+        yy2 = np.minimum(y2[i], y2[order[1:]])
+
+        w = np.maximum(1e-28, xx2 - xx1)
+        h = np.maximum(1e-28, yy2 - yy1)
+        inter = w * h
+
+        # Cross Area / (bbox + particular area - Cross Area)
+        ovr = inter / (areas[i] + areas[order[1:]] - inter)
+        #reserve all the boundingbox whose ovr less than thresh
+        inds = np.where(ovr <= 0)[0]
+        if len(inds) > 0:
+            keep.pop()
+        order = order[inds + 1]
+
+    return keep
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(
         description='visualize one or several event files along with their boxes')
@@ -41,6 +74,7 @@ if __name__ == '__main__':
     file_names = []
     gt = []
     densitys = []
+    #pointdensitys = []
 
     for i_file, file_name in enumerate(files):
         # if i_file>5:
@@ -64,24 +98,29 @@ if __name__ == '__main__':
 
             flow = np.load(os.path.join("optical_flow_buffer",file_name + "_{0}.npy".format(int(unique_time))))
 
-            for j in range(len(gt_trans)):
-                x1, y1, x2, y2 = int(gt_trans[j,1]), int(gt_trans[j,2]), int(gt_trans[j,3] + gt_trans[j,1]), int(gt_trans[j,4] + gt_trans[j,2])
+            gt_trans[:,3] = gt_trans[:,3] + gt_trans[:,1]
+            gt_trans[:,4] = gt_trans[:,4] + gt_trans[:,2]
 
-                if x1 >= shape[0]:
-                    x1 = shape[0] - 1
+            gt_trans = gt_trans[nms(gt_trans)]
+
+            for j in range(len(gt_trans)):
+                x1, y1, x2, y2 = int(gt_trans[j,1]), int(gt_trans[j,2]), int(gt_trans[j,3]), int(gt_trans[j,4])
+
+                if x1 >= shape[1]:
+                    x1 = shape[1] - 1
                 if x1 < 0:
                     x1 = 0
-                if x2 >= shape[0]:
-                    x2 = shape[0] - 1
+                if x2 >= shape[1]:
+                    x2 = shape[1] - 1
                 if x2 < 0:
                     x2 = 0
                 
-                if y1 >= shape[1]:
-                    y1 = shape[1] - 1
+                if y1 >= shape[0]:
+                    y1 = shape[0] - 1
                 if y1 < 0:
                     y1 = 0
-                if y2 >= shape[1]:
-                    y2 = shape[1] - 1
+                if y2 >= shape[0]:
+                    y2 = shape[0] - 1
                 if y2 < 0:
                     y2 = 0
 
