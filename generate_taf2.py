@@ -191,9 +191,10 @@ if __name__ == '__main__':
                     if target_shape[0] != shape[0]:
                         features = torch.nn.functional.interpolate(features[None,:,:,:], size = target_shape, mode='nearest')[0]
                         ecd_quantile = torch.nn.functional.interpolate(ecd_quantile[None,:,:,:], size = target_shape, mode='nearest')[0]
+                        ecd_quantile2 = torch.nn.functional.interpolate(ecd_quantile2[None,:,:,:], size = target_shape, mode='nearest')[0]
                         ecd_minmax = torch.nn.functional.interpolate(ecd_minmax[None,:,:,:], size = target_shape, mode='nearest')[0]
                         ecd_leaky = torch.nn.functional.interpolate(ecd_leaky[None,:,:,:], size = target_shape, mode='nearest')[0]
-                    features, ecd_quantile, ecd_quantile2, ecd_minmax, ecd_leaky = features.cpu().numpy(), ecd_quantile.cpu().numpy(), ecd_minmax.cpu().numpy(), ecd_leaky.cpu().numpy()
+                    features, ecd_quantile, ecd_quantile2, ecd_minmax, ecd_leaky = features.cpu().numpy(), ecd_quantile.cpu().numpy(), ecd_quantile2.cpu().numpy(), ecd_minmax.cpu().numpy(), ecd_leaky.cpu().numpy()
                     # features.astype(np.uint8).tofile(os.path.join(os.path.join(target_root,"feature"),file_name+"_"+str(unique_time)+".npy"))
                     # ecd_quantile.astype(np.uint8).tofile(os.path.join(os.path.join(target_root,"quantile"),file_name+"_"+str(unique_time)+".npy"))
                     # ecd_minmax.astype(np.uint8).tofile(os.path.join(os.path.join(target_root,"minmax"),file_name+"_"+str(unique_time)+".npy"))
