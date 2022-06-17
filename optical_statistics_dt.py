@@ -105,15 +105,17 @@ if __name__ == '__main__':
 
             dt_trans = dt_bbox[(dt_bbox[:,0] >= unique_time - args.tol) & (dt_bbox[:,0] <= unique_time + args.tol)]
 
-            dt_trans[:,3] = dt_trans[:,3] + dt_trans[:,1]
-            dt_trans[:,4] = dt_trans[:,4] + dt_trans[:,2]
-
-            dt_trans = dt_trans[nms(dt_trans)]
 
             flow = np.load(os.path.join("optical_flow_buffer",file_name + "_{0}.npy".format(int(unique_time))))
 
+            dt_nms = np.zeros_like(dt_trans)
+            dt_nms[:,3] = dt_trans[:,3] + dt_trans[:,1]
+            dt_nms[:,4] = dt_trans[:,4] + dt_trans[:,2]
+
+            dt_trans = dt_trans[nms(dt_nms)]
+
             for j in range(len(dt_trans)):
-                x1, y1, x2, y2 = int(dt_trans[j,1]), int(dt_trans[j,2]), int(dt_trans[j,3]), int(dt_trans[j,4])
+                x1, y1, x2, y2 = int(dt_trans[j,1]), int(dt_trans[j,2]), int(dt_trans[j,3] + dt_trans[j,1]), int(dt_trans[j,4] + dt_trans[j,2])
 
                 if x1 >= shape[1]:
                     x1 = shape[1] - 1

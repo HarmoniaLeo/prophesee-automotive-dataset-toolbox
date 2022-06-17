@@ -98,13 +98,14 @@ if __name__ == '__main__':
 
             flow = np.load(os.path.join("optical_flow_buffer",file_name + "_{0}.npy".format(int(unique_time))))
 
-            gt_trans[:,3] = gt_trans[:,3] + gt_trans[:,1]
-            gt_trans[:,4] = gt_trans[:,4] + gt_trans[:,2]
+            gt_nms = np.zeros_like(gt_trans)
+            gt_nms[:,3] = gt_trans[:,3] + gt_trans[:,1]
+            gt_nms[:,4] = gt_trans[:,4] + gt_trans[:,2]
 
-            gt_trans = gt_trans[nms(gt_trans)]
+            gt_trans = gt_trans[nms(gt_nms)]
 
             for j in range(len(gt_trans)):
-                x1, y1, x2, y2 = int(gt_trans[j,1]), int(gt_trans[j,2]), int(gt_trans[j,3]), int(gt_trans[j,4])
+                x1, y1, x2, y2 = int(gt_trans[j,1]), int(gt_trans[j,2]), int(gt_trans[j,3] + gt_trans[j,1]), int(gt_trans[j,4] + gt_trans[j,2])
 
                 if x1 >= shape[1]:
                     x1 = shape[1] - 1
