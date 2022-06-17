@@ -16,7 +16,7 @@ import cv2
 
 def generate_taf_cuda(x, y, c, p, features, volume_bins, shape):
 
-    b, x, y, p, c = b.long(), x.long(), y.long(), p.long(), c.long()
+    x, y, p, c = x.long(), y.long(), p.long(), c.long()
     
     H, W = shape
     C = volume_bins * 2
