@@ -19,7 +19,7 @@ def generate_event_volume(data_path, item, time_stamp_end):
         ecd = cv2.imread(os.path.join(data_path, "quantile")+"/"+item+"_{0}_{1}.jpg".format(time_stamp_end,i))
         features.append(feature)
         ecds.append(ecd)
-    return volumes, ecds
+    return features, ecds
 
 LABELMAP = ["car", "pedestrian"]
 
