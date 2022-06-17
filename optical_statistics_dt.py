@@ -101,14 +101,14 @@ if __name__ == '__main__':
 
         dt_bbox = dts[file_names == file_name]
 
-        dt_trans[:,3] = dt_trans[:,3] + dt_trans[:,1]
-        dt_trans[:,4] = dt_trans[:,4] + dt_trans[:,2]
-
-        dt_trans = dt_trans[nms(dt_trans)]
-
         for bbox_count,unique_time in enumerate(unique_ts):
 
             dt_trans = dt_bbox[(dt_bbox[:,0] >= unique_time - args.tol) & (dt_bbox[:,0] <= unique_time + args.tol)]
+
+            dt_trans[:,3] = dt_trans[:,3] + dt_trans[:,1]
+            dt_trans[:,4] = dt_trans[:,4] + dt_trans[:,2]
+
+            dt_trans = dt_trans[nms(dt_trans)]
 
             flow = np.load(os.path.join("optical_flow_buffer",file_name + "_{0}.npy".format(int(unique_time))))
 
