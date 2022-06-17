@@ -176,14 +176,14 @@ if __name__ == '__main__':
                         ecd_minmax = torch.nn.functional.interpolate(ecd_minmax[None,:,:,:], size = target_shape, mode='nearest')[0]
                         ecd_leaky = torch.nn.functional.interpolate(ecd_leaky[None,:,:,:], size = target_shape, mode='nearest')[0]
                     features, ecd_quantile, ecd_minmax, ecd_leaky = features.cpu().numpy(), ecd_quantile.cpu().numpy(), ecd_minmax.cpu().numpy(), ecd_leaky.cpu().numpy()
-                    features.astype(np.uint8).tofile(os.path.join(os.path.join(target_root,"feature"),file_name+"_"+str(unique_time)+".npy"))
-                    ecd_quantile.astype(np.uint8).tofile(os.path.join(os.path.join(target_root,"quantile"),file_name+"_"+str(unique_time)+".npy"))
-                    ecd_minmax.astype(np.uint8).tofile(os.path.join(os.path.join(target_root,"minmax"),file_name+"_"+str(unique_time)+".npy"))
-                    ecd_leaky.astype(np.uint8).tofile(os.path.join(os.path.join(target_root,"leaky"),file_name+"_"+str(unique_time)+".npy"))
-                    # for i in range(len(features)):
-                    #     cv2.imwrite(os.path.join(os.path.join(target_root,"feature"),file_name+"_"+str(unique_time)+"_{0}.jpg".format(i)),features[i].astype(np.uint8))
-                    #     cv2.imwrite(os.path.join(os.path.join(target_root,"quantile"),file_name+"_"+str(unique_time)+"_{0}.jpg".format(i)),ecd_quantile[i].astype(np.uint8))
-                    #     cv2.imwrite(os.path.join(os.path.join(target_root,"minmax"),file_name+"_"+str(unique_time)+"_{0}.jpg".format(i)),ecd_minmax[i].astype(np.uint8))
-                    #     cv2.imwrite(os.path.join(os.path.join(target_root,"leaky"),file_name+"_"+str(unique_time)+"_{0}.jpg".format(i)),ecd_leaky[i].astype(np.uint8))
+                    # features.astype(np.uint8).tofile(os.path.join(os.path.join(target_root,"feature"),file_name+"_"+str(unique_time)+".npy"))
+                    # ecd_quantile.astype(np.uint8).tofile(os.path.join(os.path.join(target_root,"quantile"),file_name+"_"+str(unique_time)+".npy"))
+                    # ecd_minmax.astype(np.uint8).tofile(os.path.join(os.path.join(target_root,"minmax"),file_name+"_"+str(unique_time)+".npy"))
+                    # ecd_leaky.astype(np.uint8).tofile(os.path.join(os.path.join(target_root,"leaky"),file_name+"_"+str(unique_time)+".npy"))
+                    for i in range(len(features)):
+                        cv2.imwrite(os.path.join(os.path.join(target_root,"feature"),file_name+"_"+str(unique_time)+"_{0}.jpg".format(i)),features[i].astype(np.uint8))
+                        cv2.imwrite(os.path.join(os.path.join(target_root,"quantile"),file_name+"_"+str(unique_time)+"_{0}.jpg".format(i)),ecd_quantile[i].astype(np.uint8))
+                        cv2.imwrite(os.path.join(os.path.join(target_root,"minmax"),file_name+"_"+str(unique_time)+"_{0}.jpg".format(i)),ecd_minmax[i].astype(np.uint8))
+                        cv2.imwrite(os.path.join(os.path.join(target_root,"leaky"),file_name+"_"+str(unique_time)+"_{0}.jpg".format(i)),ecd_leaky[i].astype(np.uint8))
             pbar.update(1)
         pbar.close()
