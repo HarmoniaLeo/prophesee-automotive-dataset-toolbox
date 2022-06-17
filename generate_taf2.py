@@ -68,6 +68,12 @@ def generate_taf_cuda(x, y, c, p, features, volume_bins, shape):
     ecd_leaky = volume[:,:,:,1].clone() * 0.1
     ecd_leaky = torch.exp(ecd_leaky) * 255
 
+    features = torch.where(features > 255, torch.zeros_like(features)+ 255, features)
+    ecd_quantile = torch.where(ecd_quantile > 255, torch.zeros_like(ecd_quantile)+ 255, ecd_quantile)
+    ecd_quantile2 = torch.where(ecd_quantile2 > 255, torch.zeros_like(ecd_quantile2)+ 255, ecd_quantile2)
+    ecd_minmax = torch.where(ecd_minmax > 255, torch.zeros_like(ecd_minmax)+ 255, ecd_minmax)
+    ecd_leaky = torch.where(ecd_leaky > 255, torch.zeros_like(ecd_leaky)+ 255, ecd_leaky)
+
     return features, ecd_quantile, ecd_quantile2, ecd_minmax, ecd_leaky
 
 
@@ -201,11 +207,6 @@ if __name__ == '__main__':
                     # ecd_quantile.astype(np.uint8).tofile(os.path.join(os.path.join(target_root,"quantile"),file_name+"_"+str(unique_time)+".npy"))
                     # ecd_minmax.astype(np.uint8).tofile(os.path.join(os.path.join(target_root,"minmax"),file_name+"_"+str(unique_time)+".npy"))
                     # ecd_leaky.astype(np.uint8).tofile(os.path.join(os.path.join(target_root,"leaky"),file_name+"_"+str(unique_time)+".npy"))
-                    features = np.where(features >255, 255, features)
-                    ecd_quantile = np.where(ecd_quantile >255, 255, ecd_quantile)
-                    ecd_quantile2 = np.where(ecd_quantile2 >255, 255, ecd_quantile2)
-                    ecd_minmax = np.where(ecd_minmax >255, 255, ecd_minmax)
-                    ecd_leaky = np.where(ecd_leaky >255, 255, ecd_leaky)
                     for i in range(len(features)):
                         cv2.imwrite(os.path.join(os.path.join(target_root,"feature"),file_name+"_"+str(unique_time)+"_{0}.jpg".format(i)),features[i].astype(np.uint8))
                         cv2.imwrite(os.path.join(os.path.join(target_root,"quantile"),file_name+"_"+str(unique_time)+"_{0}.jpg".format(i)),ecd_quantile[i].astype(np.uint8))
