@@ -152,8 +152,6 @@ if __name__ == '__main__':
             #     continue
             if not file_name == "moorea_2019-06-26_test_02_000_976500000_1036500000":
                 continue
-
-            event_file = os.path.join(root, file_name + '_td.dat')
             bbox_file = os.path.join(root, file_name + '_bbox.npy')
             # if os.path.exists(volume_save_path):
             #     continue
@@ -165,17 +163,15 @@ if __name__ == '__main__':
 
             unique_ts, unique_indices = np.unique(dat_bbox['t'], return_index=True)
 
-            f_event = psee_loader.PSEELoader(event_file)
-
             #min_event_count = f_event.event_count()
 
             for bbox_count,unique_time in enumerate(unique_ts):
                 volume_save_path_l = os.path.join(data_root, file_name+"_"+str(unique_time)+"_locations.npy")
                 volume_save_path_f = os.path.join(data_root, file_name+"_"+str(unique_time)+"_features.npy")
                 end_time = int(unique_time)
-                end_count = f_event.seek_time(end_time)
-                if end_count is None:
-                    continue
+                # end_count = f_event.seek_time(end_time)
+                # if end_count is None:
+                #     continue
                 if os.path.exists(volume_save_path_l):
                     locations = np.fromfile(volume_save_path_l, dtype=np.int32)
                     x = np.bitwise_and(locations, 1023).astype(np.float32)
