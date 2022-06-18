@@ -29,20 +29,20 @@ def generate_taf_cuda(x, y, c, p, features, volume_bins, shape):
 
     features = volume[:,:,:,0] / 5 * 255
 
-    #ecd_quantile = volume[:,:,:,1].clone()
+    ecd_quantile = volume[:,:,:,1].clone()
 
-    # for i in range(len(features)):
+    for i in range(len(features)):
 
-    #     ecd_view = volume[i,:,:,1] [volume[i,:,:,1]  > - 1e8]
+        ecd_view = volume[i,:,:,1] [volume[i,:,:,1]  > - 1e8]
         
-    #     try:
-    #         q10, q90 = torch.quantile(ecd_view, torch.tensor([0.1,0.9]).to(x.device))
-    #         q100 = torch.max(ecd_view)
-    #         ecd_quantile[i] = torch.where(ecd_quantile[i] > q90, (ecd_quantile[i] - q90) / (q100 - q90 + 1e-8) * 2, ecd_quantile[i])
-    #         ecd_quantile[i] = torch.where((ecd_quantile[i] <= q90)&(ecd_quantile[i] > - 1e8), (ecd_quantile[i] - q90) / (q90 - q10 + 1e-8) * 6, ecd_quantile[i])
-    #         ecd_quantile[i] = torch.exp(ecd_quantile[i]) / 7.389 * 255
-    #     except Exception:
-    #         pass
+        try:
+            q10, q90 = torch.quantile(ecd_view, torch.tensor([0.1,0.9]).to(x.device))
+            q100 = torch.max(ecd_view)
+            ecd_quantile[i] = torch.where(ecd_quantile[i] > q90, (ecd_quantile[i] - q90) / (q100 - q90 + 1e-8) * 2, ecd_quantile[i])
+            ecd_quantile[i] = torch.where((ecd_quantile[i] <= q90)&(ecd_quantile[i] > - 1e8), (ecd_quantile[i] - q90) / (q90 - q10 + 1e-8) * 6, ecd_quantile[i])
+            ecd_quantile[i] = torch.exp(ecd_quantile[i]) / 7.389 * 255
+        except Exception:
+            pass
     
     ecd_quantile2 = volume[:,:,:,1].clone()
     ecd_view = volume[:,:,:,1] [volume[:,:,:,1]  > - 1e8]
@@ -55,16 +55,16 @@ def generate_taf_cuda(x, y, c, p, features, volume_bins, shape):
     except Exception:
         pass
     
-    # ecd_quantile3 = volume[:,:,:,1].clone()
-    # ecd_view = volume[:,:,:,1] [volume[:,:,:,1]  > - 1e8]
-    # try:
-    #     q10, q90 = torch.quantile(ecd_view, torch.tensor([0.1,0.95]).to(x.device))
-    #     q100 = torch.max(ecd_view)
-    #     ecd_quantile2 = torch.where(ecd_quantile2 > q90, (ecd_quantile2 - q90) / (q100 - q90 + 1e-8) * 2, ecd_quantile2)
-    #     ecd_quantile2 = torch.where((ecd_quantile2 <= q90)&(ecd_quantile2 > - 1e8), (ecd_quantile2 - q90) / (q90 - q10 + 1e-8) * 6, ecd_quantile2)
-    #     ecd_quantile2 = torch.exp(ecd_quantile2) / 7.389 * 255
-    # except Exception:
-    #     pass
+    ecd_quantile3 = volume[:,:,:,1].clone()
+    ecd_view = volume[:,:,:,1] [volume[:,:,:,1]  > - 1e8]
+    try:
+        q10, q90 = torch.quantile(ecd_view, torch.tensor([0.1,0.95]).to(x.device))
+        q100 = torch.max(ecd_view)
+        ecd_quantile2 = torch.where(ecd_quantile2 > q90, (ecd_quantile2 - q90) / (q100 - q90 + 1e-8) * 2, ecd_quantile2)
+        ecd_quantile2 = torch.where((ecd_quantile2 <= q90)&(ecd_quantile2 > - 1e8), (ecd_quantile2 - q90) / (q90 - q10 + 1e-8) * 6, ecd_quantile2)
+        ecd_quantile2 = torch.exp(ecd_quantile2) / 7.389 * 255
+    except Exception:
+        pass
         
     ecd_minmax = volume[:,:,:,1].clone()
     ecd_view = volume[:,:,:,1] [volume[:,:,:,1]  > - 1e8]
@@ -80,13 +80,13 @@ def generate_taf_cuda(x, y, c, p, features, volume_bins, shape):
     ecd_leaky = torch.exp(ecd_leaky) * 255
 
     features = torch.where(features > 255, torch.zeros_like(features)+ 255, features)
-    #ecd_quantile = torch.where(ecd_quantile > 255, torch.zeros_like(ecd_quantile)+ 255, ecd_quantile)
+    ecd_quantile = torch.where(ecd_quantile > 255, torch.zeros_like(ecd_quantile)+ 255, ecd_quantile)
     ecd_quantile2 = torch.where(ecd_quantile2 > 255, torch.zeros_like(ecd_quantile2)+ 255, ecd_quantile2)
-    #ecd_quantile3 = torch.where(ecd_quantile3 > 255, torch.zeros_like(ecd_quantile3)+ 255, ecd_quantile3)
+    ecd_quantile3 = torch.where(ecd_quantile3 > 255, torch.zeros_like(ecd_quantile3)+ 255, ecd_quantile3)
     ecd_minmax = torch.where(ecd_minmax > 255, torch.zeros_like(ecd_minmax)+ 255, ecd_minmax)
     ecd_leaky = torch.where(ecd_leaky > 255, torch.zeros_like(ecd_leaky)+ 255, ecd_leaky)
 
-    return features, [ecd_quantile2,  ecd_minmax, ecd_leaky]#[ecd_quantile, ecd_quantile2, ecd_quantile3, ecd_minmax, ecd_leaky]
+    return features, [ecd_quantile, ecd_quantile2, ecd_quantile3, ecd_minmax, ecd_leaky] #[ecd_quantile2,  ecd_minmax, ecd_leaky]#
 
 
 def denseToSparse(dense_tensor):
@@ -128,8 +128,8 @@ if __name__ == '__main__':
     rh = shape[0] / target_shape[0]
     rw = shape[1] / target_shape[1]
 
-    #ecd_types = ["quantile","quantile2","quantile3","minmax","leaky"]
-    ecd_types = ["quantile2","minmax","leaky"]
+    ecd_types = ["quantile","quantile2","quantile3","minmax","leaky"]
+    #ecd_types = ["quantile2","minmax","leaky"]
 
     if not os.path.exists(raw_dir):
         os.makedirs(raw_dir)
