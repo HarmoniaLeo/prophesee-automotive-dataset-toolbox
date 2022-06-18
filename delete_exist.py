@@ -2,7 +2,7 @@ import os
 
 f=open("already_exist.txt", mode='rb')
 files=f.readlines()
-root="/home/Large_Automotive_Detection_Dataset_processed/taf/train/feature"
+root="/home/lbd/Large_Automotive_Detection_Dataset_processed/taf/train/feature"
 count = 0
 for file in files:
     file = file.decode("utf-8")[:-1]
