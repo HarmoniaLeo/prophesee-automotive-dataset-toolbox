@@ -54,6 +54,17 @@ def generate_taf_cuda(x, y, c, p, features, volume_bins, shape):
         ecd_quantile2 = torch.exp(ecd_quantile2) / 7.389 * 255
     except Exception:
         pass
+    
+    ecd_quantile3 = volume[:,:,:,1].clone()
+    ecd_view = volume[:,:,:,1] [volume[:,:,:,1]  > - 1e8]
+    try:
+        q10, q90 = torch.quantile(ecd_view, torch.tensor([0.1,0.95]).to(x.device))
+        q100 = torch.max(ecd_view)
+        ecd_quantile2 = torch.where(ecd_quantile2 > q90, (ecd_quantile2 - q90) / (q100 - q90 + 1e-8) * 2, ecd_quantile2)
+        ecd_quantile2 = torch.where((ecd_quantile2 <= q90)&(ecd_quantile2 > - 1e8), (ecd_quantile2 - q90) / (q90 - q10 + 1e-8) * 6, ecd_quantile2)
+        ecd_quantile2 = torch.exp(ecd_quantile2) / 7.389 * 255
+    except Exception:
+        pass
         
     ecd_minmax = volume[:,:,:,1].clone()
     ecd_view = volume[:,:,:,1] [volume[:,:,:,1]  > - 1e8]
@@ -74,7 +85,7 @@ def generate_taf_cuda(x, y, c, p, features, volume_bins, shape):
     ecd_minmax = torch.where(ecd_minmax > 255, torch.zeros_like(ecd_minmax)+ 255, ecd_minmax)
     ecd_leaky = torch.where(ecd_leaky > 255, torch.zeros_like(ecd_leaky)+ 255, ecd_leaky)
 
-    return features, ecd_quantile, ecd_quantile2, ecd_minmax, ecd_leaky
+    return features, [ecd_quantile, ecd_quantile2, ecd_quantile3, ecd_minmax, ecd_leaky]
 
 
 def denseToSparse(dense_tensor):
@@ -116,8 +127,7 @@ if __name__ == '__main__':
     rh = shape[0] / target_shape[0]
     rw = shape[1] / target_shape[1]
 
-    total_volume_time = []
-    total_taf_time = []
+    ecd_types = ["feature","quantile","quantile2","quantile3","minmax","leaky"]
 
     if not os.path.exists(raw_dir):
         os.makedirs(raw_dir)
@@ -138,7 +148,7 @@ if __name__ == '__main__':
         target_root = os.path.join(target_dir, mode)
         if not os.path.exists(target_root):
             os.makedirs(target_root)
-        for ecd_type in ["feature","quantile","quantile2","minmax","leaky"]:
+        for ecd_type in ecd_types:
             if not os.path.exists(os.path.join(target_root,ecd_type)):
                 os.makedirs(os.path.join(target_root,ecd_type))
         #h5 = h5py.File(raw_dir + '/ATIS_taf_'+mode+'.h5', 'w')
@@ -195,23 +205,37 @@ if __name__ == '__main__':
                         x = np.where(x%19!=0, x+1, x)
                         y = np.where(y%15!=0, y+1, y)
 
-                    features, ecd_quantile, ecd_quantile2, ecd_minmax, ecd_leaky = generate_taf_cuda(torch.from_numpy(x).cuda(),torch.from_numpy(y).cuda(),torch.from_numpy(c).cuda(),torch.from_numpy(p).cuda(),torch.from_numpy(features).cuda(),event_volume_bins,shape)
+                    features, ecds = generate_taf_cuda(torch.from_numpy(x).cuda(),torch.from_numpy(y).cuda(),torch.from_numpy(c).cuda(),torch.from_numpy(p).cuda(),torch.from_numpy(features).cuda(),event_volume_bins,shape)
                     if target_shape[0] != shape[0]:
                         features = torch.nn.functional.interpolate(features[None,:,:,:], size = target_shape, mode='nearest')[0]
-                        ecd_quantile = torch.nn.functional.interpolate(ecd_quantile[None,:,:,:], size = target_shape, mode='nearest')[0]
-                        ecd_quantile2 = torch.nn.functional.interpolate(ecd_quantile2[None,:,:,:], size = target_shape, mode='nearest')[0]
-                        ecd_minmax = torch.nn.functional.interpolate(ecd_minmax[None,:,:,:], size = target_shape, mode='nearest')[0]
-                        ecd_leaky = torch.nn.functional.interpolate(ecd_leaky[None,:,:,:], size = target_shape, mode='nearest')[0]
-                    features, ecd_quantile, ecd_quantile2, ecd_minmax, ecd_leaky = features.cpu().numpy(), ecd_quantile.cpu().numpy(), ecd_quantile2.cpu().numpy(), ecd_minmax.cpu().numpy(), ecd_leaky.cpu().numpy()
+                        for i in range(len(ecds)):
+                            ecds[i] = torch.nn.functional.interpolate(ecds[i][None,:,:,:], size = target_shape, mode='nearest')[0]
+                    features = features.cpu().numpy()
+                    ecds = [ecd.cpu().numpy() for ecd in ecds]
+
+                    for i, ecd_type in enumerate(ecd_types):
+                        locations, ecd = denseToSparse(ecds[i])
+
+                        c, y, x = locations
+                        p = c%2
+                        c = (c/2).astype(int)
+
+                        volume = x.astype(np.uint32) + np.left_shift(y.astype(np.uint32), 10) + np.left_shift(c.astype(np.uint32), 19) + np.left_shift(p.astype(np.uint32), 22) + np.left_shift(ecd.astype(np.uint32), 23)
+
+                        x = np.bitwise_and(volume, 1023).astype(int)
+                        y = np.right_shift(np.bitwise_and(volume, 523264), 10).astype(int)
+                        c = np.right_shift(np.bitwise_and(volume, 3670016), 19).astype(int)
+                        p = np.right_shift(np.bitwise_and(volume, 4194304), 22).astype(int)
+                        ecd = np.right_shift(np.bitwise_and(volume, 2139095040), 23).astype(int)
+
+                        print(x.max(),y.max(),c.max(),p.max(),ecd.max())
+
+                        volume.tofile(os.path.join(os.path.join(target_root,ecd_type),file_name+"_"+str(unique_time)+".npy"))
+                    
+                    features.astype(np.uint8).tofile(os.path.join(os.path.join(target_root,"feature"),file_name+"_"+str(unique_time)+".npy"))
                     # features.astype(np.uint8).tofile(os.path.join(os.path.join(target_root,"feature"),file_name+"_"+str(unique_time)+".npy"))
                     # ecd_quantile.astype(np.uint8).tofile(os.path.join(os.path.join(target_root,"quantile"),file_name+"_"+str(unique_time)+".npy"))
                     # ecd_minmax.astype(np.uint8).tofile(os.path.join(os.path.join(target_root,"minmax"),file_name+"_"+str(unique_time)+".npy"))
                     # ecd_leaky.astype(np.uint8).tofile(os.path.join(os.path.join(target_root,"leaky"),file_name+"_"+str(unique_time)+".npy"))
-                    for i in range(len(features)):
-                        cv2.imwrite(os.path.join(os.path.join(target_root,"feature"),file_name+"_"+str(unique_time)+"_{0}.jpg".format(i)),features[i].astype(np.uint8))
-                        cv2.imwrite(os.path.join(os.path.join(target_root,"quantile"),file_name+"_"+str(unique_time)+"_{0}.jpg".format(i)),ecd_quantile[i].astype(np.uint8))
-                        cv2.imwrite(os.path.join(os.path.join(target_root,"quantile2"),file_name+"_"+str(unique_time)+"_{0}.jpg".format(i)),ecd_quantile2[i].astype(np.uint8))
-                        cv2.imwrite(os.path.join(os.path.join(target_root,"minmax"),file_name+"_"+str(unique_time)+"_{0}.jpg".format(i)),ecd_minmax[i].astype(np.uint8))
-                        cv2.imwrite(os.path.join(os.path.join(target_root,"leaky"),file_name+"_"+str(unique_time)+"_{0}.jpg".format(i)),ecd_leaky[i].astype(np.uint8))
             pbar.update(1)
         pbar.close()
