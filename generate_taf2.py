@@ -98,7 +98,7 @@ def denseToSparse(dense_tensor):
     """
     non_zero_indices = np.nonzero(dense_tensor)
 
-    features = dense_tensor[non_zero_indices[0],non_zero_indices[1],non_zero_indices[2],non_zero_indices[3]]
+    features = dense_tensor[non_zero_indices[0],non_zero_indices[1],non_zero_indices[2]]
 
     return np.stack(non_zero_indices), features
 if __name__ == '__main__':
