@@ -222,11 +222,11 @@ if __name__ == '__main__':
 
                         volume = x.astype(np.uint32) + np.left_shift(y.astype(np.uint32), 10) + np.left_shift(c.astype(np.uint32), 19) + np.left_shift(p.astype(np.uint32), 22) + np.left_shift(ecd.astype(np.uint32), 23)
 
-                        x = np.bitwise_and(volume, 1023).astype(int)
-                        y = np.right_shift(np.bitwise_and(volume, 523264), 10).astype(int)
-                        c = np.right_shift(np.bitwise_and(volume, 3670016), 19).astype(int)
-                        p = np.right_shift(np.bitwise_and(volume, 4194304), 22).astype(int)
-                        ecd = np.right_shift(np.bitwise_and(volume, 2139095040), 23).astype(int)
+                        # x = np.bitwise_and(volume, 1023).astype(int)
+                        # y = np.right_shift(np.bitwise_and(volume, 523264), 10).astype(int)
+                        # c = np.right_shift(np.bitwise_and(volume, 3670016), 19).astype(int)
+                        # p = np.right_shift(np.bitwise_and(volume, 4194304), 22).astype(int)
+                        # ecd = np.right_shift(np.bitwise_and(volume, 2139095040), 23).astype(int)
 
                         volume.tofile(os.path.join(os.path.join(target_root,ecd_type),file_name+"_"+str(unique_time)+".npy"))
                     
