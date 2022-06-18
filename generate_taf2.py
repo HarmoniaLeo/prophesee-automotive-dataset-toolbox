@@ -60,9 +60,9 @@ def generate_taf_cuda(x, y, c, p, features, volume_bins, shape):
     try:
         q10, q90 = torch.quantile(ecd_view, torch.tensor([0.1,0.95]).to(x.device))
         q100 = torch.max(ecd_view)
-        ecd_quantile2 = torch.where(ecd_quantile2 > q90, (ecd_quantile2 - q90) / (q100 - q90 + 1e-8) * 2, ecd_quantile2)
-        ecd_quantile2 = torch.where((ecd_quantile2 <= q90)&(ecd_quantile2 > - 1e8), (ecd_quantile2 - q90) / (q90 - q10 + 1e-8) * 6, ecd_quantile2)
-        ecd_quantile2 = torch.exp(ecd_quantile2) / 7.389 * 255
+        ecd_quantile3 = torch.where(ecd_quantile3 > q90, (ecd_quantile3 - q90) / (q100 - q90 + 1e-8) * 2, ecd_quantile3)
+        ecd_quantile3 = torch.where((ecd_quantile3 <= q90)&(ecd_quantile3 > - 1e8), (ecd_quantile3 - q90) / (q90 - q10 + 1e-8) * 6, ecd_quantile3)
+        ecd_quantile3 = torch.exp(ecd_quantile3) / 7.389 * 255
     except Exception:
         pass
         
