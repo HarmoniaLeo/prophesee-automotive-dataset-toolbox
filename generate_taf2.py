@@ -127,7 +127,7 @@ if __name__ == '__main__':
     rh = shape[0] / target_shape[0]
     rw = shape[1] / target_shape[1]
 
-    ecd_types = ["feature","quantile","quantile2","quantile3","minmax","leaky"]
+    ecd_types = ["quantile","quantile2","quantile3","minmax","leaky"]
 
     if not os.path.exists(raw_dir):
         os.makedirs(raw_dir)
@@ -148,7 +148,7 @@ if __name__ == '__main__':
         target_root = os.path.join(target_dir, mode)
         if not os.path.exists(target_root):
             os.makedirs(target_root)
-        for ecd_type in ecd_types:
+        for ecd_type in ["feature"] + ecd_types:
             if not os.path.exists(os.path.join(target_root,ecd_type)):
                 os.makedirs(os.path.join(target_root,ecd_type))
         #h5 = h5py.File(raw_dir + '/ATIS_taf_'+mode+'.h5', 'w')
@@ -227,8 +227,6 @@ if __name__ == '__main__':
                         c = np.right_shift(np.bitwise_and(volume, 3670016), 19).astype(int)
                         p = np.right_shift(np.bitwise_and(volume, 4194304), 22).astype(int)
                         ecd = np.right_shift(np.bitwise_and(volume, 2139095040), 23).astype(int)
-
-                        print(x.max(),y.max(),c.max(),p.max(),ecd.max())
 
                         volume.tofile(os.path.join(os.path.join(target_root,ecd_type),file_name+"_"+str(unique_time)+".npy"))
                     
