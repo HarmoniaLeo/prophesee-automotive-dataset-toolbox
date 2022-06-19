@@ -98,7 +98,7 @@ if __name__ == '__main__':
 
             flow = np.load(os.path.join("optical_flow_buffer",file_name + "_{0}.npy".format(int(unique_time))))
 
-            gt_nms = gt_trans.clone()
+            gt_nms = gt_trans.copy()
             gt_nms[:,3] = gt_trans[:,3] + gt_trans[:,1]
             gt_nms[:,4] = gt_trans[:,4] + gt_trans[:,2]
 
