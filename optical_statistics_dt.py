@@ -108,7 +108,7 @@ if __name__ == '__main__':
 
             flow = np.load(os.path.join("optical_flow_buffer",file_name + "_{0}.npy".format(int(unique_time))))
 
-            dt_nms = np.zeros_like(dt_trans)
+            dt_nms = dt_trans.clone()
             dt_nms[:,3] = dt_trans[:,3] + dt_trans[:,1]
             dt_nms[:,4] = dt_trans[:,4] + dt_trans[:,2]
 
