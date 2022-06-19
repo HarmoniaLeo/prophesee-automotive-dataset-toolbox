@@ -45,13 +45,13 @@ def draw_bboxes(img, boxes, dt, labelmap):
             cv2.rectangle(img, (pt1[0], pt1[1] - 15), (pt1[0] + 35, pt1[1]), color, -1)
             cv2.putText(img, class_name[:3], (pt1[0]+3, pt1[1] - 5), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0,0,0), 1)
 
-def visualizeVolume(volume_,gt,dt,filename,path,time_stamp_end,tol,LABELMAP):
+def visualizeVolume(volume_, ecds,gt,dt,filename,path,time_stamp_end,tol,LABELMAP):
     img_list = []
-    for i in range(1, len(volume_)+1, 2):
-        ecd = np.exp(volume_[i])
+    for i in range(0, len(volume_)):
+        ecd = ecds[i]
         #ecd = volume[-1]
         #ecd = volume[-1]
-        volume = volume_[i-1]
+        volume = volume_[i]
         img_s = 255 * np.ones((volume.shape[0], volume.shape[1], 3), dtype=np.uint8)
         #tar = volume[-1] - volume[-2]
         #tar = ecd * 2
