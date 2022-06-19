@@ -10,15 +10,12 @@ import pandas as pd
 import torch
 sns.set_style("darkgrid")
 
-def generate_event_volume(data_path, item, time_stamp_end):
+def generate_event_volume(data_path, item, time_stamp_end, shape, ecd):
 
-    features = []
-    ecds = []
-    for i in range(10):
-        feature = cv2.imread(os.path.join(data_path, "feature")+"/"+item+"_{0}_{1}.jpg".format(time_stamp_end,i))
-        ecd = cv2.imread(os.path.join(data_path, "quantile")+"/"+item+"_{0}_{1}.jpg".format(time_stamp_end,i))
-        features.append(feature)
-        ecds.append(ecd)
+    feature_file = os.path.join(os.path.join(data_path,"feature"), item+ "_" + str(time_stamp_end) + ".npy")
+    features = np.fromfile(feature_file, dtype=np.uint8).reshape(10, shape[0], shape[1]).astype(np.float32)
+    ecd_file = os.path.join(os.path.join(data_path,ecd), item+ "_" + str(time_stamp_end) + ".npy")
+    ecds = np.fromfile(ecd_file, dtype=np.uint8).reshape(10, shape[0], shape[1]).astype(np.float32)
     return features, ecds
 
 LABELMAP = ["car", "pedestrian"]
@@ -100,6 +97,7 @@ if __name__ == '__main__':
         description='visualize one or several event files along with their boxes')
     parser.add_argument('-item', type=str)
     parser.add_argument('-end', type=int)
+    parser.add_argument('-ecd', type=str)
     parser.add_argument('-exp_name', type=str, default=None)
     parser.add_argument('-tol', type = int, default=4999)
     parser.add_argument('-dataset', type = str, default="gen1")
@@ -155,5 +153,5 @@ if __name__ == '__main__':
     #print(target)
 
     data_path = os.path.join(data_path,data_folder)
-    volumes, ecds = generate_event_volume(data_path, item, time_stamp_end)
+    volumes, ecds = generate_event_volume(data_path, item, time_stamp_end, shape, args.ecd)
     visualizeVolume(volumes, ecds,dat_bbox,dt,item,result_path,time_stamp_end,args.tol,LABELMAP)
