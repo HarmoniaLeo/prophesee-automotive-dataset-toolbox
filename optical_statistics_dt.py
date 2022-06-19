@@ -112,7 +112,7 @@ if __name__ == '__main__':
             dt_nms[:,3] = dt_trans[:,3] + dt_trans[:,1]
             dt_nms[:,4] = dt_trans[:,4] + dt_trans[:,2]
 
-            #dt_trans = dt_trans[nms(dt_nms)]
+            dt_trans = dt_trans[nms(dt_nms)]
 
             for j in range(len(dt_trans)):
                 x1, y1, x2, y2 = int(dt_trans[j,1]), int(dt_trans[j,2]), int(dt_trans[j,3] + dt_trans[j,1]), int(dt_trans[j,4] + dt_trans[j,2])
