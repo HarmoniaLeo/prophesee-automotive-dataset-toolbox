@@ -119,7 +119,7 @@ if __name__ == '__main__':
     raw_dir = "/data/lbd/ATIS_taf_all"
     target_dir = "/home/lbd/ATIS_Automotive_Detection_Dataset_processed/taf"
     #target_dir2 = "/datassd4t/lbd/Large_Automotive_Detection_Dataset_processed/taf"
-    dataset = "gen4"
+    dataset = "gen1"
 
     if dataset == "gen4":
         # min_event_count = 800000
