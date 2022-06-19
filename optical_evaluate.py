@@ -34,6 +34,7 @@ if __name__ == '__main__':
         shape = [720,1280]
         filter_boxes = filter_boxes_large
         classes = ['pedestrian', 'two wheeler', 'car', 'truck', 'bus', 'traffic sign', 'traffic light']
+        percentiles = [0.0, 0.13798373765648486, 0.6976278461290158, 2.025066711356914, 5.278082102864997, 1000]
         
     bbox_file = result_path
     f_bbox = np.load(bbox_file)
