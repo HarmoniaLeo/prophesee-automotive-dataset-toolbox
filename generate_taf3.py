@@ -227,7 +227,7 @@ if __name__ == '__main__':
 
                     for i, ecd_type in enumerate(ecd_types):
                         if ecd_type == "minmax":
-                            ecds[i].astype(np.uint8).tofile(os.path.join(os.path.join(target_root2,ecd_type),file_name+"_"+str(unique_time)+".npy"))
+                            ecds[i].astype(np.uint8).tofile(os.path.join(os.path.join(target_root1,ecd_type),file_name+"_"+str(unique_time)+".npy"))
                         if ecd_type == "minmax2":
                             if i_file > len(files)/2:
                                 ecds[i].astype(np.uint8).tofile(os.path.join(os.path.join(target_root1,ecd_type),file_name+"_"+str(unique_time)+".npy"))
