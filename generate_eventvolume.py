@@ -166,18 +166,18 @@ if __name__ == '__main__':
                 if target_shape[0] < shape[0]:
                     events[:,0] = events[:,0] * rw
                     events[:,1] = events[:,1] * rh
-                    start = time.time()
+                    #start = time.time()
                     volume = generate_agile_event_volume_cuda(events, target_shape, time_window, event_volume_bins)
-                    torch.cuda.synchronize()
-                    end = time.time()
+                    # torch.cuda.synchronize()
+                    # end = time.time()
                 else:
-                    start = time.time()
+                    #start = time.time()
                     volume = generate_agile_event_volume_cuda(events, shape, time_window, event_volume_bins)
-                    torch.cuda.synchronize()
-                    end = time.time()
+                    # torch.cuda.synchronize()
+                    # end = time.time()
                     volume = torch.nn.functional.interpolate(volume[None,:,:,:], size = target_shape, mode='nearest')[0]
                 
-                print(end - start)
+                #print(end - start)
 
                 volume = volume.cpu().numpy()
                 volume = np.where(volume > 255, 255, volume)
@@ -198,7 +198,7 @@ if __name__ == '__main__':
 
                 events = np.stack([x, y, c, p, features], axis=1)
 
-                #volume.tofile(volume_save_path)
+                volume.tofile(volume_save_path)
                 #features.tofile(volume_save_path_f)
                 #np.savez(volume_save_path, locations = locations, features = features)
                 #h5.create_dataset(str(unique_time)+"/locations", data=locations)
