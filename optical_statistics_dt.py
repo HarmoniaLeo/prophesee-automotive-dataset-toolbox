@@ -34,7 +34,7 @@ def nms(dets):
         # Cross Area / (bbox + particular area - Cross Area)
         ovr = inter / (areas[i] + areas[order[1:]] - inter)
         #reserve all the boundingbox whose ovr less than thresh
-        inds = np.where(ovr <= 1e-28)[0]
+        inds = np.where(ovr <= 0.1)[0]
         if len(inds) != len(ovr):
             keep.pop()
         order = order[inds + 1]
@@ -139,7 +139,7 @@ if __name__ == '__main__':
                 densitys.append(density)
 
                 dt_trans[j,1] = x1
-                dt_trans[j,2] = x2
+                dt_trans[j,2] = y1
                 dt_trans[j,3] = x2 - x1
                 dt_trans[j,4] = y2 - y1
                 dt.append(dt_trans[j])

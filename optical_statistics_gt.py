@@ -35,7 +35,7 @@ def nms(dets):
         # Cross Area / (bbox + particular area - Cross Area)
         ovr = inter / (areas[i] + areas[order[1:]] - inter)
         #reserve all the boundingbox whose ovr less than thresh
-        inds = np.where(ovr <= 1e-28)[0]
+        inds = np.where(ovr <= 0.1)[0]
         if len(inds) != len(ovr):
             keep.pop()
         order = order[inds + 1]
@@ -128,7 +128,7 @@ if __name__ == '__main__':
 
                 file_names.append(file_name)
                 gt_trans[j,1] = x1
-                gt_trans[j,2] = x2
+                gt_trans[j,2] = y1
                 gt_trans[j,3] = x2 - x1
                 gt_trans[j,4] = y2 - y1
                 gt.append(gt_trans[j])
