@@ -112,7 +112,7 @@ if __name__ == '__main__':
             dt_nms[:,3] = dt_trans[:,3] + dt_trans[:,1]
             dt_nms[:,4] = dt_trans[:,4] + dt_trans[:,2]
 
-            #dt_trans = dt_trans[nms(dt_nms)]
+            dt_trans = dt_trans[nms(dt_nms)]
 
             for j in range(len(dt_trans)):
                 x1, y1, x2, y2 = int(dt_trans[j,1]), int(dt_trans[j,2]), int(dt_trans[j,3] + dt_trans[j,1]), int(dt_trans[j,4] + dt_trans[j,2])
@@ -138,6 +138,10 @@ if __name__ == '__main__':
                 density = np.sum(np.sqrt(flow[y1:y2,x1:x2,0]**2 + flow[y1:y2,x1:x2,1]**2))/((y2 - y1)*(x2 - x1) + 1e-8)
                 densitys.append(density)
 
+                dt_trans[j,1] = x1
+                dt_trans[j,2] = x2
+                dt_trans[j,3] = x2 - x1
+                dt_trans[j,4] = y2 - y1
                 dt.append(dt_trans[j])
                 file_names2.append(file_name)
 

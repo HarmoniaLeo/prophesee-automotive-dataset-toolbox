@@ -1,4 +1,5 @@
 from cgitb import small
+from telnetlib import X3PAD
 import numpy as np
 from src.io import npy_events_tools
 from src.io import psee_loader
@@ -102,7 +103,7 @@ if __name__ == '__main__':
             gt_nms[:,3] = gt_trans[:,3] + gt_trans[:,1]
             gt_nms[:,4] = gt_trans[:,4] + gt_trans[:,2]
 
-            #gt_trans = gt_trans[nms(gt_nms)]
+            gt_trans = gt_trans[nms(gt_nms)]
 
             for j in range(len(gt_trans)):
                 x1, y1, x2, y2 = int(gt_trans[j,1]), int(gt_trans[j,2]), int(gt_trans[j,3] + gt_trans[j,1]), int(gt_trans[j,4] + gt_trans[j,2])
@@ -126,6 +127,10 @@ if __name__ == '__main__':
                     y2 = 0
 
                 file_names.append(file_name)
+                gt_trans[j,1] = x1
+                gt_trans[j,2] = x2
+                gt_trans[j,3] = x2 - x1
+                gt_trans[j,4] = y2 - y1
                 gt.append(gt_trans[j])
 
                 density = np.sum(np.sqrt(flow[y1:y2,x1:x2,0]**2 + flow[y1:y2,x1:x2,1]**2))/((y2 - y1)*(x2 - x1) + 1e-8)
