@@ -76,6 +76,21 @@ def generate_taf_cuda(x, y, c, p, features, volume_bins, shape):
     except Exception:
         pass
 
+    ecd_minmax2 = volume[:,:,:,1].clone()
+
+    for i in range(len(ecd_minmax2)):
+
+        ecd_view = volume[i,:,:,1] [volume[i,:,:,1]  > - 1e8]
+        
+        try:
+            q100 = torch.max(ecd_view)
+            #q0 = torch.min(ecd_view)
+            q10 = torch.quantile(ecd_view, 0.1)
+            ecd_minmax2[i] = torch.where(ecd_minmax2[i] > -1e8, (ecd_minmax2[i] - q100) / (q100 - q10 + 1e-8) * 6, ecd_minmax2[i])
+            ecd_minmax2[i] = torch.exp(ecd_minmax2[i]) * 255
+        except Exception:
+            pass
+
     ecd_leaky = volume[:,:,:,1].clone() * 0.1
     ecd_leaky = torch.exp(ecd_leaky) * 255
 
@@ -84,9 +99,10 @@ def generate_taf_cuda(x, y, c, p, features, volume_bins, shape):
     ecd_quantile2 = torch.where(ecd_quantile2 > 255, torch.zeros_like(ecd_quantile2)+ 255, ecd_quantile2)
     ecd_quantile3 = torch.where(ecd_quantile3 > 255, torch.zeros_like(ecd_quantile3)+ 255, ecd_quantile3)
     ecd_minmax = torch.where(ecd_minmax > 255, torch.zeros_like(ecd_minmax)+ 255, ecd_minmax)
+    ecd_minmax2 = torch.where(ecd_minmax2 > 255, torch.zeros_like(ecd_minmax2)+ 255, ecd_minmax2)
     ecd_leaky = torch.where(ecd_leaky > 255, torch.zeros_like(ecd_leaky)+ 255, ecd_leaky)
 
-    return features, [ecd_quantile, ecd_quantile2, ecd_quantile3, ecd_minmax, ecd_leaky] #[ecd_quantile2,  ecd_minmax, ecd_leaky]#
+    return features, [ecd_quantile, ecd_quantile2, ecd_quantile3, ecd_minmax, ecd_minmax2, ecd_leaky] #[ecd_quantile2,  ecd_minmax, ecd_leaky]#
 
 
 def denseToSparse(dense_tensor):
@@ -128,7 +144,7 @@ if __name__ == '__main__':
     rh = shape[0] / target_shape[0]
     rw = shape[1] / target_shape[1]
 
-    ecd_types = ["quantile","quantile2","quantile3","minmax","leaky"]
+    ecd_types = ["quantile","quantile2","quantile3","minmax","minmax2","leaky"]
     #ecd_types = ["quantile2","minmax","leaky"]
 
     if not os.path.exists(raw_dir):
