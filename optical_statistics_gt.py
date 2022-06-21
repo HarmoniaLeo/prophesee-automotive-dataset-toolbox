@@ -35,7 +35,7 @@ def nms(dets):
         # Cross Area / (bbox + particular area - Cross Area)
         ovr = inter / (areas[i] + areas[order[1:]] - inter)
         #reserve all the boundingbox whose ovr less than thresh
-        inds = np.where(ovr <= 1e-28)[0]
+        inds = np.where(ovr <= 0.1)[0]
         if len(inds) != len(ovr):
             keep.pop()
         order = order[inds + 1]

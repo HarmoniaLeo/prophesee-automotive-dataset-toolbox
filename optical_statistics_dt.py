@@ -34,7 +34,7 @@ def nms(dets):
         # Cross Area / (bbox + particular area - Cross Area)
         ovr = inter / (areas[i] + areas[order[1:]] - inter)
         #reserve all the boundingbox whose ovr less than thresh
-        inds = np.where(ovr <= 1e-28)[0]
+        inds = np.where(ovr <= 0.1)[0]
         if len(inds) != len(ovr):
             keep.pop()
         order = order[inds + 1]
@@ -138,10 +138,12 @@ if __name__ == '__main__':
                 density = np.sum(np.sqrt(flow[y1:y2,x1:x2,0]**2 + flow[y1:y2,x1:x2,1]**2))/((y2 - y1)*(x2 - x1) + 1e-8)
                 densitys.append(density)
 
+                print(dt_trans[j])
                 dt_trans[j,1] = x1
                 dt_trans[j,2] = y1
                 dt_trans[j,3] = x2 - x1
                 dt_trans[j,4] = y2 - y1
+                print(dt_trans[j])
                 dt.append(dt_trans[j])
                 file_names2.append(file_name)
 
