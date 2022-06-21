@@ -115,7 +115,7 @@ if __name__ == '__main__':
             dt_trans = dt_trans[nms(dt_nms)]
 
             for j in range(len(dt_trans)):
-                x1, y1, x2, y2 = int(dt_trans[j,1]), int(dt_trans[j,2]), int(dt_trans[j,3] + dt_trans[j,1]), int(dt_trans[j,4] + dt_trans[j,2])
+                x1, y1, x2, y2 = dt_trans[j,1], dt_trans[j,2], dt_trans[j,3] + dt_trans[j,1], dt_trans[j,4] + dt_trans[j,2]
 
                 if x1 >= shape[1]:
                     x1 = shape[1] - 1
@@ -135,15 +135,13 @@ if __name__ == '__main__':
                 if y2 < 0:
                     y2 = 0
 
-                density = np.sum(np.sqrt(flow[y1:y2,x1:x2,0]**2 + flow[y1:y2,x1:x2,1]**2))/((y2 - y1)*(x2 - x1) + 1e-8)
+                density = np.sum(np.sqrt(flow[int(y1):int(y2),int(x1):int(x2),0]**2 + flow[int(y1):int(y2),int(x1):int(x2),1]**2))/(int(y2 - y1)*int(x2 - x1) + 1e-8)
                 densitys.append(density)
 
-                print(dt_trans[j])
                 dt_trans[j,1] = x1
                 dt_trans[j,2] = y1
                 dt_trans[j,3] = x2 - x1
                 dt_trans[j,4] = y2 - y1
-                print(dt_trans[j])
                 dt.append(dt_trans[j])
                 file_names2.append(file_name)
 

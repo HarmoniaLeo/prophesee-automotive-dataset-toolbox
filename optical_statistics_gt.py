@@ -106,7 +106,7 @@ if __name__ == '__main__':
             gt_trans = gt_trans[nms(gt_nms)]
 
             for j in range(len(gt_trans)):
-                x1, y1, x2, y2 = int(gt_trans[j,1]), int(gt_trans[j,2]), int(gt_trans[j,3] + gt_trans[j,1]), int(gt_trans[j,4] + gt_trans[j,2])
+                x1, y1, x2, y2 = gt_trans[j,1], gt_trans[j,2], gt_trans[j,3] + gt_trans[j,1], gt_trans[j,4] + gt_trans[j,2]
 
                 if x1 >= shape[1]:
                     x1 = shape[1] - 1
@@ -133,7 +133,7 @@ if __name__ == '__main__':
                 gt_trans[j,4] = y2 - y1
                 gt.append(gt_trans[j])
 
-                density = np.sum(np.sqrt(flow[y1:y2,x1:x2,0]**2 + flow[y1:y2,x1:x2,1]**2))/((y2 - y1)*(x2 - x1) + 1e-8)
+                density = np.sum(np.sqrt(flow[int(y1):int(y2),int(x1):int(x2),0]**2 + flow[int(y1):int(y2),int(x1):int(x2),1]**2))/(int(y2 - y1)*int(x2 - x1) + 1e-8)
                 densitys.append(density)
 
         #h5.close()
