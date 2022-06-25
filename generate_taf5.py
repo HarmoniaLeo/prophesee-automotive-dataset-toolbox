@@ -20,7 +20,7 @@ def taf_cuda(x, y, t, p, shape, volume_bins, past_volume, filter = False):
     H, W = shape
     
     img = torch.zeros((H * W * 2)).float().to(x.device)
-    img.index_add_(0, p + 2 * x + 2 * W * y, torch.ones_like(x))
+    img.index_add_(0, p + 2 * x + 2 * W * y, torch.ones_like(x).float())
 
     img = img.view(H, W, 2)
     torch.cuda.synchronize()
