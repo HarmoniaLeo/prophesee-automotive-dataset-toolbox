@@ -146,8 +146,6 @@ if __name__ == '__main__':
         pbar = tqdm.tqdm(total=len(files), unit='File', unit_scale=True)
 
         for i_file, file_name in enumerate(files):
-            if not file_name == "17-04-13_15-05-43_3599500000_3659500000":
-                continue
             event_file = os.path.join(root, file_name + '_td.dat')
             bbox_file = os.path.join(root, file_name + '_bbox.npy')
             #h5 = h5py.File(volume_save_path, "w")
