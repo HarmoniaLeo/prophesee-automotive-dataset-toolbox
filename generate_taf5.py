@@ -57,6 +57,8 @@ def taf_cuda(x, y, t, p, shape, volume_bins, past_volume, filter = False):
     torch.cuda.synchronize()
     generate_encode_time = time.time() - tick
 
+    print(ecd.shape)
+
     ecd_viewed = ecd.permute(3, 2, 0, 1).view(volume_bins * 2, H, W).contiguous()
 
     #print(generate_volume_time, filter_time, generate_encode_time)
