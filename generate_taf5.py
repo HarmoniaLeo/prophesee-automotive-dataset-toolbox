@@ -28,17 +28,19 @@ def taf_cuda(x, y, t, p, shape, volume_bins, past_volume, filter = False):
 
     tick = time.time()
     if not filter:
-        forward = (img == 0)[:,None].long()
+        forward = (img == 0)[:,None]
     else:
         forward = (img <= 1).float()
         forward = 1 - forward.permute(2, 0, 1)[None, :, :, :]
         forward = torch.nn.MaxPool2d(2, 2)(forward)
-        forward = torch.nn.Upsample(scale_factor=2, mode = "nearest")(1 - forward).long().permute(2, 3, 1, 0)
+        forward = torch.nn.Upsample(scale_factor=2, mode = "nearest")(1 - forward).bool().permute(2, 3, 1, 0)
     torch.cuda.synchronize()
     filter_time = time.time() - tick
     tick = time.time()
     old_ecd = past_volume
-    if torch.sum(1 - forward) > 0:
+    if torch.all(forward):
+        ecd = old_ecd
+    else:
         ecd = torch.where(forward, torch.zeros_like(forward).float() - 1e8, torch.zeros_like(forward).float())[:, :, :, None]
         ecd = torch.cat([old_ecd, ecd],dim=3)
         for i in range(1,ecd.shape[3])[::-1]:
@@ -48,8 +50,6 @@ def taf_cuda(x, y, t, p, shape, volume_bins, past_volume, filter = False):
             ecd = ecd[:,1:]
         else:
             ecd[:,:,:,0] = torch.where(forward, torch.zeros_like(forward).float() -1e8, ecd[:,:,:,0])
-    else:
-        ecd = old_ecd
     torch.cuda.synchronize()
     generate_encode_time = time.time() - tick
 
