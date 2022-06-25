@@ -69,7 +69,8 @@ def visualizeVolume(volume_, ecds,gt,dt,filename,path,time_stamp_end,tol,LABELMA
         img_s = cv2.cvtColor(img_s, cv2.COLOR_HSV2BGR)
         mask = np.where(volume[:,:,None] * 8 > 1, 1, volume[:,:,None] * 8)
         #mask = np.where(volume[:,:,None] > 1, 1, volume[:,:,None])
-        img_s = (mask * img_s).astype(np.uint8)
+        #img_s = (mask * img_s).astype(np.uint8)
+        img_s = img_s.astype(np.uint8)
         gt = gt[gt['t']==time_stamp_end]
         draw_bboxes(img_s,gt,0,LABELMAP)
         if not (dt is None):
