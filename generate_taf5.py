@@ -15,6 +15,10 @@ import math
 import argparse
 import torch.nn
 
+pooling_layer = torch.nn.MaxPool2d(2, 2)
+up_sampling_layer = torch.nn.Upsample(scale_factor=2, mode = "nearest")
+
+
 def taf_cuda(x, y, t, p, shape, volume_bins, past_volume, filter = False):
     tick = time.time()
     H, W = shape
@@ -32,8 +36,8 @@ def taf_cuda(x, y, t, p, shape, volume_bins, past_volume, filter = False):
     else:
         forward = (img <= 1).float()
         forward = 1 - forward.permute(2, 0, 1)[None, :, :, :]
-        forward = torch.nn.MaxPool2d(2, 2)(forward)
-        forward = torch.nn.Upsample(scale_factor=2, mode = "nearest")(1 - forward).bool().permute(2, 3, 1, 0)
+        forward = pooling_layer(forward)
+        forward = up_sampling_layer(1 - forward).bool().permute(2, 3, 1, 0)
     torch.cuda.synchronize()
     filter_time = time.time() - tick
     tick = time.time()
@@ -213,7 +217,7 @@ if __name__ == '__main__':
                 events = torch.cat([events,z[:,None]], dim=1)
 
                 if start_time > time_upperbound:
-                    memory = torch.zeros((shape[0], shape[1], 2, event_volume_bins)) - 1e8
+                    memory = torch.zeros((shape[0], shape[1], 2, event_volume_bins)).cuda() - 1e8
                 for iter in range(bins):
                     events_ = events[events[...,4] == iter]
                     t_max = start_time + (iter + 1) * events_window_abin
