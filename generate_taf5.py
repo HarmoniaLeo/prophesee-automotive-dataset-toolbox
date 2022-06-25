@@ -113,7 +113,7 @@ if __name__ == '__main__':
         shape = [240,304]
         target_shape = [256, 320]
     events_window_abin = 10000
-    event_volume_bins = 10
+    event_volume_bins = 8
     events_window = events_window_abin * event_volume_bins
 
     if not os.path.exists(raw_dir):
@@ -121,7 +121,7 @@ if __name__ == '__main__':
     if not os.path.exists(target_dir):
         os.makedirs(target_dir)
 
-    bins_saved = [1, 5, 10]
+    bins_saved = [1, 4, 8]
     transform_applied = [30, 50, 70, 90, 95]
 
     for mode in ["train","val","test"]:
