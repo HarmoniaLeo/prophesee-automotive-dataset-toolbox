@@ -122,7 +122,7 @@ if __name__ == '__main__':
         os.makedirs(target_dir)
 
     bins_saved = [1, 5]
-    transform_applied = [90, 100, 70, 50, 30]
+    transform_applied = [50, 70, 90, 95, 99]
 
     for mode in ["train","val","test"]:
         file_dir = os.path.join(raw_dir, mode)
