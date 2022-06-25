@@ -74,7 +74,7 @@ def generate_taf_cuda(events, shape, past_volume = None, volume_bins=5, filter =
 def quantile_transform(ecd, head = [90], tail = 10):
     ecd = ecd.clone()
     ecd_view = ecd[ecd > -1e8]
-    qs = torch.quantile(ecd_view, torch.tensor([tail] + head).to(ecd_view.device))
+    qs = torch.quantile(ecd_view, torch.tensor([tail] + head).to(ecd_view.device)/100)
     q100 = torch.max(ecd_view)
     q10 = qs[None, None, None, None, 0:1]
     qs = qs[None, None, None, None, 1:]
