@@ -59,7 +59,7 @@ def taf_cuda(x, y, t, p, shape, volume_bins, past_volume, filter = False):
 
     ecd_viewed = ecd.permute(3, 2, 0, 1).view(volume_bins * 2, H, W).contiguous()
 
-    print(generate_volume_time, filter_time, generate_encode_time)
+    #print(generate_volume_time, filter_time, generate_encode_time)
     return ecd_viewed, ecd
 
 def generate_taf_cuda(events, shape, past_volume = None, volume_bins=5, filter = False):
@@ -233,6 +233,8 @@ if __name__ == '__main__':
                     for j, head in enumerate(transform_applied):
                         ecd = quantile_transform(volume[-bin_saved:], head = [head])
                         ecd = ecd.cpu().numpy().copy()
+                        if not os.path.exists(os.path.join(target_root,"quantile{0}_bins{1}".format(head, bin_saved))):
+                            os.makedirs(os.path.join(target_root,"quantile{0}_bins{1}".format(head, bin_saved)))
                         ecd.astype(np.uint8).tofile(os.path.join(os.path.join(target_root,"quantile{0}_bins{1}".format(head, bin_saved)),file_name+"_"+str(unique_time)+".npy"))
                 
                 time_upperbound = end_time
