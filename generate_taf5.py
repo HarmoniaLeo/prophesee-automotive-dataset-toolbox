@@ -38,15 +38,18 @@ def taf_cuda(x, y, t, p, shape, volume_bins, past_volume, filter = False):
     filter_time = time.time() - tick
     tick = time.time()
     old_ecd = past_volume
-    ecd = torch.where(forward, torch.zeros_like(forward).float() - 1e8, torch.zeros_like(forward).float())[:, :, :, None]
-    ecd = torch.cat([old_ecd, ecd],dim=3)
-    for i in range(1,ecd.shape[3])[::-1]:
-        ecd[:,:,:,i-1] = ecd[:,:,:,i-1] - 1
-        ecd[:,:,:,i] = torch.where(forward, ecd[:,:,:,i-1],ecd[:,:,:,i])
-    if ecd.shape[3] > volume_bins:
-        ecd = ecd[:,1:]
+    if torch.sum(1 - forward) > 0:
+        ecd = torch.where(forward, torch.zeros_like(forward).float() - 1e8, torch.zeros_like(forward).float())[:, :, :, None]
+        ecd = torch.cat([old_ecd, ecd],dim=3)
+        for i in range(1,ecd.shape[3])[::-1]:
+            ecd[:,:,:,i-1] = ecd[:,:,:,i-1] - 1
+            ecd[:,:,:,i] = torch.where(forward, ecd[:,:,:,i-1],ecd[:,:,:,i])
+        if ecd.shape[3] > volume_bins:
+            ecd = ecd[:,1:]
+        else:
+            ecd[:,:,:,0] = torch.where(forward, torch.zeros_like(forward).float() -1e8, ecd[:,:,:,0])
     else:
-        ecd[:,:,:,0] = torch.where(forward, torch.zeros_like(forward).float() -1e8, ecd[:,:,:,0])
+        ecd = old_ecd
     torch.cuda.synchronize()
     generate_encode_time = time.time() - tick
 
@@ -139,10 +142,10 @@ if __name__ == '__main__':
         pbar = tqdm.tqdm(total=len(files), unit='File', unit_scale=True)
 
         for i_file, file_name in enumerate(files):
+            if not file_name == "17-04-13_15-05-43_3599500000_3659500000":
+                continue
             event_file = os.path.join(root, file_name + '_td.dat')
             bbox_file = os.path.join(root, file_name + '_bbox.npy')
-            # if os.path.exists(volume_save_path):
-            #     continue
             #h5 = h5py.File(volume_save_path, "w")
             f_bbox = open(bbox_file, "rb")
             start, v_type, ev_size, size, dtype = npy_events_tools.parse_header(f_bbox)
