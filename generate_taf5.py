@@ -1,6 +1,7 @@
 from itertools import count
 import numpy as np
 from sklearn import datasets
+from sqlalchemy import false
 from src.io import npy_events_tools
 from src.io import psee_loader
 import tqdm
@@ -12,76 +13,79 @@ import torch
 import time
 import math
 import argparse
+import torch.nn
 
-def taf_cuda(x, y, t, p, shape, volume_bins, past_volume):
+def taf_cuda(x, y, t, p, shape, volume_bins, past_volume, filter = False):
     tick = time.time()
     H, W = shape
-
-    t_star = t.float()[:,None,None]
     
-    adder = torch.stack([torch.arange(2),torch.arange(2)],dim = 1).to(x.device)[None,:,:]   #1, 2, 2
-    adder = (1 - torch.abs(adder-t_star)) * torch.stack([p,1 - p],dim=1)[:,None,:]  #n, 2, 2
-    adder = torch.where(adder>=0,adder,torch.zeros_like(adder)).view(adder.shape[0], 4) #n, 4
-    
-    img = torch.zeros((H * W, 4)).float().to(x.device)
-    img.index_add_(0, x + W * y, adder)
+    img = torch.zeros((H * W * 2)).float().to(x.device)
+    img.index_add_(0, p + 2 * x + 2 * W * y, torch.ones_like(x))
 
-    img = img.view(H * W, 2, 2, 1) #img: hw, 2, 2, 1
+    img = img.view(H, W, 2)
     torch.cuda.synchronize()
     generate_volume_time = time.time() - tick
-    #print("generate_volume_time",time.time() - tick)
 
     tick = time.time()
-    forward = (img[:,-1]==0)[:,None]   #forward: hw, 1, 2, 1
-    if not (past_volume is None):
-        img_old_ecd = past_volume    #img_ecd: hw, 2, 2, 2
-        img_old_ecd[:,-1,:,0] = torch.where(img_old_ecd[:,-1,:,1] == 0,img_old_ecd[:,-1,:,0] + img[:,0,:,0],img_old_ecd[:,-1,:,0])
-        img_ecd = torch.cat([img_old_ecd,torch.cat([img[:,1:],torch.zeros_like(img[:,1:])],dim=3)],dim=1)
-        for i in range(1,img_ecd.shape[1])[::-1]:
-            img_ecd[:,i-1,:,1] = img_ecd[:,i-1,:,1] - 1
-            img_ecd[:,i:i+1] = torch.where(forward, img_ecd[:,i-1:i],img_ecd[:,i:i+1])
-        img_ecd[:,:1] = torch.where(forward, torch.cat([torch.zeros_like(forward).float(),torch.zeros_like(forward).float() -1e8],dim=3), img_ecd[:,:1])
+    if not filter:
+        forward = (img == 0)[:,None]
     else:
-        ecd = torch.where(forward, torch.zeros_like(forward).float() -1e8, torch.zeros_like(forward).float())   #ecd: hw, 1, 2, 1
-        img_ecd = torch.cat([img, torch.cat([ecd,ecd],dim=1)],dim=3)    #img_ecd: hw, 2, 2, 2
-    if img_ecd.shape[1] > volume_bins:
-        img_ecd = img_ecd[:,1:]
+        forward = (img <= 1)
+        forward = 1 - forward.permute(2, 0, 1)[None, :, :, :]
+        forward = torch.nn.MaxPool2d(2, 2)(forward)
+        forward = torch.nn.Upsample(scale_factor=2, mode = "nearest")(1 - forward).permute(2, 3, 1, 0)
+    torch.cuda.synchronize()
+    filter_time = time.time() - tick
+    tick = time.time()
+    old_ecd = past_volume
+    ecd = torch.where(forward, torch.zeros_like(forward).float() - 1e8, torch.zeros_like(forward).float())[:, :, :, None]
+    ecd = torch.cat([old_ecd, ecd],dim=3)
+    for i in range(1,ecd.shape[3])[::-1]:
+        ecd[:,:,:,i-1] = ecd[:,:,:,i-1] - 1
+        ecd[:,:,:,i] = torch.where(forward, ecd[:,:,:,i-1],ecd[:,:,:,i])
+    if ecd.shape[3] > volume_bins:
+        ecd = ecd[:,1:]
+    else:
+        ecd[:,:,:,0] = torch.where(forward, torch.zeros_like(forward).float() -1e8, ecd[:,:,:,0])
     torch.cuda.synchronize()
     generate_encode_time = time.time() - tick
-    #print("generate encode",time.time() - tick)
 
-    img_ecd_viewed = img_ecd.view((H, W, img_ecd.shape[1] * 2, 2)).permute(2, 0, 1, 3)
-    return img_ecd_viewed, img_ecd, generate_volume_time, generate_encode_time
+    ecd_viewed = ecd.permute(3, 2, 0, 1).view(volume_bins * 2, H, W).contiguous()
 
-def generate_taf_cuda(events, shape, past_volume, volume_bins, bin_start, bin_end, infer_start, infer_end):
+    print(generate_volume_time, filter_time, generate_encode_time)
+    return ecd_viewed, ecd
+
+def generate_taf_cuda(events, shape, past_volume = None, volume_bins=5):
     x, y, t, p, z = events.unbind(-1)
 
     x, y, p = x.long(), y.long(), p.long()
     
-    histogram_ecd, past_volume, generate_volume_time, generate_encode_time = taf_cuda(x, y, t, p, shape, volume_bins, past_volume)
+    histogram_ecd, past_volume = taf_cuda(x, y, t, p, shape, volume_bins, past_volume)
 
-    return histogram_ecd, past_volume, generate_volume_time, generate_encode_time
+    return histogram_ecd, past_volume
 
-def denseToSparse(dense_tensor):
-    """
-    Converts a dense tensor to a sparse vector.
+def quantile_transform(ecd, head = [90], tail = 10):
+    ecd = ecd.clone()
+    ecd_view = ecd[ecd > -1e8]
+    qs = torch.quantile(ecd_view, torch.tensor([tail] + head).to(ecd_view.device))
+    q100 = torch.max(ecd_view)
+    q10 = qs[None, None, None, None, 0:1]
+    qs = qs[None, None, None, None, 1:]
+    ecd = [ecd for i in range(len(head))]
+    ecd = torch.stack(ecd, dim = -1)
+    ecd = torch.where(ecd > qs, (ecd - qs) / (q100 - qs + 1e-8) * 2, ecd)
+    ecd = torch.where((ecd <= qs)&(ecd > - 1e8), (ecd - qs) / (qs - q10 + 1e-8) * 6, ecd)
+    ecd = torch.exp(ecd) / 7.389 * 255
+    ecd = torch.where(ecd > 255, torch.zeros_like(ecd) + 255, ecd)
+    return ecd
 
-    :param dense_tensor: BatchSize x SpatialDimension_1 x SpatialDimension_2 x ... x FeatureDimension
-    :return locations: NumberOfActive x (SumSpatialDimensions + 1). The + 1 includes the batch index
-    :return features: NumberOfActive x FeatureDimension
-    """
-    non_zero_indices = np.nonzero(dense_tensor)
-
-    features = dense_tensor[non_zero_indices[0],non_zero_indices[1],non_zero_indices[2],non_zero_indices[3]]
-
-    return np.stack(non_zero_indices), features
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(
     description='visualize one or several event files along with their boxes')
     parser.add_argument('-raw_dir', type=str)
     parser.add_argument('-target_dir', type=str)
-    parser.add_argument('-events_window_abin', type=int, default=10000)
     parser.add_argument('-dataset', type=str, default="gen4")
+    parser.add_argument('-filter', type=bool, default=False)
 
     args = parser.parse_args()
     raw_dir = args.raw_dir
@@ -101,28 +105,17 @@ if __name__ == '__main__':
         # min_event_count = 200000
         shape = [240,304]
         target_shape = [256, 320]
-
-    events_window_abin = args.events_window_abin
-    infer_time = 10000
-    event_volume_bins = 5
+    events_window_abin = 10000
+    event_volume_bins = 1
     events_window = events_window_abin * event_volume_bins
-    rh = target_shape[0] / shape[0]
-    rw = target_shape[1] / shape[1]
-    #raw_dir = "/data/lbd/ATIS_Automotive_Detection_Dataset/detection_dataset_duration_60s_ratio_1.0"
-    #target_dir = "/data/lbd/ATIS_taf"
-    #raw_dir = "/data/Large_Automotive_Detection_Dataset_sampling"
-    #target_dir = "/data/Large_taf"
-
-    ecd_types = ["quantile","quantile2","minmax","minmax2","leaky"]
-    
-
-    total_volume_time = []
-    total_taf_time = []
 
     if not os.path.exists(raw_dir):
         os.makedirs(raw_dir)
     if not os.path.exists(target_dir):
         os.makedirs(target_dir)
+
+    bins_saved = [1]
+    transform_applied = [90]
 
     for mode in ["train","val","test"]:
         file_dir = os.path.join(raw_dir, mode)
@@ -146,8 +139,6 @@ if __name__ == '__main__':
         pbar = tqdm.tqdm(total=len(files), unit='File', unit_scale=True)
 
         for i_file, file_name in enumerate(files):
-            if not file_name == "17-04-13_15-05-43_3599500000_3659500000":
-                continue
             event_file = os.path.join(root, file_name + '_td.dat')
             bbox_file = os.path.join(root, file_name + '_bbox.npy')
             # if os.path.exists(volume_save_path):
@@ -161,26 +152,89 @@ if __name__ == '__main__':
             unique_ts, unique_indices = np.unique(dat_bbox['t'], return_index=True)
 
             f_event = psee_loader.PSEELoader(event_file)
-            
-            volume = torch.zeros([event_volume_bins, shape[0], shape[1], 2]).cuda()
-            volume[...,1] = -1e8
 
-            time_iter = 0
-            bin_start = 0
+            time_upperbound = -1e16
+            count_upperbound = -1
+            already = False
+            sampling = False
 
-            while f_event.done:
-                events_ = f_event.load_delta_t(infer_time)
+            #min_event_count = f_event.event_count()
 
-                volume = generate_taf_cuda(events_, shape, volume, event_volume_bins, bin_start, bin_start + events_window_abin, time_iter, time_iter + infer_time)
+            for bbox_count,unique_time in enumerate(unique_ts):
+                end_time = int(unique_time)
+                end_count = f_event.seek_time(end_time)
+                if end_count is None:
+                    continue
+                start_count = end_count - min_event_count
+                if start_count < 0:
+                    start_count = 0
+                f_event.seek_event(start_count)
+                start_time = int(f_event.current_time)
+                if (end_time - start_time) < events_window:
+                    start_time = end_time - events_window
+                else:
+                    start_time = end_time - round((end_time - start_time - events_window)/events_window_abin) * events_window_abin - events_window
 
-                if np.sum((unique_ts <= time_iter + infer_time)&(unique_ts > time_iter)) > 0:
-                    save_volume(volume.cpu().numpy().copy(), unique_ts[(unique_ts <= time_iter + infer_time)&(unique_ts > time_iter)], target_shape)
+                #assert (start_time < time_upperbound) or (time_upperbound < 0)
+                if start_time > time_upperbound:
+                    start_count = f_event.seek_time(start_time)
+                    if (start_count is None) or (start_time < 0):
+                        start_count = 0
+                    memory = None
+                else:
+                    start_count = count_upperbound
+                    start_time = time_upperbound
+                    end_time = round((end_time - start_time) / events_window_abin) * events_window_abin + start_time
+                    if end_time > f_event.total_time():
+                        end_time = f_event.total_time()
+                    end_count = f_event.seek_time(end_time)
+                    assert bbox_count > 0
 
+                
+                #if not (os.path.exists(volume_save_path)):
+                dat_event = f_event
+                dat_event.seek_event(start_count)
+
+                events = dat_event.load_n_events(int(end_count - start_count))
+                del dat_event
+                events = torch.from_numpy(rfn.structured_to_unstructured(events)[:, [1, 2, 0, 3]].astype(float)).cuda()
+                
+
+                z = torch.zeros_like(events[:,0])
+
+                bins = math.ceil((end_time - start_time) / events_window_abin)
+                
+                for i in range(bins):
+                    z = torch.where((events[:,2] >= start_time + i * events_window_abin)&(events[:,2] <= start_time + (i + 1) * events_window_abin), torch.zeros_like(events[:,2])+i, z)
+                    #events_timestamps.append(start_time + (i + 1) * self.events_window_abin)
+                events = torch.cat([events,z[:,None]], dim=1)
+
+                if start_time > time_upperbound:
+                    memory = torch.zeros((shape[0], shape[1], 2, event_volume_bins)) - 1e8
+                for iter in range(bins):
+                    events_ = events[events[...,4] == iter]
+                    t_max = start_time + (iter + 1) * events_window_abin
+                    t_min = start_time + iter * events_window_abin
+                    events_[:,2] = (events_[:, 2] - t_min)/(t_max - t_min + 1e-8)
+                    #tick = time.time()
+                    volume, memory = generate_taf_cuda(events_, shape, memory, event_volume_bins, args.filter)
+                    #print(generate_volume_time, generate_encode_time)
+                    #torch.cuda.synchronize()
+                volume = torch.nn.functional.interpolate(volume[None,:,:,:], size = target_shape, mode='nearest')[0]
+                volume = volume.view(event_volume_bins, 2, target_shape[0], target_shape[1])
+                for i, bin_saved in enumerate(bins_saved):
+                    for j, head in enumerate(transform_applied):
+                        ecd = quantile_transform(volume[-bin_saved:], head = [head])
+                        ecd = ecd.cpu().numpy().copy()
+                        ecd.astype(np.uint8).tofile(os.path.join(os.path.join(target_root,"quantile{0}_bins{1}".format(head, bin_saved)),file_name+"_"+str(unique_time)+".npy"))
+                
+                time_upperbound = end_time
+                count_upperbound = end_count
                 torch.cuda.empty_cache()
-
-                time_iter += infer_time
-                if time_iter >= bin_start + events_window_abin:
-                    bin_start += events_window_abin
             #h5.close()
             pbar.update(1)
         pbar.close()
+        # if mode == "test":
+        #     np.save(os.path.join(root, 'total_volume_time.npy'),np.array(total_volume_time))
+        #     np.save(os.path.join(root, 'total_taf_time.npy'),np.array(total_taf_time))
+        #h5.close()
