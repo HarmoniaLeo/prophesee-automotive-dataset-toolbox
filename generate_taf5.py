@@ -28,9 +28,9 @@ def taf_cuda(x, y, t, p, shape, volume_bins, past_volume, filter = False):
 
     tick = time.time()
     if not filter:
-        forward = (img == 0)[:,None]
+        forward = (img == 0)[:,None].long()
     else:
-        forward = (img <= 1)
+        forward = (img <= 1).long()
         forward = 1 - forward.permute(2, 0, 1)[None, :, :, :]
         forward = torch.nn.MaxPool2d(2, 2)(forward)
         forward = torch.nn.Upsample(scale_factor=2, mode = "nearest")(1 - forward).permute(2, 3, 1, 0)
