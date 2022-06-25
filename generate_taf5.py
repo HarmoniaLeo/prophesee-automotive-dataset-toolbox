@@ -32,7 +32,6 @@ def taf_cuda(x, y, t, p, shape, volume_bins, past_volume, filter = False):
 
     tick = time.time()
     if not filter:
-        print("not filter")
         forward = (img == 0)
     else:
         forward = (img <= 1).float()
