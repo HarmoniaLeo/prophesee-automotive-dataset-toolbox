@@ -110,7 +110,7 @@ if __name__ == '__main__':
 
     if args.dataset == "gen1":
         bbox_path = "/data/lbd/ATIS_Automotive_Detection_Dataset/detection_dataset_duration_60s_ratio_1.0"
-        data_path = "/data/lbd/ATIS_Automotive_Detection_Dataset_processed/taf"
+        data_path = "/data/lbd/ATIS_Automotive_Detection_Dataset_processed/taf2"
         if not (args.exp_name is None):
             result_path = "/home/lbd/100-fps-event-det/" + args.exp_name + "/summarise.npz"
         ori_shape = (240,304)
@@ -127,7 +127,7 @@ if __name__ == '__main__':
         LABELMAP = ["car", "pedestrian"]
     else:
         bbox_path = "/datassd4t/lbd/Large_Automotive_Detection_Dataset_sampling"
-        data_path = "/home/lbd/Large_Automotive_Detection_Dataset_processed/taf"
+        data_path = "/home/lbd/Large_Automotive_Detection_Dataset_processed/taf2"
         if not (args.exp_name is None):
             result_path = "/home/liubingde/100-fps-event-det/" + args.exp_name + "/summarise.npz"
         ori_shape = (720,1280)
