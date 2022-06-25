@@ -121,8 +121,8 @@ if __name__ == '__main__':
     if not os.path.exists(target_dir):
         os.makedirs(target_dir)
 
-    bins_saved = [1, 5]
-    transform_applied = [50, 70, 90, 95, 99]
+    bins_saved = [1, 5, 10]
+    transform_applied = [30, 50, 70, 90, 95]
 
     for mode in ["train","val","test"]:
         file_dir = os.path.join(raw_dir, mode)
