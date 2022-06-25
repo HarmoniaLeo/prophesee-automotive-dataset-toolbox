@@ -38,7 +38,6 @@ def taf_cuda(x, y, t, p, shape, volume_bins, past_volume, filter = False):
         forward = 1 - forward.permute(2, 0, 1)[None, :, :, :]
         forward = pooling_layer(forward)
         forward = up_sampling_layer(1 - forward).bool()[0].permute(1, 2, 0)
-    print(forward.shape)
     torch.cuda.synchronize()
     filter_time = time.time() - tick
     tick = time.time()
@@ -52,10 +51,9 @@ def taf_cuda(x, y, t, p, shape, volume_bins, past_volume, filter = False):
             ecd[:,:,:,i-1] = ecd[:,:,:,i-1] - 1
             ecd[:,:,:,i] = torch.where(forward, ecd[:,:,:,i-1],ecd[:,:,:,i])
         if ecd.shape[3] > volume_bins:
-            ecd = ecd[:,1:]
+            ecd = ecd[:,:,:,1:]
         else:
             ecd[:,:,:,0] = torch.where(forward, torch.zeros_like(forward).float() -1e8, ecd[:,:,:,0])
-    print(ecd.shape)
     torch.cuda.synchronize()
     generate_encode_time = time.time() - tick
 
