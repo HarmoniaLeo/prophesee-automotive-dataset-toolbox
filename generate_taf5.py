@@ -260,7 +260,7 @@ if __name__ == '__main__':
                             ecd.astype(np.uint8).tofile(os.path.join(os.path.join(target_root, head + "_bins{0}".format(bin_saved)),file_name+"_"+str(unique_time)+".npy"))
                         else:
                             #ecd = quantile_transform(volume[-bin_saved:], head = [head])
-                            ecd = leaky_transform(volume[-bin_saved:], leaky = head)
+                            ecd = leaky_transform(volume[-bin_saved:], max_length = head)
                             ecd = ecd.cpu().numpy().copy()
                             if not os.path.exists(os.path.join(target_root,"leaky{0}_bins{1}".format(head, bin_saved))):
                                 os.makedirs(os.path.join(target_root,"leaky{0}_bins{1}".format(head, bin_saved)))
