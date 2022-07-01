@@ -25,6 +25,9 @@ def taf_cuda(x, y, t, p, shape, volume_bins, past_volume, filter = False):
     
     img = torch.zeros((H * W * 2)).float().to(x.device)
     img.index_add_(0, p + 2 * x + 2 * W * y, torch.ones_like(x).float())
+    t_img = torch.zeros((H * W * 2)).float().to(x.device)
+    t_img.index_add_(0, p + 2 * x + 2 * W * y, 1 - t)
+    img = t_img/img
 
     img = img.view(H, W, 2)
     torch.cuda.synchronize()
@@ -45,7 +48,7 @@ def taf_cuda(x, y, t, p, shape, volume_bins, past_volume, filter = False):
     if torch.all(forward):
         ecd = old_ecd
     else:
-        ecd = torch.where(forward, torch.zeros_like(forward).float() - 1e8, torch.zeros_like(forward).float())[:, :, :, None]
+        ecd = img[:, :, :, None]
         ecd = torch.cat([old_ecd, ecd],dim=3)
         for i in range(1,ecd.shape[3])[::-1]:
             ecd[:,:,:,i-1] = ecd[:,:,:,i-1] - 1
@@ -71,18 +74,33 @@ def generate_taf_cuda(events, shape, past_volume = None, volume_bins=5, filter =
 
     return histogram_ecd, past_volume
 
-def quantile_transform(ecd, head = [90], tail = 10):
-    ecd = ecd.clone()
+# def quantile_transform(ecd, head = [90], tail = 10):
+#     ecd = ecd.clone()
+#     ecd_view = ecd[ecd > -1e8]
+#     qs = torch.quantile(ecd_view, torch.tensor([tail] + head).to(ecd_view.device)/100)
+#     q100 = torch.max(ecd_view)
+#     q10 = qs[None, None, None, None, 0:1]
+#     qs = qs[None, None, None, None, 1:]
+#     ecd = [ecd for i in range(len(head))]
+#     ecd = torch.stack(ecd, dim = -1)
+#     ecd = torch.where(ecd > qs, (ecd - qs) / (q100 - qs + 1e-8) * 2, ecd)
+#     ecd = torch.where((ecd <= qs)&(ecd > - 1e8), (ecd - qs) / (qs - q10 + 1e-8) * 6, ecd)
+#     ecd = torch.exp(ecd) / 7.389 * 255
+#     ecd = torch.where(ecd > 255, torch.zeros_like(ecd) + 255, ecd)
+#     return ecd
+
+def quantile_transform(ecd, tail = 10):
     ecd_view = ecd[ecd > -1e8]
-    qs = torch.quantile(ecd_view, torch.tensor([tail] + head).to(ecd_view.device)/100)
-    q100 = torch.max(ecd_view)
-    q10 = qs[None, None, None, None, 0:1]
-    qs = qs[None, None, None, None, 1:]
-    ecd = [ecd for i in range(len(head))]
-    ecd = torch.stack(ecd, dim = -1)
-    ecd = torch.where(ecd > qs, (ecd - qs) / (q100 - qs + 1e-8) * 2, ecd)
-    ecd = torch.where((ecd <= qs)&(ecd > - 1e8), (ecd - qs) / (qs - q10 + 1e-8) * 6, ecd)
-    ecd = torch.exp(ecd) / 7.389 * 255
+    q10 = torch.quantile(ecd_view, tail/100)
+    max_length = -q10
+    ecd = leaky_transform(ecd, max_length)
+    return ecd
+
+def leaky_transform(ecd, max_length):
+    ecd = ecd.clone()
+    ecd = torch.where(torch.log(-ecd + 1)<torch.log(max_length), torch.log(-ecd + 1), torch.log(max_length))
+    ecd = (torch.log(max_length) - ecd) / torch.log(max_length)
+    ecd = ecd * 255
     ecd = torch.where(ecd > 255, torch.zeros_like(ecd) + 255, ecd)
     return ecd
 
@@ -121,8 +139,9 @@ if __name__ == '__main__':
     if not os.path.exists(target_dir):
         os.makedirs(target_dir)
 
-    bins_saved = [1, 4, 8]
-    transform_applied = [30, 50, 70, 90, 95]
+    bins_saved = [1, 4]
+    #transform_applied = [30, 50, 70, 90, 95]
+    transform_applied = [10, 25, 50, "minmax"]
 
     for mode in ["train","val","test"]:
         file_dir = os.path.join(raw_dir, mode)
@@ -146,6 +165,10 @@ if __name__ == '__main__':
         pbar = tqdm.tqdm(total=len(files), unit='File', unit_scale=True)
 
         for i_file, file_name in enumerate(files):
+            if not file_name == "17-04-13_15-05-43_3599500000_3659500000":
+                continue
+            # if not file_name == "moorea_2019-06-26_test_02_000_976500000_1036500000":
+            #     continue
             event_file = os.path.join(root, file_name + '_td.dat')
             bbox_file = os.path.join(root, file_name + '_bbox.npy')
             #h5 = h5py.File(volume_save_path, "w")
@@ -229,11 +252,20 @@ if __name__ == '__main__':
                 volume = volume.view(event_volume_bins, 2, target_shape[0], target_shape[1])
                 for i, bin_saved in enumerate(bins_saved):
                     for j, head in enumerate(transform_applied):
-                        ecd = quantile_transform(volume[-bin_saved:], head = [head])
-                        ecd = ecd.cpu().numpy().copy()
-                        if not os.path.exists(os.path.join(target_root,"quantile{0}_bins{1}".format(head, bin_saved))):
-                            os.makedirs(os.path.join(target_root,"quantile{0}_bins{1}".format(head, bin_saved)))
-                        ecd.astype(np.uint8).tofile(os.path.join(os.path.join(target_root,"quantile{0}_bins{1}".format(head, bin_saved)),file_name+"_"+str(unique_time)+".npy"))
+                        if type(head) == str:
+                            ecd = quantile_transform(volume[-bin_saved:])
+                            ecd = ecd.cpu().numpy().copy()
+                            if not os.path.exists(os.path.join(target_root, head + "_bins{0}".format(bin_saved))):
+                                os.makedirs(os.path.join(target_root, head + "_bins{0}".format(bin_saved)))
+                            ecd.astype(np.uint8).tofile(os.path.join(os.path.join(target_root, head + "_bins{0}".format(bin_saved)),file_name+"_"+str(unique_time)+".npy"))
+                        else:
+                            #ecd = quantile_transform(volume[-bin_saved:], head = [head])
+                            ecd = leaky_transform(volume[-bin_saved:], leaky = head)
+                            ecd = ecd.cpu().numpy().copy()
+                            if not os.path.exists(os.path.join(target_root,"leaky{0}_bins{1}".format(head, bin_saved))):
+                                os.makedirs(os.path.join(target_root,"leaky{0}_bins{1}".format(head, bin_saved)))
+                            ecd.astype(np.uint8).tofile(os.path.join(os.path.join(target_root,"leaky{0}_bins{1}".format(head, bin_saved)),file_name+"_"+str(unique_time)+".npy"))
+                            
                 
                 time_upperbound = end_time
                 count_upperbound = end_count
