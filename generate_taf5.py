@@ -98,10 +98,10 @@ def quantile_transform(ecd, tail = 10):
 
 def leaky_transform(ecd, max_length):
     ecd = ecd.clone()
-    ecd = torch.where(torch.log(-ecd + 1)<torch.log(max_length), torch.log(-ecd + 1), torch.log(max_length))
-    ecd = (torch.log(max_length) - ecd) / torch.log(max_length)
+    ecd = torch.log(-ecd + 1)
+    ecd = (np.log(max_length) - ecd) / np.log(max_length)
     ecd = ecd * 255
-    ecd = torch.where(ecd > 255, torch.zeros_like(ecd) + 255, ecd)
+    ecd = torch.where(ecd < 0, torch.zeros_like(ecd) ecd)
     return ecd
 
 if __name__ == '__main__':
