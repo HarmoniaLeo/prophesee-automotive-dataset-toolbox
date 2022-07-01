@@ -68,7 +68,7 @@ def taf_cuda(x, y, t, p, shape, volume_bins, past_volume, filter = False):
 def generate_taf_cuda(events, shape, past_volume = None, volume_bins=5, filter = False):
     x, y, t, p, z = events.unbind(-1)
 
-    x, y, p = x.long(), y.long(), p.long()
+    x, y, t, p = x.long(), y.long(), t.float(), p.long()
     
     histogram_ecd, past_volume = taf_cuda(x, y, t, p, shape, volume_bins, past_volume, filter)
 
