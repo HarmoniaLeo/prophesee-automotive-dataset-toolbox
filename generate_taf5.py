@@ -27,7 +27,7 @@ def taf_cuda(x, y, t, p, shape, volume_bins, past_volume, filter = False):
     img.index_add_(0, p + 2 * x + 2 * W * y, torch.ones_like(x).float())
     t_img = torch.zeros((H * W * 2)).float().to(x.device)
     t_img.index_add_(0, p + 2 * x + 2 * W * y, t - 1)
-    t_img = t_img/img
+    t_img = t_img/(img+1e-8)
     print(t_img.max(),t_img.min())
 
     img = img.view(H, W, 2)
