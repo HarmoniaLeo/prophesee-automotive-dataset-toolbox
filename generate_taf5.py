@@ -97,9 +97,11 @@ def quantile_transform(ecd, tail = 10):
     return ecd
 
 def leaky_transform(ecd, max_length):
+    if type(max_length) == int:
+        max_length = torch.tensor([max_length]).float()
     ecd = ecd.clone()
     ecd = torch.log(-ecd + 1)
-    ecd = (np.log(max_length) - ecd) / np.log(max_length)
+    ecd = (torch.log(max_length) - ecd) / torch.log(max_length)
     ecd = ecd * 255
     ecd = torch.where(ecd < 0, torch.zeros_like(ecd), ecd)
     return ecd
