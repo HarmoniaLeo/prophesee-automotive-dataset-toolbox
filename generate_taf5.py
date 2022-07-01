@@ -26,10 +26,11 @@ def taf_cuda(x, y, t, p, shape, volume_bins, past_volume, filter = False):
     img = torch.zeros((H * W * 2)).float().to(x.device)
     img.index_add_(0, p + 2 * x + 2 * W * y, torch.ones_like(x).float())
     t_img = torch.zeros((H * W * 2)).float().to(x.device)
-    t_img.index_add_(0, p + 2 * x + 2 * W * y, 1 - t)
-    img = t_img/img
+    t_img.index_add_(0, p + 2 * x + 2 * W * y, t - 1)
+    t_img = t_img/img
 
     img = img.view(H, W, 2)
+    t_img = t_img.view(H, W, 2)
     torch.cuda.synchronize()
     generate_volume_time = time.time() - tick
 
@@ -48,7 +49,7 @@ def taf_cuda(x, y, t, p, shape, volume_bins, past_volume, filter = False):
     if torch.all(forward):
         ecd = old_ecd
     else:
-        ecd = img[:, :, :, None]
+        ecd = t_img[:, :, :, None]
         ecd = torch.cat([old_ecd, ecd],dim=3)
         for i in range(1,ecd.shape[3])[::-1]:
             ecd[:,:,:,i-1] = ecd[:,:,:,i-1] - 1
