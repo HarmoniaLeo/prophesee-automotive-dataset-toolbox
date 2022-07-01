@@ -101,7 +101,7 @@ def leaky_transform(ecd, max_length):
     ecd = torch.log(-ecd + 1)
     ecd = (np.log(max_length) - ecd) / np.log(max_length)
     ecd = ecd * 255
-    ecd = torch.where(ecd < 0, torch.zeros_like(ecd) ecd)
+    ecd = torch.where(ecd < 0, torch.zeros_like(ecd), ecd)
     return ecd
 
 if __name__ == '__main__':
