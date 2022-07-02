@@ -63,7 +63,7 @@ def taf_cuda(x, y, t, p, shape, volume_bins, past_volume, filter = False):
 
     ecd_viewed = ecd.permute(3, 2, 0, 1).contiguous().view(volume_bins * 2, H, W)
 
-    print(generate_volume_time, filter_time, generate_encode_time)
+    #print(generate_volume_time, filter_time, generate_encode_time)
     return ecd_viewed, ecd
 
 def generate_taf_cuda(events, shape, past_volume = None, volume_bins=5, filter = False):
@@ -168,8 +168,8 @@ if __name__ == '__main__':
         pbar = tqdm.tqdm(total=len(files), unit='File', unit_scale=True)
 
         for i_file, file_name in enumerate(files):
-            if not file_name == "17-04-13_15-05-43_3599500000_3659500000":
-                continue
+            # if not file_name == "17-04-13_15-05-43_3599500000_3659500000":
+            #     continue
             # if not file_name == "moorea_2019-06-26_test_02_000_976500000_1036500000":
             #     continue
             event_file = os.path.join(root, file_name + '_td.dat')
