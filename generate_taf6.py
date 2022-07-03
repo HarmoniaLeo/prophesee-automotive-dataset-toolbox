@@ -259,7 +259,7 @@ if __name__ == '__main__':
                 events = torch.cat([events,z[:,None]], dim=1)
 
                 if start_time > time_upperbound:
-                    memory = torch.zeros((shape[0], shape[1], 2, event_volume_bins)).cuda() - 1e8
+                    memory = (torch.zeros((shape[0], shape[1], 2, event_volume_bins)).cuda() - 1e8, torch.zeros((shape[0], shape[1], 2, event_volume_bins)).cuda(), torch.zeros((shape[0], shape[1], 2, event_volume_bins)).cuda())
                 for iter in range(bins):
                     events_ = events[events[...,4] == iter]
                     t_max = start_time + (iter + 1) * events_window_abin
