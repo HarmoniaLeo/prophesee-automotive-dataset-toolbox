@@ -60,8 +60,8 @@ def taf_cuda(x, y, t, p, shape, volume_bins, past_volume, filter = False):
         for i in range(1,ecd.shape[3])[::-1]:
             ecd[:,:,:,i-1] = ecd[:,:,:,i-1] - 1
             ecd[:,:,:,i] = torch.where(forward, ecd[:,:,:,i-1], ecd[:,:,:,i])
-            # t_img_f[:,:,:,i] = torch.where(forward, t_img_f[:,:,:,i-1], t_img_f[:,:,:,i])
-            # t_img_b[:,:,:,i] = torch.where(forward, t_img_b[:,:,:,i-1], t_img_b[:,:,:,i])
+            t_img_f[:,:,:,i] = torch.where(forward, t_img_f[:,:,:,i-1], t_img_f[:,:,:,i])
+            t_img_b[:,:,:,i] = torch.where(forward, t_img_b[:,:,:,i-1], t_img_b[:,:,:,i])
         if ecd.shape[3] > volume_bins:
             ecd = ecd[:,:,:,1:]
             t_img_f = t_img_f[:,:,:,1:]
@@ -107,7 +107,7 @@ def quantile_transform(ecd, head = [90], tail = 10):
 def limit(ecd):
     ecd = ecd.clone()
     ecd = ecd / 5 * 255
-    ecd = torch.where(ecd > 0, ecd + 128, ecd)
+    #ecd = torch.where(ecd > 0, ecd + 128, ecd)
     ecd = torch.where(ecd > 255, torch.zeros_like(ecd) + 255, ecd)
     return ecd
 
@@ -189,8 +189,8 @@ if __name__ == '__main__':
         pbar = tqdm.tqdm(total=len(files), unit='File', unit_scale=True)
 
         for i_file, file_name in enumerate(files):
-            if not file_name == "17-04-13_15-05-43_3599500000_3659500000":
-                continue
+            # if not file_name == "17-04-13_15-05-43_3599500000_3659500000":
+            #     continue
             # if not file_name == "moorea_2019-06-26_test_02_000_976500000_1036500000":
             #     continue
             event_file = os.path.join(root, file_name + '_td.dat')
