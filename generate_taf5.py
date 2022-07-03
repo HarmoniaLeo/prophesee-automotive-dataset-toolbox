@@ -133,8 +133,8 @@ if __name__ == '__main__':
         # min_event_count = 200000
         shape = [240,304]
         target_shape = [256, 320]
-    events_window_abin = 10000
-    event_volume_bins = 32
+    events_window_abin = 50000
+    event_volume_bins = 4
     events_window = events_window_abin * event_volume_bins
 
     if not os.path.exists(raw_dir):
@@ -142,7 +142,7 @@ if __name__ == '__main__':
     if not os.path.exists(target_dir):
         os.makedirs(target_dir)
 
-    bins_saved = [32]
+    bins_saved = [4]
     transform_applied = [90]
     #transform_applied = [10, 25, 50, "minmax"]
 
@@ -255,19 +255,19 @@ if __name__ == '__main__':
                 volume = volume.view(event_volume_bins, 2, target_shape[0], target_shape[1])
                 for i, bin_saved in enumerate(bins_saved):
                     for j, head in enumerate(transform_applied):
-                        # if type(head) == str:
-                        #     ecd = quantile_transform(volume[-bin_saved:])
-                        #     ecd = ecd.cpu().numpy().copy()
-                        #     if not os.path.exists(os.path.join(target_root, head + "_bins{0}".format(bin_saved))):
-                        #         os.makedirs(os.path.join(target_root, head + "_bins{0}".format(bin_saved)))
-                        #     ecd.astype(np.uint8).tofile(os.path.join(os.path.join(target_root, head + "_bins{0}".format(bin_saved)),file_name+"_"+str(unique_time)+".npy"))
-                        # else:
-                        ecd = quantile_transform(volume[-bin_saved:], head = [head])
-                        #ecd = leaky_transform(volume[-bin_saved:], max_length = head)
-                        ecd = ecd.cpu().numpy().copy()
-                        if not os.path.exists(os.path.join(target_root,"quantile{0}_bins{1}".format(head, bin_saved))):
-                            os.makedirs(os.path.join(target_root,"quantile{0}_bins{1}".format(head, bin_saved)))
-                        ecd.astype(np.uint8).tofile(os.path.join(os.path.join(target_root,"quantile{0}_bins{1}".format(head, bin_saved)),file_name+"_"+str(unique_time)+".npy"))
+                        if type(head) == str:
+                            ecd = quantile_transform(volume[-bin_saved:])
+                            ecd = ecd.cpu().numpy().copy()
+                            if not os.path.exists(os.path.join(target_root, head + "_bins{0}".format(bin_saved))):
+                                os.makedirs(os.path.join(target_root, head + "_bins{0}".format(bin_saved)))
+                            ecd.astype(np.uint8).tofile(os.path.join(os.path.join(target_root, head + "_bins{0}".format(bin_saved)),file_name+"_"+str(unique_time)+".npy"))
+                        else:
+                        #ecd = quantile_transform(volume[-bin_saved:], head = [head])
+                            ecd = leaky_transform(volume[-bin_saved:], max_length = head)
+                            ecd = ecd.cpu().numpy().copy()
+                            if not os.path.exists(os.path.join(target_root,"leaky{0}_bins{1}".format(head, bin_saved))):
+                                os.makedirs(os.path.join(target_root,"leaky{0}_bins{1}".format(head, bin_saved)))
+                            ecd.astype(np.uint8).tofile(os.path.join(os.path.join(target_root,"leaky{0}_bins{1}".format(head, bin_saved)),file_name+"_"+str(unique_time)+".npy"))
                             
                 
                 time_upperbound = end_time
