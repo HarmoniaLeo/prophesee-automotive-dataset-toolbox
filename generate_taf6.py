@@ -27,12 +27,8 @@ def taf_cuda(x, y, t, p, shape, volume_bins, past_volume, filter = False):
     img.index_add_(0, p + 2 * x + 2 * W * y, torch.ones_like(x).float())
     t_img_f = torch.zeros((H * W * 2)).float().to(x.device)
     t_img_f.index_add_(0, p + 2 * x + 2 * W * y, 1 - t)
-    if len(1-t)>0:
-        print(torch.max(1-t),torch.min(1-t))
     t_img_b = torch.zeros((H * W * 2)).float().to(x.device)
     t_img_b.index_add_(0, p + 2 * x + 2 * W * y, t)
-    if len(1-t)>0:
-        print(torch.max(t),torch.min(t))
 
     img = img.view(H, W, 2)
     t_img_f = t_img_f.view(H, W, 2)
@@ -64,8 +60,8 @@ def taf_cuda(x, y, t, p, shape, volume_bins, past_volume, filter = False):
         for i in range(1,ecd.shape[3])[::-1]:
             ecd[:,:,:,i-1] = ecd[:,:,:,i-1] - 1
             ecd[:,:,:,i] = torch.where(forward, ecd[:,:,:,i-1], ecd[:,:,:,i])
-            t_img_f[:,:,:,i] = torch.where(forward, t_img_f[:,:,:,i-1], t_img_f[:,:,:,i])
-            t_img_b[:,:,:,i] = torch.where(forward, t_img_b[:,:,:,i-1], t_img_b[:,:,:,i])
+            # t_img_f[:,:,:,i] = torch.where(forward, t_img_f[:,:,:,i-1], t_img_f[:,:,:,i])
+            # t_img_b[:,:,:,i] = torch.where(forward, t_img_b[:,:,:,i-1], t_img_b[:,:,:,i])
         if ecd.shape[3] > volume_bins:
             ecd = ecd[:,:,:,1:]
             t_img_f = t_img_f[:,:,:,1:]
