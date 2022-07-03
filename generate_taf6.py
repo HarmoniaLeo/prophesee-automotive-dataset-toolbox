@@ -107,6 +107,7 @@ def quantile_transform(ecd, head = [90], tail = 10):
 def limit(ecd):
     ecd = ecd.clone()
     ecd = ecd / 5 * 255
+    ecd = torch.where(ecd > 0, ecd + 128, ecd)
     ecd = torch.where(ecd > 255, torch.zeros_like(ecd) + 255, ecd)
     return ecd
 
