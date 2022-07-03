@@ -68,8 +68,8 @@ def taf_cuda(x, y, t, p, shape, volume_bins, past_volume, filter = False):
             t_img_b = t_img_b[:,:,:,1:]
         else:
             ecd[:,:,:,0] = torch.where(forward, torch.zeros_like(forward).float() -1e8, ecd[:,:,:,0])
-            t_img_f[:,:,:,0] = torch.where(forward, torch.zeros_like(forward).float() -1e8, t_img_f[:,:,:,0])
-            t_img_b[:,:,:,0] = torch.where(forward, torch.zeros_like(forward).float() -1e8, t_img_b[:,:,:,0])
+            t_img_f[:,:,:,0] = torch.where(forward, torch.zeros_like(forward).float(), t_img_f[:,:,:,0])
+            t_img_b[:,:,:,0] = torch.where(forward, torch.zeros_like(forward).float(), t_img_b[:,:,:,0])
     torch.cuda.synchronize()
     generate_encode_time = time.time() - tick
 
