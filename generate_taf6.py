@@ -52,6 +52,8 @@ def taf_cuda(x, y, t, p, shape, volume_bins, past_volume, filter = False):
         ecd, t_img_f, t_img_b = old_ecd
     else:
         ecd = torch.zeros_like(forward)[:, :, :, None]
+        t_img_f = t_img_f[:, :, :, None]
+        t_img_b = t_img_b[:, :, :, None]
         ecd = torch.cat([old_ecd[0], ecd],dim=3)
         t_img_f = torch.cat([old_ecd[1], t_img_f],dim=3)
         t_img_b = torch.cat([old_ecd[2], t_img_b],dim=3)
@@ -186,8 +188,8 @@ if __name__ == '__main__':
         pbar = tqdm.tqdm(total=len(files), unit='File', unit_scale=True)
 
         for i_file, file_name in enumerate(files):
-            # if not file_name == "17-04-13_15-05-43_3599500000_3659500000":
-            #     continue
+            if not file_name == "17-04-13_15-05-43_3599500000_3659500000":
+                continue
             # if not file_name == "moorea_2019-06-26_test_02_000_976500000_1036500000":
             #     continue
             event_file = os.path.join(root, file_name + '_td.dat')
