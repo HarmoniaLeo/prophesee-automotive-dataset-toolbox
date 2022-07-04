@@ -51,14 +51,15 @@ def taf_cuda(x, y, t, p, shape, volume_bins, past_volume, filter = False):
     if torch.all(forward):
         ecd, t_img_f, t_img_b = old_ecd
     else:
-        ecd = torch.zeros_like(forward)[:, :, :, None]
+        ecd = torch.where(forward, -1e8, 0)[:, :, :, None]
         t_img_f = t_img_f[:, :, :, None]
         t_img_b = t_img_b[:, :, :, None]
         ecd = torch.cat([old_ecd[0], ecd],dim=3)
         t_img_f = torch.cat([old_ecd[1], t_img_f],dim=3)
         t_img_b = torch.cat([old_ecd[2], t_img_b],dim=3)
+        decay = torch.exp(ecd) / torch.exp(ecd).sum(dim=3, keepdim=True)
         for i in range(1,ecd.shape[3])[::-1]:
-            ecd[:,:,:,i-1] = ecd[:,:,:,i-1] - 1
+            ecd[:,:,:,i-1] = ecd[:,:,:,i-1] - 0.1 * decay[:,:,:,i-1]
             ecd[:,:,:,i] = torch.where(forward, ecd[:,:,:,i-1], ecd[:,:,:,i])
             t_img_f[:,:,:,i] = torch.where(forward, t_img_f[:,:,:,i-1], t_img_f[:,:,:,i])
             t_img_b[:,:,:,i] = torch.where(forward, t_img_b[:,:,:,i-1], t_img_b[:,:,:,i])
@@ -91,16 +92,17 @@ def generate_taf_cuda(events, shape, past_volume = None, volume_bins=5, filter =
 
 def quantile_transform(ecd, head = [90], tail = 10):
     ecd = ecd.clone()
-    ecd_view = ecd[ecd > -1e8]
-    qs = torch.quantile(ecd_view, torch.tensor([tail] + head).to(ecd_view.device)/100)
-    q100 = torch.max(ecd_view)
-    q10 = qs[None, None, None, None, 0:1]
-    qs = qs[None, None, None, None, 1:]
-    ecd = [ecd for i in range(len(head))]
-    ecd = torch.stack(ecd, dim = -1)
-    ecd = torch.where(ecd > qs, (ecd - qs) / (q100 - qs + 1e-8) * 2, ecd)
-    ecd = torch.where((ecd <= qs)&(ecd > - 1e8), (ecd - qs) / (qs - q10 + 1e-8) * 6, ecd)
-    ecd = torch.exp(ecd) * torch.exp(ecd) / torch.exp(ecd).sum(dim = 0, keepdim=True)
+    # ecd_view = ecd[ecd > -1e8]
+    # qs = torch.quantile(ecd_view, torch.tensor([tail] + head).to(ecd_view.device)/100)
+    # q100 = torch.max(ecd_view)
+    # q10 = qs[None, None, None, None, 0:1]
+    # qs = qs[None, None, None, None, 1:]
+    # ecd = [ecd for i in range(len(head))]
+    # ecd = torch.stack(ecd, dim = -1)
+    # ecd = torch.where(ecd > qs, (ecd - qs) / (q100 - qs + 1e-8) * 2, ecd)
+    # ecd = torch.where((ecd <= qs)&(ecd > - 1e8), (ecd - qs) / (qs - q10 + 1e-8) * 6, ecd)
+    # ecd = torch.exp(ecd) * torch.exp(ecd) / torch.exp(ecd).sum(dim = 0, keepdim=True)
+    ecd = torch.exp(ecd + 3)
     ecd = ecd / 7.389 * 255
     ecd = torch.where(ecd > 255, torch.zeros_like(ecd) + 255, ecd)
     return ecd
