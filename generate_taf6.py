@@ -58,7 +58,7 @@ def taf_cuda(x, y, t, p, shape, volume_bins, past_volume, filter = False):
         t_img_f = torch.cat([old_ecd[1], t_img_f],dim=3)
         t_img_b = torch.cat([old_ecd[2], t_img_b],dim=3)
         for i in range(1,ecd.shape[3])[::-1]:
-            ecd[:,:,:,i-1] = ecd[:,:,:,i-1] - 1
+            ecd[:,:,:,i-1] = ecd[:,:,:,i-1] - 0.1
             ecd[:,:,:,i] = torch.where(forward, ecd[:,:,:,i-1], ecd[:,:,:,i])
             t_img_f[:,:,:,i] = torch.where(forward, t_img_f[:,:,:,i-1], t_img_f[:,:,:,i])
             t_img_b[:,:,:,i] = torch.where(forward, t_img_b[:,:,:,i-1], t_img_b[:,:,:,i])
@@ -102,7 +102,7 @@ def quantile_transform(ecd, head = [90], tail = 10):
     # ecd = torch.where((ecd <= qs)&(ecd > - 1e8), (ecd - qs) / (qs - q10 + 1e-8) * 6, ecd)
     # ecd = torch.exp(ecd) * torch.exp(ecd) / torch.exp(ecd).sum(dim = 0, keepdim=True)
     decay = torch.exp(ecd) / torch.exp(ecd).sum(dim = 0, keepdim=True)
-    ecd = torch.exp(ecd) * decay
+    ecd = torch.exp(ecd * decay)
     ecd = ecd  * 255
     ecd = torch.where(ecd > 255, torch.zeros_like(ecd) + 255, ecd)
     return ecd
