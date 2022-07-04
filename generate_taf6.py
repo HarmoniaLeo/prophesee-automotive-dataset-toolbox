@@ -100,7 +100,8 @@ def quantile_transform(ecd, head = [90], tail = 10):
     ecd = torch.stack(ecd, dim = -1)
     ecd = torch.where(ecd > qs, (ecd - qs) / (q100 - qs + 1e-8) * 2, ecd)
     ecd = torch.where((ecd <= qs)&(ecd > - 1e8), (ecd - qs) / (qs - q10 + 1e-8) * 6, ecd)
-    ecd = torch.exp(ecd) / 7.389 * 255
+    ecd = torch.exp(ecd) / ecd.sum(dim = 0, keepdim=True)
+    ecd = ecd * 255
     ecd = torch.where(ecd > 255, torch.zeros_like(ecd) + 255, ecd)
     return ecd
 
@@ -154,7 +155,7 @@ if __name__ == '__main__':
         # min_event_count = 200000
         shape = [240,304]
         target_shape = [256, 320]
-    events_window_abin = 50000
+    events_window_abin = 10000
     event_volume_bins = 4
     events_window = events_window_abin * event_volume_bins
 
@@ -189,8 +190,8 @@ if __name__ == '__main__':
         pbar = tqdm.tqdm(total=len(files), unit='File', unit_scale=True)
 
         for i_file, file_name in enumerate(files):
-            # if not file_name == "17-04-13_15-05-43_3599500000_3659500000":
-            #     continue
+            if not file_name == "17-04-13_15-05-43_3599500000_3659500000":
+                continue
             # if not file_name == "moorea_2019-06-26_test_02_000_976500000_1036500000":
             #     continue
             event_file = os.path.join(root, file_name + '_td.dat')
