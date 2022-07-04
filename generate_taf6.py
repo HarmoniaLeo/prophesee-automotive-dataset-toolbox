@@ -100,7 +100,7 @@ def quantile_transform(ecd, head = [90], tail = 10):
     ecd = torch.stack(ecd, dim = -1)
     ecd = torch.where(ecd > qs, (ecd - qs) / (q100 - qs + 1e-8) * 2, ecd)
     ecd = torch.where((ecd <= qs)&(ecd > - 1e8), (ecd - qs) / (qs - q10 + 1e-8) * 6, ecd)
-    ecd = torch.exp(ecd) / ecd.sum(dim = 0, keepdim=True)
+    ecd = torch.exp(ecd) / torch.exp(ecd).sum(dim = 0, keepdim=True)
     ecd = ecd * 255
     ecd = torch.where(ecd > 255, torch.zeros_like(ecd) + 255, ecd)
     return ecd
