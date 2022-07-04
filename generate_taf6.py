@@ -51,7 +51,7 @@ def taf_cuda(x, y, t, p, shape, volume_bins, past_volume, filter = False):
     if torch.all(forward):
         ecd, t_img_f, t_img_b = old_ecd
     else:
-        ecd = torch.where(forward, -1e8, 0)[:, :, :, None]
+        ecd = torch.where(forward, torch.zeros_like(forward) - 1e8, torch.zeros_like(forward))[:, :, :, None]
         t_img_f = t_img_f[:, :, :, None]
         t_img_b = t_img_b[:, :, :, None]
         ecd = torch.cat([old_ecd[0], ecd],dim=3)
