@@ -75,36 +75,34 @@ def generate_taf_cuda(events, shape, past_volume = None, volume_bins=5, filter =
 
     return histogram_ecd, past_volume
 
-# def quantile_transform(ecd, head = [90], tail = 10):
-#     ecd = ecd.clone()
-#     ecd_view = ecd[ecd > -1e8]
-#     qs = torch.quantile(ecd_view, torch.tensor([tail] + head).to(ecd_view.device)/100)
-#     q100 = torch.max(ecd_view)
-#     q10 = qs[None, None, None, None, 0:1]
-#     qs = qs[None, None, None, None, 1:]
-#     ecd = [ecd for i in range(len(head))]
-#     ecd = torch.stack(ecd, dim = -1)
-#     ecd = torch.where(ecd > qs, (ecd - qs) / (q100 - qs + 1e-8) * 2, ecd)
-#     ecd = torch.where((ecd <= qs)&(ecd > - 1e8), (ecd - qs) / (qs - q10 + 1e-8) * 6, ecd)
-#     ecd = torch.exp(ecd) / 7.389 * 255
-#     ecd = torch.where(ecd > 255, torch.zeros_like(ecd) + 255, ecd)
-#     return ecd
-
-def quantile_transform(ecd, tail = 10):
+def quantile_transform(ecd, head = [70], tail = 10):
+    ecd = ecd.clone()
     ecd_view = ecd[ecd > -1e8]
-    q10 = torch.quantile(ecd_view, tail/100)
-    max_length = -q10
-    ecd = leaky_transform(ecd, max_length)
+    qs = torch.quantile(ecd_view, torch.tensor([tail] + head).to(ecd_view.device)/100)
+    q100 = torch.max(ecd_view)
+    q10 = qs[None, None, None, None, 0:1]
+    qs = qs[None, None, None, None, 1:]
+    ecd = [ecd for i in range(len(head))]
+    ecd = torch.stack(ecd, dim = -1)
+    ecd = torch.where(ecd > qs, (ecd - qs) / (q100 - qs + 1e-8) * 2, ecd)
+    ecd = torch.where((ecd <= qs)&(ecd > - 1e8), (ecd - qs) / (qs - q10 + 1e-8) * 6, ecd)
+    ecd = torch.exp(ecd) / 7.389 * 255
+    ecd = torch.where(ecd > 255, torch.zeros_like(ecd) + 255, ecd)
     return ecd
+
+# def quantile_transform(ecd, tail = 10):
+#     ecd_view = ecd[ecd > -1e8]
+#     q10 = torch.quantile(ecd_view, tail/100)
+#     max_length = -q10
+#     ecd = leaky_transform(ecd, max_length)
+#     return ecd
 
 def leaky_transform(ecd, max_length):
     if type(max_length) == int:
         max_length = torch.tensor([max_length]).float().to(ecd.device)
     
-    ecd_view = (ecd > -1e8)
     ecd = ecd.clone()
     ecd = ecd / max_length * 9 + 3
-    print(ecd[ecd_view].min(),ecd.max())
     ecd = torch.exp(ecd)
     ecd = ecd / 7.389 * 255
     ecd = torch.where(ecd > 255, torch.zeros_like(ecd) + 255, ecd)
@@ -147,7 +145,7 @@ if __name__ == '__main__':
 
     bins_saved = [1]
     #transform_applied = [90]
-    transform_applied = [10, 25, 50, 100, 200, "minmax"]
+    transform_applied = [10, 25, 50, 75, 100, 200, "quantile"]
 
     for mode in ["train","val","test"]:
         file_dir = os.path.join(raw_dir, mode)
@@ -171,8 +169,8 @@ if __name__ == '__main__':
         pbar = tqdm.tqdm(total=len(files), unit='File', unit_scale=True)
 
         for i_file, file_name in enumerate(files):
-            if not file_name == "17-04-13_15-05-43_3599500000_3659500000":
-                continue
+            # if not file_name == "17-04-13_15-05-43_3599500000_3659500000":
+            #     continue
             # if not file_name == "moorea_2019-06-26_test_02_000_976500000_1036500000":
             #     continue
             event_file = os.path.join(root, file_name + '_td.dat')
