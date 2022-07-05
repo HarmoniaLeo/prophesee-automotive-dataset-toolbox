@@ -75,37 +75,38 @@ def generate_taf_cuda(events, shape, past_volume = None, volume_bins=5, filter =
 
     return histogram_ecd, past_volume
 
-def quantile_transform(ecd, head = [90], tail = 10):
-    ecd = ecd.clone()
+# def quantile_transform(ecd, head = [90], tail = 10):
+#     ecd = ecd.clone()
+#     ecd_view = ecd[ecd > -1e8]
+#     qs = torch.quantile(ecd_view, torch.tensor([tail] + head).to(ecd_view.device)/100)
+#     q100 = torch.max(ecd_view)
+#     q10 = qs[None, None, None, None, 0:1]
+#     qs = qs[None, None, None, None, 1:]
+#     ecd = [ecd for i in range(len(head))]
+#     ecd = torch.stack(ecd, dim = -1)
+#     ecd = torch.where(ecd > qs, (ecd - qs) / (q100 - qs + 1e-8) * 2, ecd)
+#     ecd = torch.where((ecd <= qs)&(ecd > - 1e8), (ecd - qs) / (qs - q10 + 1e-8) * 6, ecd)
+#     ecd = torch.exp(ecd) / 7.389 * 255
+#     ecd = torch.where(ecd > 255, torch.zeros_like(ecd) + 255, ecd)
+#     return ecd
+
+def quantile_transform(ecd, tail = 10):
     ecd_view = ecd[ecd > -1e8]
-    qs = torch.quantile(ecd_view, torch.tensor([tail] + head).to(ecd_view.device)/100)
-    q100 = torch.max(ecd_view)
-    q10 = qs[None, None, None, None, 0:1]
-    qs = qs[None, None, None, None, 1:]
-    ecd = [ecd for i in range(len(head))]
-    ecd = torch.stack(ecd, dim = -1)
-    ecd = torch.where(ecd > qs, (ecd - qs) / (q100 - qs + 1e-8) * 2, ecd)
-    ecd = torch.where((ecd <= qs)&(ecd > - 1e8), (ecd - qs) / (qs - q10 + 1e-8) * 6, ecd)
-    ecd = torch.exp(ecd) / 7.389 * 255
-    ecd = torch.where(ecd > 255, torch.zeros_like(ecd) + 255, ecd)
+    q10 = torch.quantile(ecd_view, tail/100)
+    max_length = -q10
+    ecd = leaky_transform(ecd, max_length)
     return ecd
 
-# def quantile_transform(ecd, tail = 10):
-#     ecd_view = ecd[ecd > -1e8]
-#     q10 = torch.quantile(ecd_view, tail/100)
-#     max_length = -q10
-#     ecd = leaky_transform(ecd, max_length)
-#     return ecd
-
-# def leaky_transform(ecd, max_length):
-#     if type(max_length) == int:
-#         max_length = torch.tensor([max_length]).float().to(ecd.device)
-#     ecd = ecd.clone()
-#     ecd = torch.log(-ecd + 1)
-#     ecd = (torch.log(max_length) - ecd) / torch.log(max_length)
-#     ecd = ecd * 255
-#     ecd = torch.where(ecd < 0, torch.zeros_like(ecd), ecd)
-#     return ecd
+def leaky_transform(ecd, max_length):
+    if type(max_length) == int:
+        max_length = torch.tensor([max_length]).float().to(ecd.device)
+    
+    ecd = ecd.clone()
+    ecd = ecd / max_length * 9 + 3
+    ecd = torch.exp(ecd)
+    ecd = ecd / 7.389 * 255
+    ecd = torch.where(ecd > 255, torch.zeros_like(ecd) + 255, ecd)
+    return ecd
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(
@@ -134,7 +135,7 @@ if __name__ == '__main__':
         shape = [240,304]
         target_shape = [256, 320]
     events_window_abin = 50000
-    event_volume_bins = 4
+    event_volume_bins = 1
     events_window = events_window_abin * event_volume_bins
 
     if not os.path.exists(raw_dir):
@@ -142,9 +143,9 @@ if __name__ == '__main__':
     if not os.path.exists(target_dir):
         os.makedirs(target_dir)
 
-    bins_saved = [4]
-    transform_applied = [90]
-    #transform_applied = [10, 25, 50, "minmax"]
+    bins_saved = [1]
+    #transform_applied = [90]
+    transform_applied = [25, 50, 100, 200, "minmax"]
 
     for mode in ["train","val","test"]:
         file_dir = os.path.join(raw_dir, mode)
