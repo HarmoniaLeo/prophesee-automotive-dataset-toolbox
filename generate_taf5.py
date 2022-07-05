@@ -103,6 +103,7 @@ def leaky_transform(ecd, max_length):
     
     ecd = ecd.clone()
     ecd = ecd / max_length * 9 + 3
+    print(ecd.min(),ecd.max())
     ecd = torch.exp(ecd)
     ecd = ecd / 7.389 * 255
     ecd = torch.where(ecd > 255, torch.zeros_like(ecd) + 255, ecd)
