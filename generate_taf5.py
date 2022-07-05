@@ -101,9 +101,10 @@ def leaky_transform(ecd, max_length):
     if type(max_length) == int:
         max_length = torch.tensor([max_length]).float().to(ecd.device)
     
+    ecd_view = (ecd > -1e8)
     ecd = ecd.clone()
     ecd = ecd / max_length * 9 + 3
-    print(ecd.min(),ecd.max())
+    print(ecd[ecd_view].min(),ecd.max())
     ecd = torch.exp(ecd)
     ecd = ecd / 7.389 * 255
     ecd = torch.where(ecd > 255, torch.zeros_like(ecd) + 255, ecd)
