@@ -145,7 +145,7 @@ if __name__ == '__main__':
 
     bins_saved = [1]
     #transform_applied = [90]
-    transform_applied = [25, 50, 100, 200, "minmax"]
+    transform_applied = [10, 25, 50, 100, 200, "minmax"]
 
     for mode in ["train","val","test"]:
         file_dir = os.path.join(raw_dir, mode)
