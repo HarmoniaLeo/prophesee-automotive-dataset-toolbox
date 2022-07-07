@@ -25,14 +25,12 @@ def taf_cuda(x, y, t, p, shape, volume_bins, past_volume, filter = False):
     
     img = torch.zeros((H * W * 2)).float().to(x.device)
     img.index_add_(0, p + 2 * x + 2 * W * y, torch.ones_like(x).float())
-    t_img_f = torch.zeros((H * W * 2)).float().to(x.device)
-    t_img_f.index_add_(0, p + 2 * x + 2 * W * y, 1 - t)
-    t_img_b = torch.zeros((H * W * 2)).float().to(x.device)
-    t_img_b.index_add_(0, p + 2 * x + 2 * W * y, t)
+    t_img = torch.zeros((H * W * 2)).float().to(x.device)
+    t_img.index_add_(0, p + 2 * x + 2 * W * y, t - 1)
+    t_img = t_img/(img+1e-8)
 
     img = img.view(H, W, 2)
-    t_img_f = t_img_f.view(H, W, 2)
-    t_img_b = t_img_b.view(H, W, 2)
+    t_img = t_img.view(H, W, 2)
     torch.cuda.synchronize()
     generate_volume_time = time.time() - tick
 
@@ -49,36 +47,24 @@ def taf_cuda(x, y, t, p, shape, volume_bins, past_volume, filter = False):
     tick = time.time()
     old_ecd = past_volume
     if torch.all(forward):
-        ecd, t_img_f, t_img_b = old_ecd
+        ecd = old_ecd
     else:
-        ecd = torch.zeros_like(forward)[:, :, :, None]
-        t_img_f = t_img_f[:, :, :, None]
-        t_img_b = t_img_b[:, :, :, None]
-        ecd = torch.cat([old_ecd[0], ecd],dim=3)
-        t_img_f = torch.cat([old_ecd[1], t_img_f],dim=3)
-        t_img_b = torch.cat([old_ecd[2], t_img_b],dim=3)
+        ecd = t_img[:, :, :, None]
+        ecd = torch.cat([old_ecd, ecd],dim=3)
         for i in range(1,ecd.shape[3])[::-1]:
-            ecd[:,:,:,i-1] = ecd[:,:,:,i-1] - 0.1
-            ecd[:,:,:,i] = torch.where(forward, ecd[:,:,:,i-1], ecd[:,:,:,i])
-            t_img_f[:,:,:,i] = torch.where(forward, t_img_f[:,:,:,i-1], t_img_f[:,:,:,i])
-            t_img_b[:,:,:,i] = torch.where(forward, t_img_b[:,:,:,i-1], t_img_b[:,:,:,i])
+            ecd[:,:,:,i-1] = ecd[:,:,:,i-1] - 1
+            ecd[:,:,:,i] = torch.where(forward, ecd[:,:,:,i-1],ecd[:,:,:,i])
         if ecd.shape[3] > volume_bins:
             ecd = ecd[:,:,:,1:]
-            t_img_f = t_img_f[:,:,:,1:]
-            t_img_b = t_img_b[:,:,:,1:]
         else:
             ecd[:,:,:,0] = torch.where(forward, torch.zeros_like(forward).float() -1e8, ecd[:,:,:,0])
-            t_img_f[:,:,:,0] = torch.where(forward, torch.zeros_like(forward).float(), t_img_f[:,:,:,0])
-            t_img_b[:,:,:,0] = torch.where(forward, torch.zeros_like(forward).float(), t_img_b[:,:,:,0])
     torch.cuda.synchronize()
     generate_encode_time = time.time() - tick
 
     ecd_viewed = ecd.permute(3, 2, 0, 1).contiguous().view(volume_bins * 2, H, W)
-    t_img_f_viewed = t_img_f.permute(3, 2, 0, 1).contiguous().view(volume_bins * 2, H, W)
-    t_img_b_viewed = t_img_b.permute(3, 2, 0, 1).contiguous().view(volume_bins * 2, H, W)
 
     #print(generate_volume_time, filter_time, generate_encode_time)
-    return torch.cat([ecd_viewed, t_img_f_viewed, t_img_b_viewed], dim=0), (ecd, t_img_f, t_img_b)
+    return ecd_viewed, ecd
 
 def generate_taf_cuda(events, shape, past_volume = None, volume_bins=5, filter = False):
     x, y, t, p, z = events.unbind(-1)
@@ -89,30 +75,20 @@ def generate_taf_cuda(events, shape, past_volume = None, volume_bins=5, filter =
 
     return histogram_ecd, past_volume
 
-def quantile_transform(ecd, head = [90], tail = 10):
-    ecd = ecd.clone()
-    # ecd_view = ecd[ecd > -1e8]
-    # qs = torch.quantile(ecd_view, torch.tensor([tail] + head).to(ecd_view.device)/100)
-    # q100 = torch.max(ecd_view)
-    # q10 = qs[None, None, None, None, 0:1]
-    # qs = qs[None, None, None, None, 1:]
-    # ecd = [ecd for i in range(len(head))]
-    # ecd = torch.stack(ecd, dim = -1)
-    # ecd = torch.where(ecd > qs, (ecd - qs) / (q100 - qs + 1e-8) * 2, ecd)
-    # ecd = torch.where((ecd <= qs)&(ecd > - 1e8), (ecd - qs) / (qs - q10 + 1e-8) * 6, ecd)
-    # ecd = torch.exp(ecd) * torch.exp(ecd) / torch.exp(ecd).sum(dim = 0, keepdim=True)
-    decay = torch.exp(ecd) / torch.exp(ecd).sum(dim = 0, keepdim=True)
-    ecd = torch.exp(ecd * decay)
-    ecd = ecd  * 255
-    ecd = torch.where(ecd > 255, torch.zeros_like(ecd) + 255, ecd)
-    return ecd
-
-def limit(ecd):
-    ecd = ecd.clone()
-    ecd = ecd / 5 * 255
-    #ecd = torch.where(ecd > 0, ecd + 128, ecd)
-    ecd = torch.where(ecd > 255, torch.zeros_like(ecd) + 255, ecd)
-    return ecd
+# def quantile_transform(ecd, head = [70], tail = 10):
+#     ecd = ecd.clone()
+#     ecd_view = ecd[ecd > -1e8]
+#     qs = torch.quantile(ecd_view, torch.tensor([tail] + head).to(ecd_view.device)/100)
+#     q100 = torch.max(ecd_view)
+#     q10 = qs[None, None, None, None, 0:1]
+#     qs = qs[None, None, None, None, 1:]
+#     ecd = [ecd for i in range(len(head))]
+#     ecd = torch.stack(ecd, dim = -1)
+#     ecd = torch.where(ecd > qs, (ecd - qs) / (q100 - qs + 1e-8) * 2, ecd)
+#     ecd = torch.where((ecd <= qs)&(ecd > - 1e8), (ecd - qs) / (qs - q10 + 1e-8) * 6, ecd)
+#     ecd = torch.exp(ecd) / 7.389 * 255
+#     ecd = torch.where(ecd > 255, torch.zeros_like(ecd) + 255, ecd)
+#     return ecd
 
 # def quantile_transform(ecd, tail = 10):
 #     ecd_view = ecd[ecd > -1e8]
@@ -121,15 +97,17 @@ def limit(ecd):
 #     ecd = leaky_transform(ecd, max_length)
 #     return ecd
 
-# def leaky_transform(ecd, max_length):
-#     if type(max_length) == int:
-#         max_length = torch.tensor([max_length]).float().to(ecd.device)
-#     ecd = ecd.clone()
-#     ecd = torch.log(-ecd + 1)
-#     ecd = (torch.log(max_length) - ecd) / torch.log(max_length)
-#     ecd = ecd * 255
-#     ecd = torch.where(ecd < 0, torch.zeros_like(ecd), ecd)
-#     return ecd
+def leaky_transform(ecd):
+    if type(max_length) == int:
+        max_length = torch.tensor([max_length]).float().to(ecd.device)
+    
+    ecd = ecd.clone()
+    ecd = torch.log1p(-ecd)
+    ecd = 1 - ecd / 8.7
+    ecd = torch.where(ecd < 0, torch.zeros_like(ecd), ecd)
+    ecd = ecd / torch.sum(ecd, dim = 0, keepdim=True)
+    ecd = ecd * 255
+    return ecd
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(
@@ -157,8 +135,8 @@ if __name__ == '__main__':
         # min_event_count = 200000
         shape = [240,304]
         target_shape = [256, 320]
-    events_window_abin = 10000
-    event_volume_bins = 4
+    events_window_abin = 50000
+    event_volume_bins = 1
     events_window = events_window_abin * event_volume_bins
 
     if not os.path.exists(raw_dir):
@@ -166,9 +144,9 @@ if __name__ == '__main__':
     if not os.path.exists(target_dir):
         os.makedirs(target_dir)
 
-    bins_saved = [1, 4]
-    transform_applied = [90]
-    #transform_applied = [10, 25, 50, "minmax"]
+    bins_saved = [1, 4, 8]
+    #transform_applied = [90]
+    #transform_applied = [10, 25, 50, 75, 100, 200, "quantile"]
 
     for mode in ["train","val","test"]:
         file_dir = os.path.join(raw_dir, mode)
@@ -192,8 +170,8 @@ if __name__ == '__main__':
         pbar = tqdm.tqdm(total=len(files), unit='File', unit_scale=True)
 
         for i_file, file_name in enumerate(files):
-            if not file_name == "17-04-13_15-05-43_3599500000_3659500000":
-                continue
+            # if not file_name == "17-04-13_15-05-43_3599500000_3659500000":
+            #     continue
             # if not file_name == "moorea_2019-06-26_test_02_000_976500000_1036500000":
             #     continue
             event_file = os.path.join(root, file_name + '_td.dat')
@@ -265,7 +243,7 @@ if __name__ == '__main__':
                 events = torch.cat([events,z[:,None]], dim=1)
 
                 if start_time > time_upperbound:
-                    memory = (torch.zeros((shape[0], shape[1], 2, event_volume_bins)).cuda() - 1e8, torch.zeros((shape[0], shape[1], 2, event_volume_bins)).cuda(), torch.zeros((shape[0], shape[1], 2, event_volume_bins)).cuda())
+                    memory = torch.zeros((shape[0], shape[1], 2, event_volume_bins)).cuda() - 1e8
                 for iter in range(bins):
                     events_ = events[events[...,4] == iter]
                     t_max = start_time + (iter + 1) * events_window_abin
@@ -276,9 +254,9 @@ if __name__ == '__main__':
                     #print(generate_volume_time, generate_encode_time)
                     #torch.cuda.synchronize()
                 volume = torch.nn.functional.interpolate(volume[None,:,:,:], size = target_shape, mode='nearest')[0]
-                volume = volume.view(3, event_volume_bins, 2, target_shape[0], target_shape[1])
+                volume = volume.view(event_volume_bins, 2, target_shape[0], target_shape[1])
                 for i, bin_saved in enumerate(bins_saved):
-                    for j, head in enumerate(transform_applied):
+                    #for j, head in enumerate(transform_applied):
                         # if type(head) == str:
                         #     ecd = quantile_transform(volume[-bin_saved:])
                         #     ecd = ecd.cpu().numpy().copy()
@@ -286,22 +264,13 @@ if __name__ == '__main__':
                         #         os.makedirs(os.path.join(target_root, head + "_bins{0}".format(bin_saved)))
                         #     ecd.astype(np.uint8).tofile(os.path.join(os.path.join(target_root, head + "_bins{0}".format(bin_saved)),file_name+"_"+str(unique_time)+".npy"))
                         # else:
-                        ecd = quantile_transform(volume[0,-bin_saved:], head = [head])
-                        t_img_f = limit(volume[1,-bin_saved:])
-                        t_img_b = limit(volume[2,-bin_saved:])
-                        #ecd = leaky_transform(volume[-bin_saved:], max_length = head)
-                        ecd = ecd.cpu().numpy().copy()
-                        t_img_f = t_img_f.cpu().numpy().copy()
-                        t_img_b = t_img_b.cpu().numpy().copy()
-                        if not os.path.exists(os.path.join(target_root,"quantile{0}_bins{1}".format(head, bin_saved))):
-                            os.makedirs(os.path.join(target_root,"quantile{0}_bins{1}".format(head, bin_saved)))
-                        if not os.path.exists(os.path.join(target_root,"f_bins{0}".format(bin_saved))):
-                            os.makedirs(os.path.join(target_root,"f_bins{0}".format(bin_saved)))
-                        if not os.path.exists(os.path.join(target_root,"b_bins{0}".format(bin_saved))):
-                            os.makedirs(os.path.join(target_root,"b_bins{0}".format(bin_saved)))
-                        ecd.astype(np.uint8).tofile(os.path.join(os.path.join(target_root,"quantile{0}_bins{1}".format(head, bin_saved)),file_name+"_"+str(unique_time)+".npy"))
-                        t_img_f.astype(np.uint8).tofile(os.path.join(os.path.join(target_root,"f_bins{0}".format(bin_saved)),file_name+"_"+str(unique_time)+".npy"))
-                        t_img_b.astype(np.uint8).tofile(os.path.join(os.path.join(target_root,"b_bins{0}".format(bin_saved)),file_name+"_"+str(unique_time)+".npy")) 
+                        #ecd = quantile_transform(volume[-bin_saved:], head = [head])
+                    ecd = leaky_transform(volume[-bin_saved:])
+                    ecd = ecd.cpu().numpy().copy()
+                    if not os.path.exists(os.path.join(target_root,"bins{0}".format(bin_saved))):
+                        os.makedirs(os.path.join(target_root,"bins{0}".format(bin_saved)))
+                    ecd.astype(np.uint8).tofile(os.path.join(os.path.join(target_root,"bins{0}".format(bin_saved)),file_name+"_"+str(unique_time)+".npy"))
+                            
                 
                 time_upperbound = end_time
                 count_upperbound = end_count
