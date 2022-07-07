@@ -107,9 +107,9 @@ def leaky_transform(ecd):
     #print("transform",ecd.max(),ecd.min())
     ecd = torch.where(ecd < 0, torch.zeros_like(ecd), ecd)
     #print("limit",ecd.max(),ecd.min())
-    ecd = ecd * ecd / (torch.sum(ecd, dim = 0, keepdim=True) + 1e-8)
+    #ecd = ecd * ecd / (torch.sum(ecd, dim = 0, keepdim=True) + 1e-8)
     #print("encode",ecd.max(),ecd.min())
-    ecd = ecd / ecd.max()
+    #ecd = ecd / ecd.max()
     ecd = ecd * 255
     #print("scaling",ecd.max(),ecd.min())
     return ecd
