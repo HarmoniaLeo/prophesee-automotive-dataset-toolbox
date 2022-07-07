@@ -103,7 +103,7 @@ def leaky_transform(ecd):
     ecd = torch.log1p(-ecd)
     ecd = 1 - ecd / 8.7
     ecd = torch.where(ecd < 0, torch.zeros_like(ecd), ecd)
-    ecd = ecd / torch.sum(ecd, dim = 0, keepdim=True)
+    ecd = ecd * ecd / torch.sum(ecd, dim = 0, keepdim=True)
     ecd = ecd * 255
     return ecd
 
