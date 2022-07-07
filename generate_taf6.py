@@ -100,17 +100,17 @@ def generate_taf_cuda(events, shape, past_volume = None, volume_bins=5, filter =
 def leaky_transform(ecd):
     
     ecd = ecd.clone()
-    print("raw",ecd.max(),ecd.min())
+    #print("raw",ecd.max(),ecd.min())
     ecd = torch.log1p(-ecd)
-    print("log1p",ecd.max(),ecd.min())
+    #print("log1p",ecd.max(),ecd.min())
     ecd = 1 - ecd / 8.7
-    print("transform",ecd.max(),ecd.min())
+    #print("transform",ecd.max(),ecd.min())
     ecd = torch.where(ecd < 0, torch.zeros_like(ecd), ecd)
-    print("limit",ecd.max(),ecd.min())
+    #print("limit",ecd.max(),ecd.min())
     ecd = ecd * ecd / (torch.sum(ecd, dim = 0, keepdim=True) + 1e-8)
-    print("encode",ecd.max(),ecd.min())
+    #print("encode",ecd.max(),ecd.min())
     ecd = ecd * 255
-    print("scaling",ecd.max(),ecd.min())
+    #print("scaling",ecd.max(),ecd.min())
     return ecd
 
 if __name__ == '__main__':
@@ -188,6 +188,8 @@ if __name__ == '__main__':
 
             unique_ts, unique_indices = np.unique(dat_bbox['t'], return_index=True)
 
+            print(unique_ts.max())
+
             f_event = psee_loader.PSEELoader(event_file)
 
             time_upperbound = -1e16
@@ -240,7 +242,6 @@ if __name__ == '__main__':
                 z = torch.zeros_like(events[:,0])
 
                 bins = math.ceil((end_time - start_time) / events_window_abin)
-                print("bins",bins)
                 
                 for i in range(bins):
                     z = torch.where((events[:,2] >= start_time + i * events_window_abin)&(events[:,2] <= start_time + (i + 1) * events_window_abin), torch.zeros_like(events[:,2])+i, z)
