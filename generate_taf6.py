@@ -260,7 +260,7 @@ if __name__ == '__main__':
                     #torch.cuda.synchronize()
                 volume = torch.nn.functional.interpolate(volume[None,:,:,:], size = target_shape, mode='nearest')[0]
                 volume = volume.view(event_volume_bins, 2, target_shape[0], target_shape[1])
-                ecd = leaky_transform(volume)
+                volume = leaky_transform(volume)
                 for i in range(event_volume_bins):
                     #for j, head in enumerate(transform_applied):
                         # if type(head) == str:
@@ -272,7 +272,7 @@ if __name__ == '__main__':
                         # else:
                         #ecd = quantile_transform(volume[-bin_saved:], head = [head])
                     
-                    ecd = ecd.cpu().numpy().copy()
+                    ecd = volume[i].cpu().numpy().copy()
                     if not os.path.exists(os.path.join(target_root,"bin{0}".format(i))):
                         os.makedirs(os.path.join(target_root,"bin{0}".format(i)))
                     ecd.astype(np.uint8).tofile(os.path.join(os.path.join(target_root,"bin{0}".format(i)),file_name+"_"+str(unique_time)+".npy"))
