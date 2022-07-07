@@ -149,7 +149,7 @@ if __name__ == '__main__':
     if not os.path.exists(target_dir):
         os.makedirs(target_dir)
 
-    bins_saved = [1, 4, 8]
+    #bins_saved = [1, 4, 8]
     #transform_applied = [90]
     #transform_applied = [10, 25, 50, 75, 100, 200, "quantile"]
 
@@ -260,7 +260,8 @@ if __name__ == '__main__':
                     #torch.cuda.synchronize()
                 volume = torch.nn.functional.interpolate(volume[None,:,:,:], size = target_shape, mode='nearest')[0]
                 volume = volume.view(event_volume_bins, 2, target_shape[0], target_shape[1])
-                for i, bin_saved in enumerate(bins_saved):
+                ecd = leaky_transform(volume)
+                for i in range(event_volume_bins):
                     #for j, head in enumerate(transform_applied):
                         # if type(head) == str:
                         #     ecd = quantile_transform(volume[-bin_saved:])
@@ -270,11 +271,11 @@ if __name__ == '__main__':
                         #     ecd.astype(np.uint8).tofile(os.path.join(os.path.join(target_root, head + "_bins{0}".format(bin_saved)),file_name+"_"+str(unique_time)+".npy"))
                         # else:
                         #ecd = quantile_transform(volume[-bin_saved:], head = [head])
-                    ecd = leaky_transform(volume[-bin_saved:])
+                    
                     ecd = ecd.cpu().numpy().copy()
-                    if not os.path.exists(os.path.join(target_root,"bins{0}".format(bin_saved))):
-                        os.makedirs(os.path.join(target_root,"bins{0}".format(bin_saved)))
-                    ecd.astype(np.uint8).tofile(os.path.join(os.path.join(target_root,"bins{0}".format(bin_saved)),file_name+"_"+str(unique_time)+".npy"))
+                    if not os.path.exists(os.path.join(target_root,"bin{0}".format(i))):
+                        os.makedirs(os.path.join(target_root,"bin{0}".format(i)))
+                    ecd.astype(np.uint8).tofile(os.path.join(os.path.join(target_root,"bin{0}".format(i)),file_name+"_"+str(unique_time)+".npy"))
                             
                 
                 time_upperbound = end_time
