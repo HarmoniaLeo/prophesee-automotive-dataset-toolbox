@@ -98,8 +98,6 @@ def generate_taf_cuda(events, shape, past_volume = None, volume_bins=5, filter =
 #     return ecd
 
 def leaky_transform(ecd):
-    if type(max_length) == int:
-        max_length = torch.tensor([max_length]).float().to(ecd.device)
     
     ecd = ecd.clone()
     ecd = torch.log1p(-ecd)
