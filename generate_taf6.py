@@ -107,7 +107,7 @@ def leaky_transform(ecd):
     print("transform",ecd.max(),ecd.min())
     ecd = torch.where(ecd < 0, torch.zeros_like(ecd), ecd)
     print("limit",ecd.max(),ecd.min())
-    ecd = ecd * ecd / torch.sum(ecd, dim = 0, keepdim=True)
+    ecd = ecd * ecd / (torch.sum(ecd, dim = 0, keepdim=True) + 1e-8)
     print("encode",ecd.max(),ecd.min())
     ecd = ecd * 255
     print("scaling",ecd.max(),ecd.min())
@@ -139,7 +139,7 @@ if __name__ == '__main__':
         # min_event_count = 200000
         shape = [240,304]
         target_shape = [256, 320]
-    events_window_abin = 50000
+    events_window_abin = 10000
     event_volume_bins = 8
     events_window = events_window_abin * event_volume_bins
 
@@ -240,6 +240,7 @@ if __name__ == '__main__':
                 z = torch.zeros_like(events[:,0])
 
                 bins = math.ceil((end_time - start_time) / events_window_abin)
+                print("bins",bins)
                 
                 for i in range(bins):
                     z = torch.where((events[:,2] >= start_time + i * events_window_abin)&(events[:,2] <= start_time + (i + 1) * events_window_abin), torch.zeros_like(events[:,2])+i, z)

@@ -134,7 +134,7 @@ if __name__ == '__main__':
         # min_event_count = 200000
         shape = [240,304]
         target_shape = [256, 320]
-    events_window_abin = 50000
+    events_window_abin = 10000
     event_volume_bins = 1
     events_window = events_window_abin * event_volume_bins
 
