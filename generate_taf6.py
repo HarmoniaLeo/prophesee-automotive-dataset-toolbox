@@ -100,16 +100,17 @@ def generate_taf_cuda(events, shape, past_volume = None, volume_bins=5, filter =
 def leaky_transform(ecd):
     
     ecd = ecd.clone()
+    print("raw",ecd.max(),ecd.min())
     ecd = torch.log1p(-ecd)
-    print(ecd.max(),ecd.min())
+    print("log1p",ecd.max(),ecd.min())
     ecd = 1 - ecd / 8.7
-    print(ecd.max(),ecd.min())
+    print("transform",ecd.max(),ecd.min())
     ecd = torch.where(ecd < 0, torch.zeros_like(ecd), ecd)
-    print(ecd.max(),ecd.min())
+    print("limit",ecd.max(),ecd.min())
     ecd = ecd * ecd / torch.sum(ecd, dim = 0, keepdim=True)
-    print(ecd.max(),ecd.min())
+    print("encode",ecd.max(),ecd.min())
     ecd = ecd * 255
-    print(ecd.max(),ecd.min())
+    print("scaling",ecd.max(),ecd.min())
     return ecd
 
 if __name__ == '__main__':
