@@ -134,7 +134,7 @@ if __name__ == '__main__':
         shape = [240,304]
         target_shape = [256, 320]
     events_window_abin = 50000
-    event_volume_bins = 1
+    event_volume_bins = 8
     events_window = events_window_abin * event_volume_bins
 
     if not os.path.exists(raw_dir):
