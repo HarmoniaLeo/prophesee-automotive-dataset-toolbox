@@ -57,7 +57,7 @@ def taf_cuda(x, y, t, p, shape, volume_bins, past_volume, filter = False):
         if ecd.shape[3] > volume_bins:
             ecd = ecd[:,:,:,1:]
         else:
-            ecd[:,:,:,0] = torch.where(forward, torch.zeros_like(forward).float() -1e8, ecd[:,:,:,0])
+            ecd[:,:,:,0] = torch.where(forward, torch.zeros_like(forward).float() -6000, ecd[:,:,:,0])
     torch.cuda.synchronize()
     generate_encode_time = time.time() - tick
 
@@ -107,7 +107,7 @@ def leaky_transform(ecd):
     #print("transform",ecd.max(),ecd.min())
     ecd = torch.where(ecd < 0, torch.zeros_like(ecd), ecd)
     #print("limit",ecd.max(),ecd.min())
-    ecd = ecd * ecd / (torch.sum(ecd, dim = 0, keepdim=True) + 1e-8)
+    #ecd = ecd * ecd / (torch.sum(ecd, dim = 0, keepdim=True) + 1e-8)
     #print("encode",ecd.max(),ecd.min())
     ecd = ecd * 255
     #print("scaling",ecd.max(),ecd.min())
@@ -187,8 +187,6 @@ if __name__ == '__main__':
             f_bbox.close()
 
             unique_ts, unique_indices = np.unique(dat_bbox['t'], return_index=True)
-
-            print(unique_ts.max())
 
             f_event = psee_loader.PSEELoader(event_file)
 
