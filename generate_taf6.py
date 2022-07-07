@@ -101,10 +101,15 @@ def leaky_transform(ecd):
     
     ecd = ecd.clone()
     ecd = torch.log1p(-ecd)
+    print(ecd.max(),ecd.min())
     ecd = 1 - ecd / 8.7
+    print(ecd.max(),ecd.min())
     ecd = torch.where(ecd < 0, torch.zeros_like(ecd), ecd)
+    print(ecd.max(),ecd.min())
     ecd = ecd * ecd / torch.sum(ecd, dim = 0, keepdim=True)
+    print(ecd.max(),ecd.min())
     ecd = ecd * 255
+    print(ecd.max(),ecd.min())
     return ecd
 
 if __name__ == '__main__':
