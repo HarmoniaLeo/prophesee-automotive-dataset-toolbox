@@ -113,7 +113,7 @@ if __name__ == '__main__':
                             
                 if not os.path.exists(os.path.join(target_root,"bins{0}".format(event_volume_bins))):
                     os.makedirs(os.path.join(target_root,"bins{0}".format(event_volume_bins)))
-                ecd.astype(np.uint8).tofile(os.path.join(os.path.join(target_root,"bins{0}".format(event_volume_bins)),file_name+"_"+str(unique_time)+".npy"))
+                volume.astype(np.uint8).tofile(os.path.join(os.path.join(target_root,"bins{0}".format(event_volume_bins)),file_name+"_"+str(unique_time)+".npy"))
 
             #h5.close()
             pbar.update(1)
