@@ -101,10 +101,13 @@ if __name__ == '__main__':
 
             for bbox_count,unique_time in enumerate(unique_ts):
                 ecds = []
-                for i in range(event_volume_bins):
-                    ecd_file = os.path.join(os.path.join(target_root,"bin{0}".format(7-i)), file_name+ "_" + str(unique_time) + ".npy")
-                    ecd = np.fromfile(ecd_file, dtype=np.uint8).reshape(2, target_shape[0], target_shape[1]).astype(np.float32)
-                    ecds.append(ecd)
+                try:
+                    for i in range(event_volume_bins):
+                        ecd_file = os.path.join(os.path.join(target_root,"bin{0}".format(7-i)), file_name+ "_" + str(unique_time) + ".npy")
+                        ecd = np.fromfile(ecd_file, dtype=np.uint8).reshape(2, target_shape[0], target_shape[1]).astype(np.float32)
+                        ecds.append(ecd)
+                except Exception:
+                    continue
                 #volume = np.concatenate([feature, ecd], 0)
                 volume = np.concatenate(ecds, 0)
                             
