@@ -80,7 +80,6 @@ if __name__ == '__main__':
             #     continue
             # if not file_name == "moorea_2019-06-26_test_02_000_976500000_1036500000":
             #     continue
-            event_file = os.path.join(root, file_name + '_td.dat')
             bbox_file = os.path.join(root, file_name + '_bbox.npy')
             #h5 = h5py.File(volume_save_path, "w")
             f_bbox = open(bbox_file, "rb")
@@ -89,8 +88,6 @@ if __name__ == '__main__':
             f_bbox.close()
 
             unique_ts, unique_indices = np.unique(dat_bbox['t'], return_index=True)
-
-            f_event = psee_loader.PSEELoader(event_file)
 
             time_upperbound = -1e16
             count_upperbound = -1
