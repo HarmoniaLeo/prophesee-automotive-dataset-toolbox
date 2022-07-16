@@ -70,8 +70,8 @@ if __name__ == '__main__':
         # Remove duplicates (.npy and .dat)
         # files = files[int(2*len(files)/3):]
         #files = files[int(len(files)/3):]
-        files = [time_seq_name[:-7] for time_seq_name in files
-                        if time_seq_name[-3:] == 'dat']
+        files = [time_seq_name[:-9] for time_seq_name in files
+                        if time_seq_name[-3:] == 'npy']
 
         pbar = tqdm.tqdm(total=len(files), unit='File', unit_scale=True)
 
