@@ -151,4 +151,4 @@ if __name__ == '__main__':
 
     data_path = os.path.join(data_path,data_folder)
     ecds = generate_event_volume(data_path, item, time_stamp_end, shape, args.ecd, args.volume_bins)
-    visualizeVolume(ecds,dat_bbox,dt,item,result_path,time_stamp_end,args.tol,LABELMAP)
+    visualizeVolume(np.flip(ecds, axis = 0),dat_bbox,dt,item,result_path,time_stamp_end,args.tol,LABELMAP)

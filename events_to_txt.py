@@ -82,10 +82,10 @@ if __name__ == '__main__':
 
             event_txt_file.write("{0} {1}\n".format(shape[0],shape[1]).encode("utf-8"))
 
-            while not f_event.done:
-                events = f_event.load_n_events(10000)
-                for event in events:
-                    event_txt_file.write("{0} {1} {2} {3}\n".format(event[0]/1000000,event[1],event[2],event[3]).encode("utf-8"))
+            #while not f_event.done:
+            events = f_event.load_n_events(500000)
+            events = torch.from_numpy(rfn.structured_to_unstructured(events).astype(int)).cuda()
+            events = 
             
             event_txt_file.close()
             
