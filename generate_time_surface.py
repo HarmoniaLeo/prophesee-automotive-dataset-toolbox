@@ -20,7 +20,7 @@ def taf_cuda(x, y, t, p, shape, lamdas):
     H, W = shape
     
     t_img = torch.zeros((H * W * 2)).float().to(x.device)
-    t_img.index_put_(0, p + 2 * x + 2 * W * y, t)
+    t_img.index_put_(p + 2 * x + 2 * W * y, t)
 
     t_img = t_img.view(H, W, 2)
 
