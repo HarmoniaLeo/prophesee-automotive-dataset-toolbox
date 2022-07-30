@@ -36,14 +36,14 @@ def taf_cuda(x, y, t, p, shape, lamdas):
     return ecd_viewed
 
 def generate_leaky_cuda(events, shape, lamdas):
-    x, y, t, p, z = events.unbind(-1)
+    x, y, t, p = events.unbind(-1)
 
     x, y, t, p = x.long(), y.long(), t.float(), p.long()
     
     histogram_ecd = taf_cuda(x, y, t, p, shape, lamdas)
 
     return histogram_ecd
-
+å
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(
     description='visualize one or several event files along with their boxes')
