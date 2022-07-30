@@ -22,13 +22,10 @@ def taf_cuda(x, y, t, p, shape, lamdas):
     t_img = torch.zeros((2, H, W)).float().to(x.device) - 2000000
     t_img.index_put_(indices= [p, y, x], values= t)
 
-    print(torch.min(t_img),torch.max(t_img))
-
     t_imgs = []
     for lamda in lamdas:
-        t_img = torch.exp(lamda * t_img)
-        print(torch.min(t_img),torch.max(t_img))
-        t_imgs.append(t_img)
+        t_img_ = torch.exp(lamda * t_img)
+        t_imgs.append(t_img_)
     ecd = torch.stack(t_imgs, 0)
 
     ecd_viewed = ecd.view(len(lamdas) * 2, H, W) * 255
