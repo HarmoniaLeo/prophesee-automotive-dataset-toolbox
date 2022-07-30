@@ -144,7 +144,7 @@ if __name__ == '__main__':
 
                 volume = torch.nn.functional.interpolate(volume[None,:,:,:], size = target_shape, mode='nearest')[0]
                 volume = volume.view(len(lamdas), 2, target_shape[0], target_shape[1])
-                for i in range(lamdas):
+                for i in lamdas:
                     
                     ecd = volume[i].cpu().numpy().copy()
                     if not os.path.exists(os.path.join(target_root,"leaky{0}".format(i))):
