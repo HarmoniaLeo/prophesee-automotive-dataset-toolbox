@@ -131,6 +131,9 @@ if __name__ == '__main__':
                 else:
                     start_count = f_event.seek_time(start_time)
                 
+                if (start_count is None) or (start_time < 0):
+                    start_count = 0
+                
                 dat_event = f_event
                 dat_event.seek_event(start_count)
 
