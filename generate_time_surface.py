@@ -126,9 +126,10 @@ if __name__ == '__main__':
                     continue
                 start_time = int(f_event.current_time)
                 start_time = end_time - events_window
-                start_count = f_event.seek_time(start_time)
-                if (start_time is None) or (start_count < 0):
-                    start_count = 0
+                if start_time < 0:
+                    start_count = f_event.seek_time(0)
+                else:
+                    start_count = f_event.seek_time(start_time)
                 
                 dat_event = f_event
                 dat_event.seek_event(start_count)
