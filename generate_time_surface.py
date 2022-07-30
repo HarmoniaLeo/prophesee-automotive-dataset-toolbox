@@ -19,7 +19,7 @@ import torch.nn
 def taf_cuda(x, y, t, p, shape, lamdas):
     H, W = shape
 
-    t_img = torch.zeros((2, H, W)).float().to(x.device)
+    t_img = torch.zeros((2, H, W)).float().to(x.device) - 2000000
     t_img.index_put_(indices= [p, y, x], values= t)
 
     t_imgs = []
