@@ -82,9 +82,6 @@ if __name__ == '__main__':
         if not os.path.exists(file_dir):
             os.makedirs(file_dir)
         root = file_dir
-        target_root = os.path.join(target_dir, mode)
-        if not os.path.exists(target_root):
-            os.makedirs(target_root)
         #h5 = h5py.File(raw_dir + '/ATIS_taf_'+mode+'.h5', 'w')
         try:
             files = os.listdir(file_dir)
@@ -145,11 +142,16 @@ if __name__ == '__main__':
                 volume = torch.nn.functional.interpolate(volume[None,:,:,:], size = target_shape, mode='nearest')[0]
                 volume = volume.view(len(lamdas), 2, target_shape[0], target_shape[1])
                 for j,i in enumerate(lamdas):
+                    target_root = os.path.join(target_dir,"leaky{0}".format(i))
+                    if not os.path.exists(target_root):
+                        os.makedirs(target_root)
+                    target_root = os.path.join(target_root, mode)
+                    if not os.path.exists(target_root):
+                        os.makedirs(target_root)
                     
                     ecd = volume[j].cpu().numpy().copy()
-                    if not os.path.exists(os.path.join(target_root,"leaky{0}".format(i))):
-                        os.makedirs(os.path.join(target_root,"leaky{0}".format(i)))
-                    ecd.astype(np.uint8).tofile(os.path.join(os.path.join(target_root,"leaky{0}".format(i)),file_name+"_"+str(unique_time)+".npy"))
+                    
+                    ecd.astype(np.uint8).tofile(os.path.join(target_root,file_name+"_"+str(unique_time)+".npy"))
                             
                 torch.cuda.empty_cache()
             #h5.close()
