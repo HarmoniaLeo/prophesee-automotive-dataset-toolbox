@@ -149,6 +149,9 @@ if __name__ == '__main__':
                 events = events[events[:, 2] > unique_time - events_window]
                 memory = events
 
+                time_upper_bound = unique_time
+                count_upper_bound = end_count
+
                 events[:, 2] = events[:, 2] - unique_time
                 volume = generate_leaky_cuda(events, shape, lamdas)
 
