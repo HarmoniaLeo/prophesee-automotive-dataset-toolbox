@@ -97,8 +97,8 @@ if __name__ == '__main__':
         pbar = tqdm.tqdm(total=len(files), unit='File', unit_scale=True)
 
         for i_file, file_name in enumerate(files):
-            # if not file_name == "17-04-13_15-05-43_3599500000_3659500000":
-            #     continue
+            if not file_name == "17-04-13_15-05-43_3599500000_3659500000":
+                continue
             # if not file_name == "moorea_2019-06-26_test_02_000_976500000_1036500000":
             #     continue
             event_file = os.path.join(root, file_name + '_td.dat')
@@ -114,6 +114,9 @@ if __name__ == '__main__':
             f_event = psee_loader.PSEELoader(event_file)
 
             #min_event_count = f_event.event_count()
+            time_upper_bound = -100000000
+            count_upper_bound = 0
+            memory = None
 
             for bbox_count,unique_time in enumerate(unique_ts):
                 end_time = int(unique_time)
@@ -130,12 +133,21 @@ if __name__ == '__main__':
                 if (start_count is None) or (start_time < 0):
                     start_count = 0
                 
+                if start_time <= time_upper_bound:
+                    start_count = count_upper_bound
+                
                 dat_event = f_event
                 dat_event.seek_event(start_count)
 
                 events = dat_event.load_n_events(int(end_count - start_count))
                 del dat_event
                 events = torch.from_numpy(rfn.structured_to_unstructured(events)[:, [1, 2, 0, 3]].astype(float)).cuda()
+
+                if not memory is None:
+                    events = torch.cat([memory, events])
+                
+                events = events[events[:, 2] > unique_time - events_window]
+                memory = events
 
                 events[:, 2] = events[:, 2] - unique_time
                 volume = generate_leaky_cuda(events, shape, lamdas)
