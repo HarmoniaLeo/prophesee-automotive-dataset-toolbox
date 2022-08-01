@@ -148,7 +148,7 @@ if __name__ == '__main__':
     f_bbox.close()
     #print(target)
 
-    data_path = os.path.join(data_path,data_folder)
     data_path = os.path.join(data_path,args.ecd)
+    data_path = os.path.join(data_path,data_folder)
     ecds = generate_event_volume(data_path, item, time_stamp_end, shape)
     visualizeVolume(np.flip(ecds, axis = 0),dat_bbox,dt,item,result_path,time_stamp_end,args.tol,LABELMAP)
