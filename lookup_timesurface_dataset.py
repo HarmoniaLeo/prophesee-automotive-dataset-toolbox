@@ -108,8 +108,8 @@ if __name__ == '__main__':
     time_stamp_end = args.end
 
     if args.dataset == "gen1":
-        bbox_path = "/data2/lbd/ATIS_Automotive_Detection_Dataset/detection_dataset_duration_60s_ratio_1.0"
-        data_path = "/data2/lbd/ATIS_Automotive_Detection_Dataset_processed/leaky"
+        bbox_path = "/data/lbd/ATIS_Automotive_Detection_Dataset/detection_dataset_duration_60s_ratio_1.0"
+        data_path = "/data/lbd/ATIS_Automotive_Detection_Dataset_processed/leaky"
         if not (args.exp_name is None):
             result_path = "/home/lbd/100-fps-event-det/" + args.exp_name + "/summarise.npz"
         ori_shape = (240,304)
