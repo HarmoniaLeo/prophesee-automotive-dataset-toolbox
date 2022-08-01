@@ -67,7 +67,7 @@ if __name__ == '__main__':
         # min_event_count = 200000
         shape = [240,304]
         target_shape = [256, 320]
-    events_window = 2000000
+    events_window = 5000000
 
     if not os.path.exists(raw_dir):
         os.makedirs(raw_dir)
@@ -75,7 +75,8 @@ if __name__ == '__main__':
         os.makedirs(target_dir)
 
 
-    lamdas = [0.00002, 0.00001, 0.000005, 0.0000025]
+    #lamdas = [0.00002, 0.00001, 0.000005, 0.0000025]
+    lamdas = [0.000001]
 
     for mode in ["train","val","test"]:
         file_dir = os.path.join(raw_dir, mode)
