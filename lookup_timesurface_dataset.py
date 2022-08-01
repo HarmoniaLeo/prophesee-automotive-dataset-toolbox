@@ -10,9 +10,9 @@ import pandas as pd
 import torch
 sns.set_style("darkgrid")
 
-def generate_event_volume(data_path, item, time_stamp_end, shape, ecd):
+def generate_event_volume(data_path, item, time_stamp_end, shape):
 
-    ecd_file = os.path.join(os.path.join(data_path,ecd), item+ "_" + str(time_stamp_end) + ".npy")
+    ecd_file = os.path.join(data_path, item+ "_" + str(time_stamp_end) + ".npy")
     ecds = np.fromfile(ecd_file, dtype=np.uint8).reshape(2, shape[0], shape[1]).astype(np.float32)
     return ecds
 
@@ -149,5 +149,6 @@ if __name__ == '__main__':
     #print(target)
 
     data_path = os.path.join(data_path,data_folder)
-    ecds = generate_event_volume(data_path, item, time_stamp_end, shape, args.ecd)
+    data_path = os.path.join(data_path,args.ecd)
+    ecds = generate_event_volume(data_path, item, time_stamp_end, shape)
     visualizeVolume(np.flip(ecds, axis = 0),dat_bbox,dt,item,result_path,time_stamp_end,args.tol,LABELMAP)
