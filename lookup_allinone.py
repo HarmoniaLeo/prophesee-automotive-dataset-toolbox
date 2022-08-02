@@ -364,7 +364,7 @@ if __name__ == '__main__':
         shape = (512,640)
         LABELMAP = ['pedestrian', 'two wheeler', 'car', 'truck', 'bus', 'traffic sign', 'traffic light']
 
-    if not (args.exp_name is None):
+    if not (args.result_path is None):
         bbox_file = result_path
         f_bbox = np.load(bbox_file)
         dt = f_bbox["dts"][f_bbox["file_names"]==item]
