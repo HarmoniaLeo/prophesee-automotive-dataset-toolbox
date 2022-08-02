@@ -325,7 +325,7 @@ if __name__ == '__main__':
         description='visualize one or several event files along with their boxes')
     parser.add_argument('-item', type=str)
     parser.add_argument('-end', type=int)
-    parser.add_argument('-volume_bins', type=int)
+    parser.add_argument('-volume_bins', type=float)
     parser.add_argument('-ecd', type=str)
     parser.add_argument('-bbox_path', type=str)
     parser.add_argument('-data_path', type=str)
