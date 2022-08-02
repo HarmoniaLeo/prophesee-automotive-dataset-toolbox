@@ -10,9 +10,9 @@ import pandas as pd
 import torch
 sns.set_style("darkgrid")
 
-def generate_event_volume(data_path, item, time_stamp_end, shape, ori_shape, ecd, volume_bins):
+def generate_event_volume(data_path, item, time_stamp_end, shape, ori_shape, ecd, volume_bins, data_folder):
 
-    ecd_file = os.path.join(os.path.join(data_path,ecd), item+ "_" + str(time_stamp_end) + ".npy")
+    ecd_file = os.path.join(os.path.join(os.path.join(data_path,ecd),data_folder), item+ "_" + str(time_stamp_end) + ".npy")
     ecds = np.fromfile(ecd_file, dtype=np.uint8).reshape(1, int(volume_bins * 2), shape[0], shape[1]).astype(np.float32)
     ecds = torch.from_numpy(ecds)
     ecds = torch.nn.functional.interpolate(ecds, size = ori_shape, mode='nearest')[0]
@@ -371,20 +371,19 @@ if __name__ == '__main__':
     else:
         dt = None
 
-    final_path = os.path.join(bbox_path,data_folder)
-    bbox_file = os.path.join(final_path, item+"_bbox.npy")
+    bbox_path = os.path.join(bbox_path,data_folder)
+    bbox_file = os.path.join(bbox_path, item+"_bbox.npy")
     f_bbox = open(bbox_file, "rb")
     start, v_type, ev_size, size, _ = npy_events_tools.parse_header(f_bbox)
     dat_bbox = np.fromfile(f_bbox, dtype=v_type, count=-1)
     f_bbox.close()
     #print(target)
 
-    data_path = os.path.join(data_path,data_folder)
     if datatype == "opticalflow":
         ecds = generate_optflow(data_path, item, time_stamp_end, shape, ori_shape, args.ecd, args.volume_bins)
         extract_flow(ecds,dat_bbox,dt,item,result_path,time_stamp_end,args.tol,LABELMAP,suffix)
     else:
-        ecds = generate_event_volume(data_path, item, time_stamp_end, shape, ori_shape, args.ecd, args.volume_bins)
+        ecds = generate_event_volume(data_path, item, time_stamp_end, shape, ori_shape, args.ecd, args.volume_bins,data_folder)
         if datatype == "taf":
             visualizeTaf(ecds,dat_bbox,dt,item,result_path,time_stamp_end,args.tol,LABELMAP,suffix)
         elif datatype == "eventvolume":
