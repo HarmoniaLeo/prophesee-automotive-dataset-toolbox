@@ -13,7 +13,7 @@ sns.set_style("darkgrid")
 def generate_event_volume(data_path, item, time_stamp_end, shape, ori_shape, ecd, volume_bins):
 
     ecd_file = os.path.join(os.path.join(data_path,ecd), item+ "_" + str(time_stamp_end) + ".npy")
-    ecds = np.fromfile(ecd_file, dtype=np.uint8).reshape(1, volume_bins * 2, shape[0], shape[1]).astype(np.float32)
+    ecds = np.fromfile(ecd_file, dtype=np.uint8).reshape(1, int(volume_bins * 2), shape[0], shape[1]).astype(np.float32)
     ecds = torch.from_numpy(ecds)
     ecds = torch.nn.functional.interpolate(ecds, size = ori_shape, mode='nearest')[0]
     return ecds.numpy()
