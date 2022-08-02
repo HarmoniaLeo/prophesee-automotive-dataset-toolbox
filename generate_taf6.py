@@ -133,7 +133,7 @@ if __name__ == '__main__':
         shape = [240,304]
         target_shape = [256, 320]
     events_window_abin = 10000
-    event_volume_bins = 8
+    event_volume_bins = 4
     events_window = events_window_abin * event_volume_bins
 
     if not os.path.exists(target_dir):
@@ -240,12 +240,10 @@ if __name__ == '__main__':
                 volume = torch.nn.functional.interpolate(volume[None,:,:,:], size = target_shape, mode='nearest')[0]
                 volume = volume.view(event_volume_bins, 2, target_shape[0], target_shape[1])
                 volume = leaky_transform(volume)
-                for i in range(event_volume_bins):
-                    
-                    ecd = volume[i].cpu().numpy().copy()
-                    if not os.path.exists(os.path.join(target_root,"bin{0}".format(i))):
-                        os.makedirs(os.path.join(target_root,"bin{0}".format(i)))
-                    ecd.astype(np.uint8).tofile(os.path.join(os.path.join(target_root,"bin{0}".format(i)),file_name+"_"+str(unique_time)+".npy"))   
+                ecd = volume.cpu().numpy().copy()
+                if not os.path.exists(os.path.join(target_root,"bins{0}".format(event_volume_bins))):
+                    os.makedirs(os.path.join(target_root,"bins{0}".format(event_volume_bins)))
+                ecd.astype(np.uint8).tofile(os.path.join(os.path.join(target_root,"bins{0}".format(event_volume_bins)),file_name+"_"+str(unique_time)+".npy")) 
                 
                 time_upperbound = end_time
                 count_upperbound = end_count

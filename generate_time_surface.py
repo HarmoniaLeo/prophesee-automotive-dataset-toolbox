@@ -74,7 +74,8 @@ if __name__ == '__main__':
         os.makedirs(target_dir)
 
 
-    lamdas = [0.00001, 0.000005, 0.0000025, 0.000001]
+    #lamdas = [0.00001, 0.000005, 0.0000025, 0.000001]
+    lamdas = [0.000001]
 
     for mode in ["train","val","test"]:
         file_dir = os.path.join(raw_dir, mode)
@@ -147,7 +148,7 @@ if __name__ == '__main__':
                     events = torch.cat([memory, events])
                 
                 events = events[events[:, 2] > unique_time - events_window]
-                memory = events
+                memory = events.clone()
 
                 time_upper_bound = unique_time
                 count_upper_bound = end_count
