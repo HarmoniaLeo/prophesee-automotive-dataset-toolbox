@@ -156,7 +156,17 @@ if __name__ == '__main__':
         files = [time_seq_name[:-7] for time_seq_name in files
                         if time_seq_name[-3:] == 'dat']
 
-        pbar = tqdm.tqdm(total=len(files), unit='File', unit_scale=True)
+        total_length = 0
+
+        for i_file, file_name in enumerate(files):
+            bbox_file = os.path.join(label_root, file_name + '_bbox.npy')
+            f_bbox = open(bbox_file, "rb")
+            start, v_type, ev_size, size, dtype = npy_events_tools.parse_header(f_bbox)
+            dat_bbox = np.fromfile(f_bbox, dtype=v_type, count=-1)
+            unique_ts, unique_indices = np.unique(dat_bbox['t'], return_index=True)
+            total_length += len(unique_ts)
+
+        pbar = tqdm.tqdm(total=total_length, unit='File', unit_scale=True)
 
         for i_file, file_name in enumerate(files):
             # if not file_name == "17-04-13_15-05-43_3599500000_3659500000":
@@ -251,5 +261,5 @@ if __name__ == '__main__':
                 time_upperbound = end_time
                 count_upperbound = end_count
                 torch.cuda.empty_cache()
-            pbar.update(1)
+                pbar.update(1)
         pbar.close()
