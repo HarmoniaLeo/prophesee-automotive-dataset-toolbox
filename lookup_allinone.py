@@ -249,7 +249,6 @@ def visualizeTaf(ecds,gt,dt,filename,path,time_stamp_end,tol,LABELMAP,suffix):
     cv2.imwrite(path_t,img_all)
 
 def visualizeE2vid(volume,gt,dt,filename,path,time_stamp_end,tol,LABELMAP,suffix):
-    print(path, filename, time_stamp_end, suffix)
     img_s = volume[0]
     gt = gt[gt['t']==time_stamp_end]
     draw_bboxes(img_s,gt,0,LABELMAP)
@@ -338,9 +337,9 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
 
-    result_path = 'result_allinone'
-    if not os.path.exists(result_path):
-        os.mkdir(result_path)
+    target_path = 'result_allinone'
+    if not os.path.exists(target_path):
+        os.mkdir(target_path)
     data_folder = 'test'
     item = args.item
     time_stamp_end = args.end
@@ -382,14 +381,14 @@ if __name__ == '__main__':
 
     if datatype == "opticalflow":
         ecds = generate_optflow(data_path, item, time_stamp_end, shape, ori_shape, args.ecd, args.volume_bins)
-        extract_flow(ecds,dat_bbox,dt,item,result_path,time_stamp_end,args.tol,LABELMAP,suffix)
+        extract_flow(ecds,dat_bbox,dt,item,target_path,time_stamp_end,args.tol,LABELMAP,suffix)
     else:
         ecds = generate_event_volume(data_path, item, time_stamp_end, shape, ori_shape, args.ecd, args.volume_bins,data_folder)
         if datatype == "taf":
-            visualizeTaf(ecds,dat_bbox,dt,item,result_path,time_stamp_end,args.tol,LABELMAP,suffix)
+            visualizeTaf(ecds,dat_bbox,dt,item,target_path,time_stamp_end,args.tol,LABELMAP,suffix)
         elif datatype == "eventvolume":
-            visualizeVolume(ecds,dat_bbox,dt,item,result_path,time_stamp_end,args.tol,LABELMAP,suffix)
+            visualizeVolume(ecds,dat_bbox,dt,item,target_path,time_stamp_end,args.tol,LABELMAP,suffix)
         elif datatype == "timesurface":
-            visualizeTimeSurface(ecds,dat_bbox,dt,item,result_path,time_stamp_end,args.tol,LABELMAP,suffix)
+            visualizeTimeSurface(ecds,dat_bbox,dt,item,target_path,time_stamp_end,args.tol,LABELMAP,suffix)
         elif datatype == "e2vid":
-            visualizeE2vid(ecds,dat_bbox,dt,item,result_path,time_stamp_end,args.tol,LABELMAP,suffix)
+            visualizeE2vid(ecds,dat_bbox,dt,item,target_path,time_stamp_end,args.tol,LABELMAP,suffix)
