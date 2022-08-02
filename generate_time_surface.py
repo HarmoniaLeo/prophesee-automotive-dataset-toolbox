@@ -147,12 +147,10 @@ if __name__ == '__main__':
                     events = torch.cat([memory, events])
                 
                 events = events[events[:, 2] > unique_time - events_window]
-                memory = events
+                memory = events.clone()
 
                 time_upper_bound = unique_time
                 count_upper_bound = end_count
-
-                print(events[:, 2].min())
 
                 events[:, 2] = events[:, 2] - unique_time
                 
