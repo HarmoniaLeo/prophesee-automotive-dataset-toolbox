@@ -11,8 +11,6 @@ import torch
 sns.set_style("darkgrid")
 
 def generate_event_volume(ecd_file, shape, ori_shape, volume_bins):
-
-    
     ecds = np.fromfile(ecd_file, dtype=np.uint8).reshape(1, int(volume_bins * 2), shape[0], shape[1]).astype(np.float32)
     ecds = torch.from_numpy(ecds)
     ecds = torch.nn.functional.interpolate(ecds, size = ori_shape, mode='nearest')[0]
@@ -387,11 +385,11 @@ if __name__ == '__main__':
         
         if datatype == "taf":
             ecd_file = os.path.join(os.path.join(os.path.join(data_path,data_folder),args.ecd), item+ "_" + str(time_stamp_end) + ".npy")
-            ecds = generate_event_volume(ecd_file, item, time_stamp_end, shape, ori_shape, args.volume_bins)
+            ecds = generate_event_volume(ecd_file, shape, ori_shape, args.volume_bins)
             visualizeTaf(ecds,dat_bbox,dt,item,target_path,time_stamp_end,args.tol,LABELMAP,suffix)
         else:
             ecd_file = os.path.join(os.path.join(os.path.join(data_path,args.ecd),data_folder), item+ "_" + str(time_stamp_end) + ".npy")
-            ecds = generate_event_volume(ecd_file, item, time_stamp_end, shape, ori_shape, args.volume_bins)
+            ecds = generate_event_volume(ecd_file, shape, ori_shape, args.volume_bins)
             if datatype == "eventvolume":
                 visualizeVolume(ecds,dat_bbox,dt,item,target_path,time_stamp_end,args.tol,LABELMAP,suffix)
             elif datatype == "timesurface":
