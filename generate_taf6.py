@@ -182,6 +182,7 @@ if __name__ == '__main__':
             #min_event_count = f_event.event_count()
 
             for bbox_count,unique_time in enumerate(unique_ts):
+                print(bbox_count)
                 end_time = int(unique_time)
                 end_count = f_event.seek_time(end_time)
                 if end_count is None:
