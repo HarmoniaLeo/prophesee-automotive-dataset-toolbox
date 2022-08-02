@@ -46,12 +46,13 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(
     description='visualize one or several event files along with their boxes')
     parser.add_argument('-raw_dir', type=str)
+    parser.add_argument('-label_dir', type=str)
     parser.add_argument('-target_dir', type=str)
     parser.add_argument('-dataset', type=str, default="gen4")
-    parser.add_argument('-filter', type=bool, default=False)
 
     args = parser.parse_args()
     raw_dir = args.raw_dir
+    label_dir = args.label_dir
     target_dir = args.target_dir
     dataset = args.dataset
 
@@ -69,21 +70,20 @@ if __name__ == '__main__':
         target_shape = [256, 320]
     events_window = 5000000
 
-    if not os.path.exists(raw_dir):
-        os.makedirs(raw_dir)
     if not os.path.exists(target_dir):
         os.makedirs(target_dir)
 
 
-    #lamdas = [0.00002, 0.00001, 0.000005, 0.0000025]
-    lamdas = [0.000001]
+    lamdas = [0.00001, 0.000005, 0.0000025, 0.000001]
 
     for mode in ["train","val","test"]:
         file_dir = os.path.join(raw_dir, mode)
-        if not os.path.exists(file_dir):
-            os.makedirs(file_dir)
         root = file_dir
-        #h5 = h5py.File(raw_dir + '/ATIS_taf_'+mode+'.h5', 'w')
+        label_dir = os.path.join(label_dir, mode)
+        label_root = label_dir
+        target_root = os.path.join(target_dir, mode)
+        if not os.path.exists(target_root):
+            os.makedirs(target_root)
         try:
             files = os.listdir(file_dir)
         except Exception:
@@ -102,7 +102,7 @@ if __name__ == '__main__':
             # if not file_name == "moorea_2019-06-26_test_02_000_976500000_1036500000":
             #     continue
             event_file = os.path.join(root, file_name + '_td.dat')
-            bbox_file = os.path.join(root, file_name + '_bbox.npy')
+            bbox_file = os.path.join(label_root, file_name + '_bbox.npy')
             #h5 = h5py.File(volume_save_path, "w")
             f_bbox = open(bbox_file, "rb")
             start, v_type, ev_size, size, dtype = npy_events_tools.parse_header(f_bbox)
@@ -158,16 +158,16 @@ if __name__ == '__main__':
                 volume = torch.nn.functional.interpolate(volume[None,:,:,:], size = target_shape, mode='nearest')[0]
                 volume = volume.view(len(lamdas), 2, target_shape[0], target_shape[1])
                 for j,i in enumerate(lamdas):
-                    target_root = os.path.join(target_dir,"leaky{0}".format(i))
-                    if not os.path.exists(target_root):
-                        os.makedirs(target_root)
-                    target_root = os.path.join(target_root, mode)
-                    if not os.path.exists(target_root):
-                        os.makedirs(target_root)
+                    save_dir = os.path.join(target_dir,"leaky{0}".format(i))
+                    if not os.path.exists(save_dir):
+                        os.makedirs(save_dir)
+                    save_dir = os.path.join(save_dir, mode)
+                    if not os.path.exists(save_dir):
+                        os.makedirs(save_dir)
                     
                     ecd = volume[j].cpu().numpy().copy()
                     
-                    ecd.astype(np.uint8).tofile(os.path.join(target_root,file_name+"_"+str(unique_time)+".npy"))
+                    ecd.astype(np.uint8).tofile(os.path.join(save_dir,file_name+"_"+str(unique_time)+".npy"))
                             
                 torch.cuda.empty_cache()
             #h5.close()

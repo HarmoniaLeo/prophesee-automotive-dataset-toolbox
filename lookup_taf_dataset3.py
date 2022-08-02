@@ -10,11 +10,13 @@ import pandas as pd
 import torch
 sns.set_style("darkgrid")
 
-def generate_event_volume(data_path, item, time_stamp_end, shape, ecd, volume_bins):
+def generate_event_volume(data_path, item, time_stamp_end, shape, ori_shape, ecd, volume_bins):
 
     ecd_file = os.path.join(os.path.join(data_path,ecd), item+ "_" + str(time_stamp_end) + ".npy")
-    ecds = np.fromfile(ecd_file, dtype=np.uint8).reshape(volume_bins * 2, shape[0], shape[1]).astype(np.float32)
-    return ecds
+    ecds = np.fromfile(ecd_file, dtype=np.uint8).reshape(1, volume_bins * 2, shape[0], shape[1]).astype(np.float32)
+    ecds = torch.from_numpy(ecds)
+    ecds = torch.nn.functional.interpolate(ecds, size = ori_shape, mode='nearest')[0]
+    return ecds.numpy()
 
 LABELMAP = ["car", "pedestrian"]
 
@@ -126,8 +128,8 @@ if __name__ == '__main__':
         shape = (192,640)
         LABELMAP = ["car", "pedestrian"]
     else:
-        bbox_path = "/datassd4t/lbd/Large_Automotive_Detection_Dataset_sampling"
-        data_path = "/home/lbd/Large_Automotive_Detection_Dataset_processed/taf2"
+        bbox_path = "/data/lbd/Large_Automotive_Detection_Dataset_sampling"
+        data_path = "/data/lbd/Large_Automotive_Detection_Dataset_processed/taf2"
         if not (args.exp_name is None):
             result_path = "/home/liubingde/100-fps-event-det/" + args.exp_name + "/summarise.npz"
         ori_shape = (720,1280)
@@ -150,5 +152,5 @@ if __name__ == '__main__':
     #print(target)
 
     data_path = os.path.join(data_path,data_folder)
-    ecds = generate_event_volume(data_path, item, time_stamp_end, shape, args.ecd, args.volume_bins)
-    visualizeVolume(np.flip(ecds, axis = 0),dat_bbox,dt,item,result_path,time_stamp_end,args.tol,LABELMAP)
+    ecds = generate_event_volume(data_path, item, time_stamp_end, shape, ori_shape, args.ecd, args.volume_bins)
+    visualizeVolume(ecds,dat_bbox,dt,item,result_path,time_stamp_end,args.tol,LABELMAP)

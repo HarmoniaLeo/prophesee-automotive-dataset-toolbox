@@ -15,11 +15,8 @@ import math
 import argparse
 import torch.nn
 
-pooling_layer = torch.nn.MaxPool2d(2, 2)
-up_sampling_layer = torch.nn.Upsample(scale_factor=2, mode = "nearest")
 
-
-def taf_cuda(x, y, t, p, shape, volume_bins, past_volume, filter = False):
+def taf_cuda(x, y, t, p, shape, volume_bins, past_volume):
     tick = time.time()
     H, W = shape
     
@@ -35,13 +32,7 @@ def taf_cuda(x, y, t, p, shape, volume_bins, past_volume, filter = False):
     generate_volume_time = time.time() - tick
 
     tick = time.time()
-    if not filter:
-        forward = (img == 0)
-    else:
-        forward = (img <= 1).float()
-        forward = 1 - forward.permute(2, 0, 1)[None, :, :, :]
-        forward = pooling_layer(forward)
-        forward = up_sampling_layer(1 - forward).bool()[0].permute(1, 2, 0)
+    forward = (img == 0)
     torch.cuda.synchronize()
     filter_time = time.time() - tick
     tick = time.time()
@@ -118,12 +109,13 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(
     description='visualize one or several event files along with their boxes')
     parser.add_argument('-raw_dir', type=str)
+    parser.add_argument('-label_dir', type=str)
     parser.add_argument('-target_dir', type=str)
     parser.add_argument('-dataset', type=str, default="gen4")
-    parser.add_argument('-filter', type=bool, default=False)
 
     args = parser.parse_args()
     raw_dir = args.raw_dir
+    label_dir = args.label_dir
     target_dir = args.target_dir
     dataset = args.dataset
 
@@ -144,24 +136,17 @@ if __name__ == '__main__':
     event_volume_bins = 8
     events_window = events_window_abin * event_volume_bins
 
-    if not os.path.exists(raw_dir):
-        os.makedirs(raw_dir)
     if not os.path.exists(target_dir):
         os.makedirs(target_dir)
 
-    #bins_saved = [1, 4, 8]
-    #transform_applied = [90]
-    #transform_applied = [10, 25, 50, 75, 100, 200, "quantile"]
-
     for mode in ["train","val","test"]:
         file_dir = os.path.join(raw_dir, mode)
-        if not os.path.exists(file_dir):
-            os.makedirs(file_dir)
         root = file_dir
+        label_dir = os.path.join(label_dir, mode)
+        label_root = label_dir
         target_root = os.path.join(target_dir, mode)
         if not os.path.exists(target_root):
             os.makedirs(target_root)
-        #h5 = h5py.File(raw_dir + '/ATIS_taf_'+mode+'.h5', 'w')
         try:
             files = os.listdir(file_dir)
         except Exception:
@@ -180,8 +165,7 @@ if __name__ == '__main__':
             # if not file_name == "moorea_2019-06-26_test_02_000_976500000_1036500000":
             #     continue
             event_file = os.path.join(root, file_name + '_td.dat')
-            bbox_file = os.path.join(root, file_name + '_bbox.npy')
-            #h5 = h5py.File(volume_save_path, "w")
+            bbox_file = os.path.join(label_root, file_name + '_bbox.npy')
             f_bbox = open(bbox_file, "rb")
             start, v_type, ev_size, size, dtype = npy_events_tools.parse_header(f_bbox)
             dat_bbox = np.fromfile(f_bbox, dtype=v_type, count=-1)
@@ -229,7 +213,6 @@ if __name__ == '__main__':
                     assert bbox_count > 0
 
                 
-                #if not (os.path.exists(volume_save_path)):
                 dat_event = f_event
                 dat_event.seek_event(start_count)
 
@@ -244,7 +227,6 @@ if __name__ == '__main__':
                 
                 for i in range(bins):
                     z = torch.where((events[:,2] >= start_time + i * events_window_abin)&(events[:,2] <= start_time + (i + 1) * events_window_abin), torch.zeros_like(events[:,2])+i, z)
-                    #events_timestamps.append(start_time + (i + 1) * self.events_window_abin)
                 events = torch.cat([events,z[:,None]], dim=1)
 
                 if start_time > time_upperbound:
@@ -254,37 +236,19 @@ if __name__ == '__main__':
                     t_max = start_time + (iter + 1) * events_window_abin
                     t_min = start_time + iter * events_window_abin
                     events_[:,2] = (events_[:, 2] - t_min)/(t_max - t_min + 1e-8)
-                    #tick = time.time()
                     volume, memory = generate_taf_cuda(events_, shape, memory, event_volume_bins, args.filter)
-                    #print(generate_volume_time, generate_encode_time)
-                    #torch.cuda.synchronize()
                 volume = torch.nn.functional.interpolate(volume[None,:,:,:], size = target_shape, mode='nearest')[0]
                 volume = volume.view(event_volume_bins, 2, target_shape[0], target_shape[1])
                 volume = leaky_transform(volume)
                 for i in range(event_volume_bins):
-                    #for j, head in enumerate(transform_applied):
-                        # if type(head) == str:
-                        #     ecd = quantile_transform(volume[-bin_saved:])
-                        #     ecd = ecd.cpu().numpy().copy()
-                        #     if not os.path.exists(os.path.join(target_root, head + "_bins{0}".format(bin_saved))):
-                        #         os.makedirs(os.path.join(target_root, head + "_bins{0}".format(bin_saved)))
-                        #     ecd.astype(np.uint8).tofile(os.path.join(os.path.join(target_root, head + "_bins{0}".format(bin_saved)),file_name+"_"+str(unique_time)+".npy"))
-                        # else:
-                        #ecd = quantile_transform(volume[-bin_saved:], head = [head])
                     
                     ecd = volume[i].cpu().numpy().copy()
                     if not os.path.exists(os.path.join(target_root,"bin{0}".format(i))):
                         os.makedirs(os.path.join(target_root,"bin{0}".format(i)))
-                    ecd.astype(np.uint8).tofile(os.path.join(os.path.join(target_root,"bin{0}".format(i)),file_name+"_"+str(unique_time)+".npy"))
-                            
+                    ecd.astype(np.uint8).tofile(os.path.join(os.path.join(target_root,"bin{0}".format(i)),file_name+"_"+str(unique_time)+".npy"))   
                 
                 time_upperbound = end_time
                 count_upperbound = end_count
                 torch.cuda.empty_cache()
-            #h5.close()
             pbar.update(1)
         pbar.close()
-        # if mode == "test":
-        #     np.save(os.path.join(root, 'total_volume_time.npy'),np.array(total_volume_time))
-        #     np.save(os.path.join(root, 'total_taf_time.npy'),np.array(total_taf_time))
-        #h5.close()

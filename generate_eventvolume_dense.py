@@ -1,4 +1,5 @@
 from pyexpat import features
+from tkinter import S
 import numpy as np
 from src.io import npy_events_tools
 from src.io import psee_loader
@@ -55,14 +56,14 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(
     description='visualize one or several event files along with their boxes')
     parser.add_argument('-raw_dir', type=str)
+    parser.add_argument('-label_dir', type=str)
     parser.add_argument('-target_dir', type=str)
     parser.add_argument('-dataset', type=str, default="gen1")
-    parser.add_argument('-time_window', type=int, default=50000)
-    parser.add_argument('-event_volume_bins', type=int, default=5)
 
 
     args = parser.parse_args()
     raw_dir = args.raw_dir
+    label_dir = args.label_dir
     target_dir = args.target_dir
     dataset = args.dataset
 
@@ -76,23 +77,11 @@ if __name__ == '__main__':
         shape = [240,304]
         target_shape = [256, 320]
 
-    # event_volume_bins = [[5, 1, 1], [5, 1]]
-    # time_windows = [50000, 300000]
-    # time_steps = [[16, 1, 1], [1, 1]]
-    # cats = [["ev", "ev", "ts"], ["ev", "ts"]]
-    # time_step = 10000
-
     rh = target_shape[0] / shape[0]
     rw = target_shape[1] / shape[1]
 
-    time_window = args.time_window
-    #time_steps = [[1]]
-    event_volume_bins = args.event_volume_bins
-    time_step = 10000
-
-    #target_dirs = [os.path.join(target_dir, cat) for cat in ["normal", "long", "short", "ts_short", "ts_long"]]
-    #target_dirs = [os.path.join(target_dir, cat) for cat in ["normal"]]
-    #target_dir = os.path.join(target_dir, "normal")
+    time_windows = [125000, 1000000]
+    event_volume_bins = 5
 
 
     if not os.path.exists(raw_dir):
@@ -102,9 +91,12 @@ if __name__ == '__main__':
 
     for mode in ["train","val","test"]:
         file_dir = os.path.join(raw_dir, mode)
-        if not os.path.exists(file_dir):
-            os.makedirs(file_dir)
         root = file_dir
+        label_dir = os.path.join(label_dir, mode)
+        label_root = label_dir
+        target_root = os.path.join(target_dir, mode)
+        if not os.path.exists(target_root):
+            os.makedirs(target_root)
         try:
             files = os.listdir(file_dir)
         except Exception:
@@ -115,10 +107,6 @@ if __name__ == '__main__':
 
         pbar = tqdm.tqdm(total=len(files), unit='File', unit_scale=True)
 
-        target_root = os.path.join(target_dir, mode)
-    
-        if not os.path.exists(target_root):
-            os.makedirs(target_root)
         
         # Remove duplicates (.npy and .dat)
         # files = files[int(2*len(files)/3):]
@@ -129,7 +117,7 @@ if __name__ == '__main__':
             # if not file_name == "moorea_2019-06-26_test_02_000_1708500000_1768500000":
             #     continue
             event_file = os.path.join(root, file_name + '_td.dat')
-            bbox_file = os.path.join(root, file_name + '_bbox.npy')
+            bbox_file = os.path.join(label_root, file_name + '_bbox.npy')
             f_bbox = open(bbox_file, "rb")
             start, v_type, ev_size, size, dtype = npy_events_tools.parse_header(f_bbox)
             dat_bbox = np.fromfile(f_bbox, dtype=v_type, count=-1)
@@ -140,14 +128,11 @@ if __name__ == '__main__':
             f_event = psee_loader.PSEELoader(event_file)
 
             for bbox_count,unique_time in enumerate(unique_ts):
-                volume_save_path = os.path.join(target_root, file_name+"_"+str(unique_time)+".npy")
-                if os.path.exists(volume_save_path):
-                   continue
                 end_time = int(unique_time)
                 end_count = f_event.seek_time(end_time)
                 if end_count is None:
                     break
-                start_time = end_time - time_window
+                start_time = int(end_time - np.max(time_windows))
 
                 dat_event = f_event
                 
@@ -159,47 +144,34 @@ if __name__ == '__main__':
                     events = dat_event.load_delta_t(end_time)
 
                 del dat_event
-                events = torch.from_numpy(rfn.structured_to_unstructured(events)[:, [1, 2, 0, 3]].astype(float)).cuda()
+                events_ = torch.from_numpy(rfn.structured_to_unstructured(events)[:, [1, 2, 0, 3]].astype(float)).cuda()
 
-                events[:,2] = (events[:,2] - start_time) / time_window
+                for time_window in time_windows:
+                    events = events_[events_[:,2] > end_time - time_window].clone()
 
-                if target_shape[0] < shape[0]:
-                    events[:,0] = events[:,0] * rw
-                    events[:,1] = events[:,1] * rh
-                    volume = generate_agile_event_volume_cuda(events, target_shape, time_window, event_volume_bins)
-                else:
-                    volume = generate_agile_event_volume_cuda(events, shape, time_window, event_volume_bins)
-                    volume = torch.nn.functional.interpolate(volume[None,:,:,:], size = target_shape, mode='nearest')[0]
+                    events[:,2] = (events[:,2] - (end_time - time_window)) / time_window
 
-                volume = volume.cpu().numpy()
-                volume = np.where(volume > 255, 255, volume)
-                volume = volume.astype(np.uint8)
-                # locations, features = denseToSparse(volume)
+                    if target_shape[0] < shape[0]:
+                        events[:,0] = events[:,0] * rw
+                        events[:,1] = events[:,1] * rh
+                        volume = generate_agile_event_volume_cuda(events, target_shape, time_window, event_volume_bins)
+                    else:
+                        volume = generate_agile_event_volume_cuda(events, shape, time_window, event_volume_bins)
+                        volume = torch.nn.functional.interpolate(volume[None,:,:,:], size = target_shape, mode='nearest')[0]
 
-                # c, y, x = locations
-                # p = c%2
-                # c = (c/2).astype(int)
+                    volume = volume.cpu().numpy()
+                    volume = np.where(volume > 255, 255, volume)
+                    volume = volume.astype(np.uint8)
 
-                # volume = x.astype(np.uint32) + np.left_shift(y.astype(np.uint32), 10) + np.left_shift(c.astype(np.uint32), 19) + np.left_shift(p.astype(np.uint32), 22) + np.left_shift(features.astype(np.uint32), 23)
+                    save_dir = os.path.join(target_root,"long{0}".format(time_window))
+                    if not os.path.exists(save_dir):
+                        os.makedirs(save_dir)
+                    save_dir = os.path.join(save_dir, mode)
+                    if not os.path.exists(save_dir):
+                        os.makedirs(save_dir)
+                    
+                    volume.tofile(save_dir)
 
-                # x = np.bitwise_and(volume, 1023).astype(int)
-                # y = np.right_shift(np.bitwise_and(volume, 523264), 10).astype(int)
-                # c = np.right_shift(np.bitwise_and(volume, 3670016), 19).astype(int)
-                # p = np.right_shift(np.bitwise_and(volume, 4194304), 22).astype(int)
-                # features = np.right_shift(np.bitwise_and(volume, 2139095040), 23).astype(int)
-
-                # events = np.stack([x, y, c, p, features], axis=1)
-
-                volume.tofile(volume_save_path)
-                #features.tofile(volume_save_path_f)
-                #np.savez(volume_save_path, locations = locations, features = features)
-                #h5.create_dataset(str(unique_time)+"/locations", data=locations)
-                #h5.create_dataset(str(unique_time)+"/features", data=features)
                 torch.cuda.empty_cache()
-            #h5.close()
             pbar.update(1)
         pbar.close()
-        # if mode == "test":
-        #     np.save(os.path.join(root, 'total_volume_time.npy'),np.array(total_volume_time))
-        #     np.save(os.path.join(root, 'total_taf_time.npy'),np.array(total_taf_time))
-        #h5.close()
