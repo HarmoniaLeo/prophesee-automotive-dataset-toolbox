@@ -159,10 +159,10 @@ if __name__ == '__main__':
         pbar = tqdm.tqdm(total=len(files), unit='File', unit_scale=True)
 
         for i_file, file_name in enumerate(files):
-            if not file_name == "17-04-13_15-05-43_3599500000_3659500000":
-                continue
-            # if not file_name == "moorea_2019-06-26_test_02_000_976500000_1036500000":
+            # if not file_name == "17-04-13_15-05-43_3599500000_3659500000":
             #     continue
+            if not file_name == "moorea_2019-06-26_test_02_000_976500000_1036500000":
+                continue
             event_file = os.path.join(root, file_name + '_td.dat')
             bbox_file = os.path.join(label_root, file_name + '_bbox.npy')
             f_bbox = open(bbox_file, "rb")
