@@ -257,7 +257,7 @@ def visualizeE2vid(volume,gt,dt,filename,path,time_stamp_end,tol,LABELMAP,suffix
         draw_bboxes(img_s,dt,1,LABELMAP)
         path_t = os.path.join(path,filename+"_{0}_".format(int(time_stamp_end)) + suffix + "_e2vid_result.png")
     else:
-        path_t = os.path.join(path,filename+"_{0}_".format(int(time_stamp_end)) + suffix + "_e2vid_png")
+        path_t = os.path.join(path,filename+"_{0}_".format(int(time_stamp_end)) + suffix + "_e2vid.png")
     cv2.imwrite(path_t,img_s)
 
 def visualizeVolume(volume,gt,dt,filename,path,time_stamp_end,tol,LABELMAP,suffix):
