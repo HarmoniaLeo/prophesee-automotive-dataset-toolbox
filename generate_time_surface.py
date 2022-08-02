@@ -152,7 +152,10 @@ if __name__ == '__main__':
                 time_upper_bound = unique_time
                 count_upper_bound = end_count
 
+                print(events[:, 2].min())
+
                 events[:, 2] = events[:, 2] - unique_time
+                
                 volume = generate_leaky_cuda(events, shape, lamdas)
 
                 volume = torch.nn.functional.interpolate(volume[None,:,:,:], size = target_shape, mode='nearest')[0]
