@@ -235,7 +235,7 @@ if __name__ == '__main__':
                     t_max = start_time + (iter + 1) * events_window_abin
                     t_min = start_time + iter * events_window_abin
                     events_[:,2] = (events_[:, 2] - t_min)/(t_max - t_min + 1e-8)
-                    volume, memory = generate_taf_cuda(events_, shape, memory, event_volume_bins, args.filter)
+                    volume, memory = generate_taf_cuda(events_, shape, memory, event_volume_bins)
                 volume = torch.nn.functional.interpolate(volume[None,:,:,:], size = target_shape, mode='nearest')[0]
                 volume = volume.view(event_volume_bins, 2, target_shape[0], target_shape[1])
                 volume = leaky_transform(volume)
