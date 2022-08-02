@@ -10,15 +10,15 @@ import pandas as pd
 import torch
 sns.set_style("darkgrid")
 
-def generate_event_volume(data_path, item, time_stamp_end, shape, ori_shape, ecd, volume_bins, data_folder):
+def generate_event_volume(ecd_file, shape, ori_shape, volume_bins):
 
-    ecd_file = os.path.join(os.path.join(os.path.join(data_path,ecd),data_folder), item+ "_" + str(time_stamp_end) + ".npy")
+    
     ecds = np.fromfile(ecd_file, dtype=np.uint8).reshape(1, int(volume_bins * 2), shape[0], shape[1]).astype(np.float32)
     ecds = torch.from_numpy(ecds)
     ecds = torch.nn.functional.interpolate(ecds, size = ori_shape, mode='nearest')[0]
     return ecds.numpy()
 
-def generate_optflow(data_path, item, time_stamp_end, shape, ori_shape, ecd, volume_bins):
+def generate_optflow(item, time_stamp_end):
     return np.load(os.path.join("optical_flow_buffer",item + "_{0}.npy".format(time_stamp_end)))
 
 LABELMAP = ["car", "pedestrian"]
@@ -379,16 +379,22 @@ if __name__ == '__main__':
     f_bbox.close()
     #print(target)
 
+
     if datatype == "opticalflow":
-        ecds = generate_optflow(data_path, item, time_stamp_end, shape, ori_shape, args.ecd, args.volume_bins)
+        ecds = generate_optflow(item, time_stamp_end)
         extract_flow(ecds,dat_bbox,dt,item,target_path,time_stamp_end,args.tol,LABELMAP,suffix)
     else:
-        ecds = generate_event_volume(data_path, item, time_stamp_end, shape, ori_shape, args.ecd, args.volume_bins,data_folder)
+        
         if datatype == "taf":
+            ecd_file = os.path.join(os.path.join(os.path.join(data_path,data_folder),args.ecd), item+ "_" + str(time_stamp_end) + ".npy")
+            ecds = generate_event_volume(ecd_file, item, time_stamp_end, shape, ori_shape, args.volume_bins)
             visualizeTaf(ecds,dat_bbox,dt,item,target_path,time_stamp_end,args.tol,LABELMAP,suffix)
-        elif datatype == "eventvolume":
-            visualizeVolume(ecds,dat_bbox,dt,item,target_path,time_stamp_end,args.tol,LABELMAP,suffix)
-        elif datatype == "timesurface":
-            visualizeTimeSurface(ecds,dat_bbox,dt,item,target_path,time_stamp_end,args.tol,LABELMAP,suffix)
-        elif datatype == "e2vid":
-            visualizeE2vid(ecds,dat_bbox,dt,item,target_path,time_stamp_end,args.tol,LABELMAP,suffix)
+        else:
+            ecd_file = os.path.join(os.path.join(os.path.join(data_path,args.ecd),data_folder), item+ "_" + str(time_stamp_end) + ".npy")
+            ecds = generate_event_volume(ecd_file, item, time_stamp_end, shape, ori_shape, args.volume_bins)
+            if datatype == "eventvolume":
+                visualizeVolume(ecds,dat_bbox,dt,item,target_path,time_stamp_end,args.tol,LABELMAP,suffix)
+            elif datatype == "timesurface":
+                visualizeTimeSurface(ecds,dat_bbox,dt,item,target_path,time_stamp_end,args.tol,LABELMAP,suffix)
+            elif datatype == "e2vid":
+                visualizeE2vid(ecds,dat_bbox,dt,item,target_path,time_stamp_end,args.tol,LABELMAP,suffix)

@@ -83,9 +83,6 @@ if __name__ == '__main__':
     time_windows = [125000, 1000000]
     event_volume_bins = 5
 
-
-    if not os.path.exists(raw_dir):
-        os.makedirs(raw_dir)
     if not os.path.exists(target_dir):
         os.makedirs(target_dir)
 
@@ -93,9 +90,6 @@ if __name__ == '__main__':
         file_dir = os.path.join(raw_dir, mode)
         root = file_dir
         label_root = os.path.join(label_dir, mode)
-        target_root = os.path.join(target_dir, mode)
-        if not os.path.exists(target_root):
-            os.makedirs(target_root)
         try:
             files = os.listdir(file_dir)
         except Exception:
@@ -162,10 +156,11 @@ if __name__ == '__main__':
                     volume = np.where(volume > 255, 255, volume)
                     volume = volume.astype(np.uint8)
 
-                    save_dir = os.path.join(target_root,"long{0}".format(time_window))
-                    if not os.path.exists(save_dir):
-                        os.makedirs(save_dir)
-                    save_dir = os.path.join(save_dir, mode)
+                    target_root = os.path.join(target_dir, "long{0}".format(time_window))
+                    if not os.path.exists(target_root):
+                        os.makedirs(target_root)
+
+                    save_dir = os.path.join(target_root,mode)
                     if not os.path.exists(save_dir):
                         os.makedirs(save_dir)
                     
