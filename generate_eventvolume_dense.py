@@ -138,6 +138,7 @@ if __name__ == '__main__':
 
                 del dat_event
                 events_ = torch.from_numpy(rfn.structured_to_unstructured(events)[:, [1, 2, 0, 3]].astype(float)).cuda()
+                events_ = events_[-10000000:]
 
                 for time_window in time_windows:
                     events = events_[events_[:,2] > end_time - time_window]
