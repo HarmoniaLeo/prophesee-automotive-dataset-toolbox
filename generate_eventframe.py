@@ -156,10 +156,10 @@ if __name__ == '__main__':
 
                 events = dat_event.load_n_events(int(end_count - start_count))
                 del dat_event
-                events = rfn.structured_to_unstructured(events)[:, [0, 1, 2, 3]].astype(float)
+                events = torch.from_numpy(rfn.structured_to_unstructured(events)[:, [1, 2, 0, 3]].astype(float)).cuda()
 
                 if not memory is None:
-                    events = np.concatenate([memory, events])
+                    events = torch.cat([memory, events])
 
                 memory = events[-np.max(events_windows):]
                 count_upper_bound = end_count
