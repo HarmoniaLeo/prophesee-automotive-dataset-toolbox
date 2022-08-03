@@ -258,6 +258,18 @@ def visualizeE2vid(volume,gt,dt,filename,path,time_stamp_end,tol,LABELMAP,suffix
         path_t = os.path.join(path,filename+"_{0}".format(int(time_stamp_end)) + "_e2vid.png")
     cv2.imwrite(path_t,img_s)
 
+def visualizeFrame(volume,gt,dt,filename,path,time_stamp_end,tol,LABELMAP,suffix):
+    img_s = volume[0]
+    gt = gt[gt['t']==time_stamp_end]
+    draw_bboxes(img_s,gt,0,LABELMAP)
+    if not (dt is None):
+        dt = dt[(dt['t']>time_stamp_end-tol)&(dt['t']<time_stamp_end+tol)]
+        draw_bboxes(img_s,dt,1,LABELMAP)
+        path_t = os.path.join(path,filename+"_{0}_".format(int(time_stamp_end)) + suffix +"_frame_result.png")
+    else:
+        path_t = os.path.join(path,filename+"_{0}_".format(int(time_stamp_end)) + suffix +"_frame.png")
+    cv2.imwrite(path_t,img_s)
+
 def visualizeVolume(volume,gt,dt,filename,path,time_stamp_end,tol,LABELMAP,suffix):
     img = 127 * np.ones((volume.shape[1], volume.shape[2], 3), dtype=np.uint8)
     c_p = volume[5:]
@@ -396,3 +408,5 @@ if __name__ == '__main__':
                 visualizeTimeSurface(ecds,dat_bbox,dt,item,target_path,time_stamp_end,args.tol,LABELMAP,suffix)
             elif datatype == "e2vid":
                 visualizeE2vid(ecds,dat_bbox,dt,item,target_path,time_stamp_end,args.tol,LABELMAP,suffix)
+            elif datatype == "frame":
+                visualizeFrame(ecds,dat_bbox,dt,item,target_path,time_stamp_end,args.tol,LABELMAP,suffix)
