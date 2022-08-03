@@ -119,7 +119,7 @@ if __name__ == '__main__':
     target_dir = args.target_dir
     dataset = args.dataset
 
-    min_event_count = 50000000
+    min_event_count = 10000000
     if dataset == "gen4":
         # min_event_count = 800000
         shape = [720,1280]
