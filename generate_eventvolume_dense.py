@@ -80,7 +80,7 @@ if __name__ == '__main__':
     rh = target_shape[0] / shape[0]
     rw = target_shape[1] / shape[1]
 
-    time_windows = [125000, 1000000]
+    time_windows = [1000000]
     event_volume_bins = 5
 
     if not os.path.exists(target_dir):
@@ -140,7 +140,7 @@ if __name__ == '__main__':
                 events_ = torch.from_numpy(rfn.structured_to_unstructured(events)[:, [1, 2, 0, 3]].astype(float)).cuda()
 
                 for time_window in time_windows:
-                    events = events_[events_[:,2] > end_time - time_window].clone()
+                    events = events_[events_[:,2] > end_time - time_window]
 
                     events[:,2] = (events[:,2] - (end_time - time_window)) / time_window
 
