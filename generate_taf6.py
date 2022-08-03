@@ -192,9 +192,8 @@ if __name__ == '__main__':
             #min_event_count = f_event.event_count()
 
             for bbox_count,unique_time in enumerate(unique_ts):
-                print(os.path.join(os.path.join(target_root,"bins{0}".format(int(event_volume_bins/2))),file_name+"_"+str(unique_time)+".npy"))
-                raise Exception("break")
-                if os.path.exists() and os.path.exists(os.path.join(os.path.join(target_root,"bins{0}".format(event_volume_bins)),file_name+"_"+str(unique_time)+".npy")):
+                if os.path.exists(os.path.join(os.path.join(target_root,"bins{0}".format(int(event_volume_bins/2))),file_name+"_"+str(unique_time)+".npy")) and os.path.exists(os.path.join(os.path.join(target_root,"bins{0}".format(event_volume_bins)),file_name+"_"+str(unique_time)+".npy")):
+                    pbar.update(1)
                     continue
                 end_time = int(unique_time)
                 end_count = f_event.seek_time(end_time)
