@@ -122,11 +122,6 @@ if __name__ == '__main__':
             # if not file_name == "moorea_2019-06-26_test_02_000_976500000_1036500000":
             #     continue
 
-            model = load_model(args.path_to_model)
-            device = torch.device('cuda:0')
-            model = model.to(device)
-            model.eval()
-            reconstructor = ImageReconstructor(model, shape[0], shape[1], model.num_bins, args)
             event_file = os.path.join(root, file_name + '_td.dat')
             bbox_file = os.path.join(label_root, file_name + '_bbox.npy')
             #h5 = h5py.File(volume_save_path, "w")
