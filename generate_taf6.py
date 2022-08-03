@@ -192,9 +192,9 @@ if __name__ == '__main__':
             #min_event_count = f_event.event_count()
 
             for bbox_count,unique_time in enumerate(unique_ts):
-                if os.path.exists(os.path.join(os.path.join(target_root,"bins{0}".format(int(event_volume_bins/2))),file_name+"_"+str(unique_time)+".npy")) and os.path.exists(os.path.join(os.path.join(target_root,"bins{0}".format(event_volume_bins)),file_name+"_"+str(unique_time)+".npy")):
-                    pbar.update(1)
-                    continue
+                # if os.path.exists(os.path.join(os.path.join(target_root,"bins{0}".format(int(event_volume_bins/2))),file_name+"_"+str(unique_time)+".npy")) and os.path.exists(os.path.join(os.path.join(target_root,"bins{0}".format(event_volume_bins)),file_name+"_"+str(unique_time)+".npy")):
+                #     pbar.update(1)
+                #     continue
                 end_time = int(unique_time)
                 end_count = f_event.seek_time(end_time)
                 if end_count is None:
@@ -237,7 +237,6 @@ if __name__ == '__main__':
 
                 bins = math.ceil((end_time - start_time) / events_window_abin)
                 
-                print(len(events),events[:,2].max()-events[:,2].min())
                 for i in range(bins):
                     z = torch.where((events[:,2] >= start_time + i * events_window_abin)&(events[:,2] <= start_time + (i + 1) * events_window_abin), torch.zeros_like(events[:,2])+i, z)
                 events = torch.cat([events,z[:,None]], dim=1)
