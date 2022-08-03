@@ -16,7 +16,7 @@ import argparse
 import torch.nn
 
 
-def generate_eventframe((events, shape):
+def generate_eventframe(events, shape):
     """
     Events: N x 4, where cols are x, y, t, polarity, and polarity is in {0,1}. x and y correspond to image
     coordinates u and v.
