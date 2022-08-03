@@ -15,6 +15,53 @@ import math
 import argparse
 import torch.nn
 
+
+def generate_eventframe((events, shape):
+    """
+    Events: N x 4, where cols are x, y, t, polarity, and polarity is in {0,1}. x and y correspond to image
+    coordinates u and v.
+    """
+    H, W = shape
+    x, y, t, p = events.unbind(-1)
+
+    x, y, p = x.long(), y.long(), p.long()
+
+    img = torch.zeros((H * W * 2,)).float().to(x.device)
+
+    img.index_add_(0, 2 * x + 2 * W * y + p, torch.zeros_like(x).float()+0.05)
+
+    img = torch.where(img > 1, torch.ones_like(img).float(), img)
+
+    histogram = img.view((H, W, 2)).permute(2, 0, 1).contiguous()
+
+    return histogram * 255
+
+def generate_frame(events, shape, events_window = 50000, volume_bins=5):
+    H, W = shape
+
+    x, y, t, p = events.unbind(-1)
+
+    x, y, p = x.long(), y.long(), p.long()
+
+    t_star = (volume_bins * t.float())[:,None,None]
+    channels = volume_bins
+
+    adder = torch.stack([torch.arange(channels),torch.arange(channels)],dim = 1).to(x.device)[None,:,:] + 1   #1, 2, 2
+    adder = (1 - torch.abs(adder-t_star)) * torch.stack([p,1 - p],dim=1)[:,None,:]  #n, 2, 2
+    adder = torch.where(adder>=0,adder,torch.zeros_like(adder)).view(adder.shape[0], channels * 2) #n, 4
+
+    img = torch.zeros((H * W, volume_bins * 2)).float().to(x.device)
+    img.index_add_(0, x + W * y, adder)
+    img = img.view(H * W, volume_bins, 2)
+
+    img_viewed = img.view((H, W, img.shape[1] * 2)).permute(2, 0, 1).contiguous()
+
+    # print(torch.quantile(img_viewed[img_viewed>0],0.95))
+
+    img_viewed = img_viewed / 5 * 255
+
+    return img_viewed
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(
     description='visualize one or several event files along with their boxes')
