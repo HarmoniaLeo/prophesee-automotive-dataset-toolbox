@@ -164,7 +164,7 @@ if __name__ == '__main__':
                     if not os.path.exists(save_dir):
                         os.makedirs(save_dir)
                     
-                    volume.tofile(save_dir)
+                    volume.tofile(os.path.join(save_dir,file_name+"_"+str(unique_time)+".npy"))
 
                 torch.cuda.empty_cache()
             pbar.update(1)
