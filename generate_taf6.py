@@ -237,7 +237,7 @@ if __name__ == '__main__':
 
                 bins = math.ceil((end_time - start_time) / events_window_abin)
                 
-                print(len(events),events[:,2].max(),events[:,2].min())
+                print(len(events),events[:,2].max()-events[:,2].min())
                 for i in range(bins):
                     z = torch.where((events[:,2] >= start_time + i * events_window_abin)&(events[:,2] <= start_time + (i + 1) * events_window_abin), torch.zeros_like(events[:,2])+i, z)
                 events = torch.cat([events,z[:,None]], dim=1)
