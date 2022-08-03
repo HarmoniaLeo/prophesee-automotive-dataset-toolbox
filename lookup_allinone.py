@@ -338,7 +338,7 @@ if __name__ == '__main__':
     target_path = 'result_allinone'
     if not os.path.exists(target_path):
         os.mkdir(target_path)
-    data_folder = 'train'
+    data_folder = 'test'
     item = args.item
     time_stamp_end = args.end
 
