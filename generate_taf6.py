@@ -136,6 +136,9 @@ if __name__ == '__main__':
     event_volume_bins = 8
     events_window = events_window_abin * event_volume_bins
 
+    rh = target_shape[0] / shape[0]
+    rw = target_shape[1] / shape[1]
+
     if not os.path.exists(target_dir):
         os.makedirs(target_dir)
 
@@ -169,8 +172,8 @@ if __name__ == '__main__':
         pbar = tqdm.tqdm(total=total_length, unit='File', unit_scale=True)
 
         for i_file, file_name in enumerate(files):
-            # if not file_name == "17-04-13_15-05-43_3599500000_3659500000":
-            #     continue
+            if not file_name == "17-04-13_15-05-43_3599500000_3659500000":
+                continue
             # if not file_name == "moorea_2019-06-26_test_02_000_1708500000_1768500000":
             #     continue
             event_file = os.path.join(root, file_name + '_td.dat')
@@ -241,15 +244,22 @@ if __name__ == '__main__':
                     z = torch.where((events[:,2] >= start_time + i * events_window_abin)&(events[:,2] <= start_time + (i + 1) * events_window_abin), torch.zeros_like(events[:,2])+i, z)
                 events = torch.cat([events,z[:,None]], dim=1)
 
-                if start_time > time_upperbound:
-                    memory = torch.zeros((shape[0], shape[1], 2, event_volume_bins)).cuda() - 6000
                 for iter in range(bins):
                     events_ = events[events[...,4] == iter]
                     t_max = start_time + (iter + 1) * events_window_abin
                     t_min = start_time + iter * events_window_abin
                     events_[:,2] = (events_[:, 2] - t_min)/(t_max - t_min + 1e-8)
-                    volume, memory = generate_taf_cuda(events_, shape, memory, event_volume_bins)
-                volume = torch.nn.functional.interpolate(volume[None,:,:,:], size = target_shape, mode='nearest')[0]
+                    if target_shape[0] < shape[0]:
+                        if start_time > time_upperbound:
+                            memory = torch.zeros((target_shape[0], target_shape[1], 2, event_volume_bins)).cuda() - 6000
+                        events_[:,0] = events_[:,0] * rw
+                        events_[:,1] = events_[:,1] * rh
+                        volume, memory = generate_taf_cuda(events_, target_shape, memory, event_volume_bins)
+                    else:
+                        if start_time > time_upperbound:
+                            memory = torch.zeros((shape[0], shape[1], 2, event_volume_bins)).cuda() - 6000
+                        volume, memory = generate_taf_cuda(events_, shape, memory, event_volume_bins)
+                        volume = torch.nn.functional.interpolate(volume[None,:,:,:], size = target_shape, mode='nearest')[0]
                 volume = volume.view(event_volume_bins, 2, target_shape[0], target_shape[1])
                 volume = leaky_transform(volume)
                 ecd = volume.cpu().numpy().copy()

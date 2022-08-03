@@ -153,10 +153,15 @@ if __name__ == '__main__':
                 count_upper_bound = end_count
 
                 events[:, 2] = events[:, 2] - unique_time
-                
-                volume = generate_leaky_cuda(events, shape, lamdas)
 
-                volume = torch.nn.functional.interpolate(volume[None,:,:,:], size = target_shape, mode='nearest')[0]
+                if target_shape[0] < shape[0]:
+                    events[:,0] = events[:,0] * rw
+                    events[:,1] = events[:,1] * rh
+                    volume = generate_leaky_cuda(events, target_shape, lamdas)
+                else:
+                    volume = generate_leaky_cuda(events, shape, lamdas)
+                    volume = torch.nn.functional.interpolate(volume[None,:,:,:], size = target_shape, mode='nearest')[0]
+
                 volume = volume.view(len(lamdas), 2, target_shape[0], target_shape[1])
                 for j,i in enumerate(lamdas):
                     save_dir = os.path.join(target_dir,"leaky{0}".format(i))

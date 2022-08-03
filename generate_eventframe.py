@@ -93,6 +93,9 @@ if __name__ == '__main__':
     #events_window = 500000
     events_windows = [200000, 100000, 50000, 25000, 10000]
 
+    rh = target_shape[0] / shape[0]
+    rw = target_shape[1] / shape[1]
+
     if not os.path.exists(target_dir):
         os.makedirs(target_dir)
 
