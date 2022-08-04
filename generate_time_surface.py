@@ -22,7 +22,9 @@ def taf_cuda(x, y, t, p, shape, lamdas, memory, now):
     t_img = torch.zeros((2, H, W)).float().to(x.device) - 60000000
     t_img.index_put_(indices= [p, y, x], values= t)
 
-    t_img = torch.where(t_img>memory, t_img, memory)
+    if not memory is None:
+        t_img = torch.where(t_img>memory, t_img, memory)
+        
     memory = t_img
     t_img = t_img - now
 
