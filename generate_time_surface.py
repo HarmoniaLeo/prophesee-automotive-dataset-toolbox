@@ -19,17 +19,11 @@ import torch.nn
 def taf_cuda(x, y, t, p, shape, lamdas, memory, now):
     H, W = shape
 
-    print(t.min(),t.max(),y.min(),y.max(),x.min(),x.max())
-
     t_img = torch.zeros((2, H, W)).float().to(x.device) + now - 5000000
     t_img.index_put_(indices= [p, y, x], values= t)
 
-    print(t_img.min(),t_img.max())
-
     if not memory is None:
         t_img = torch.where(t_img>memory, t_img, memory)
-
-    print(t_img.min(),t_img.max())
 
     memory = t_img
     t_img = t_img - now
@@ -40,14 +34,14 @@ def taf_cuda(x, y, t, p, shape, lamdas, memory, now):
         t_imgs.append(t_img_)
     ecd = torch.stack(t_imgs, 0)
 
-    print(ecd.min(),ecd.max())
-
     ecd_viewed = ecd.view(len(lamdas) * 2, H, W) * 255
 
     #print(generate_volume_time, filter_time, generate_encode_time)
     return ecd_viewed, memory
 
 def generate_leaky_cuda(events, shape, lamdas, memory, now):
+    events = events[(events[:,0]<shape[1])&(events[:,1]<shape[0])]
+
     x, y, t, p = events.unbind(-1)
 
     x, y, t, p = x.long(), y.long(), t.float(), p.long()
