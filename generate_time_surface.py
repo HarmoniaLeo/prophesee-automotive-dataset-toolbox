@@ -19,7 +19,7 @@ import torch.nn
 def taf_cuda(x, y, t, p, shape, lamdas, memory, now):
     H, W = shape
 
-    t_img = torch.zeros((2, H, W)).float().to(x.device) - 5000000
+    t_img = torch.zeros((2, H, W)).float().to(x.device) + now - 5000000
     t_img.index_put_(indices= [p, y, x], values= t)
 
     if not memory is None:
