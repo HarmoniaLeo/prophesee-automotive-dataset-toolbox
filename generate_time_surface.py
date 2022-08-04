@@ -106,8 +106,6 @@ if __name__ == '__main__':
         pbar = tqdm.tqdm(total=len(files), unit='File', unit_scale=True)
 
         for i_file, file_name in enumerate(files):
-            if (i_file == 3) and (mode == "train"):
-                continue
             # if not file_name == "17-04-13_15-05-43_3599500000_3659500000":
             #     continue
             # if not file_name == "moorea_2019-06-26_test_02_000_1708500000_1768500000":
@@ -157,6 +155,9 @@ if __name__ == '__main__':
                 time_upper_bound = unique_time
                 count_upper_bound = end_count
 
+                if not memory is None:
+                    print(memory.max(),memory.min())
+
                 if target_shape[0] < shape[0]:
                     events[:,0] = events[:,0] * rw
                     events[:,1] = events[:,1] * rh
@@ -164,6 +165,9 @@ if __name__ == '__main__':
                 else:
                     volume, memory = generate_leaky_cuda(events, shape, lamdas, memory, unique_time)
                     volume = torch.nn.functional.interpolate(volume[None,:,:,:], size = target_shape, mode='nearest')[0]
+                
+                print(volume.max(),volume.min())
+                print(memory.max(),memory.min())
 
                 volume = volume.view(len(lamdas), 2, target_shape[0], target_shape[1])
                 for j,i in enumerate(lamdas):
@@ -175,6 +179,8 @@ if __name__ == '__main__':
                         os.makedirs(save_dir)
                     ecd = volume[j].cpu().numpy().copy()
                     ecd.astype(np.uint8).tofile(os.path.join(save_dir,file_name+"_"+str(unique_time)+".npy"))
+                
+                print(volume.max(),volume.min())
                             
                 torch.cuda.empty_cache()
             #h5.close()
