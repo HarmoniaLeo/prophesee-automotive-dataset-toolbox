@@ -163,6 +163,7 @@ if __name__ == '__main__':
                     volume = torch.nn.functional.interpolate(volume[None,:,:,:], size = target_shape, mode='nearest')[0]
 
                 volume = volume.view(len(lamdas), 2, target_shape[0], target_shape[1])
+                print(volume.shape)
                 for j,i in enumerate(lamdas):
                     save_dir = os.path.join(target_dir,"leaky{0}".format(i))
                     if not os.path.exists(save_dir):
