@@ -19,6 +19,8 @@ import torch.nn
 def taf_cuda(x, y, t, p, shape, lamdas, memory, now):
     H, W = shape
 
+    print(now, t.min(), t.max(), memory.min(),memory.max())
+
     t_img = torch.zeros((2, H, W)).float().to(x.device) + now - 5000000
     t_img.index_put_(indices= [p, y, x], values= t)
 
@@ -30,9 +32,7 @@ def taf_cuda(x, y, t, p, shape, lamdas, memory, now):
 
     t_imgs = []
     for lamda in lamdas:
-        print(t_img.min(),t_img.max())
         t_img_ = torch.exp(lamda * t_img)
-        print(t_img_.min(),t_img_.max())
         t_imgs.append(t_img_)
     ecd = torch.stack(t_imgs, 0)
 
