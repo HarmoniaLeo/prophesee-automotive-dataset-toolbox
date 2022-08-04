@@ -171,7 +171,7 @@ if __name__ == '__main__':
                     save_dir = os.path.join(save_dir, mode)
                     if not os.path.exists(save_dir):
                         os.makedirs(save_dir)
-                    
+                    print(j)
                     ecd = volume[j].cpu().numpy().copy()
                     
                     ecd.astype(np.uint8).tofile(os.path.join(save_dir,file_name+"_"+str(unique_time)+".npy"))
