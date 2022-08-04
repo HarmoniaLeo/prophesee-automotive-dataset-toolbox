@@ -24,7 +24,7 @@ def taf_cuda(x, y, t, p, shape, lamdas, memory, now):
 
     if not memory is None:
         t_img = torch.where(t_img>memory, t_img, memory)
-        
+
     memory = t_img
     t_img = t_img - now
 
@@ -44,7 +44,7 @@ def generate_leaky_cuda(events, shape, lamdas, memory, now):
 
     x, y, t, p = x.long(), y.long(), t.float(), p.long()
     
-    histogram_ecd = taf_cuda(x, y, t, p, shape, lamdas, memory, now)
+    histogram_ecd, memory = taf_cuda(x, y, t, p, shape, lamdas, memory, now)
 
     return histogram_ecd, memory
 
