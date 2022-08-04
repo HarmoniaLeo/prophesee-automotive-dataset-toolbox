@@ -82,6 +82,7 @@ if __name__ == '__main__':
         # min_event_count = 800000
         shape = [720,1280]
         target_shape = [512, 640]
+        events_windows = [800000, 400000, 200000, 100000, 40000]
     elif dataset == "kitti":
         # min_event_count = 800000
         shape = [375,1242]
@@ -90,8 +91,9 @@ if __name__ == '__main__':
         # min_event_count = 200000
         shape = [240,304]
         target_shape = [256, 320]
+        events_windows = [200000, 100000, 50000, 25000, 10000]
     #events_window = 500000
-    events_windows = [200000, 100000, 50000, 25000, 10000]
+    
 
     rh = target_shape[0] / shape[0]
     rw = target_shape[1] / shape[1]

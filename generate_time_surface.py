@@ -73,6 +73,8 @@ if __name__ == '__main__':
     if not os.path.exists(target_dir):
         os.makedirs(target_dir)
 
+    rh = target_shape[0] / shape[0]
+    rw = target_shape[1] / shape[1]
 
     lamdas = [0.00001, 0.000005, 0.0000025, 0.000001]
     #lamdas = [0.000001]
@@ -99,8 +101,8 @@ if __name__ == '__main__':
         for i_file, file_name in enumerate(files):
             # if not file_name == "17-04-13_15-05-43_3599500000_3659500000":
             #     continue
-            # if not file_name == "moorea_2019-06-26_test_02_000_976500000_1036500000":
-            #     continue
+            if not file_name == "moorea_2019-06-26_test_02_000_976500000_1036500000":
+                continue
             event_file = os.path.join(root, file_name + '_td.dat')
             bbox_file = os.path.join(label_root, file_name + '_bbox.npy')
             #h5 = h5py.File(volume_save_path, "w")
