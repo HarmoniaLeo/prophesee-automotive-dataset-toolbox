@@ -23,11 +23,6 @@ def taf_cuda(x, y, t, p, shape, lamdas, memory, now):
     t_img = torch.zeros((2, H, W)).float().to(x.device) + now - 5000000
     t_img.index_put_(indices= [p, y, x], values= t)
 
-    try:
-        min = memory.min()
-    except Exception:
-        memory = None
-
     if not memory is None:
         t_img = torch.where(t_img>memory, t_img, memory)
 
@@ -176,9 +171,11 @@ if __name__ == '__main__':
                     save_dir = os.path.join(save_dir, mode)
                     if not os.path.exists(save_dir):
                         os.makedirs(save_dir)
-                    ecd = volume[j].cpu().numpy().copy()
-                    
-                    ecd.astype(np.uint8).tofile(os.path.join(save_dir,file_name+"_"+str(unique_time)+".npy"))
+                    try:
+                        ecd = volume[j].cpu().numpy().copy()
+                        ecd.astype(np.uint8).tofile(os.path.join(save_dir,file_name+"_"+str(unique_time)+".npy"))
+                    except Exception:
+                        memory = None
                             
                 torch.cuda.empty_cache()
             #h5.close()
