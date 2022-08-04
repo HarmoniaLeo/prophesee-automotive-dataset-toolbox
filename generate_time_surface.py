@@ -101,8 +101,7 @@ if __name__ == '__main__':
         for i_file, file_name in enumerate(files):
             # if not file_name == "17-04-13_15-05-43_3599500000_3659500000":
             #     continue
-            print(file_name)
-            if not file_name == "moorea_2019-06-26_test_02_000_976500000_1036500000":
+            if not file_name == "moorea_2019-06-26_test_02_000_1708500000_1768500000":
                 continue
             event_file = os.path.join(root, file_name + '_td.dat')
             bbox_file = os.path.join(label_root, file_name + '_bbox.npy')
@@ -126,7 +125,7 @@ if __name__ == '__main__':
                 end_count = f_event.seek_time(end_time)
                 if end_count is None:
                     continue
-                start_time = int(f_event.current_time)
+                start_time = int(f_event.current_time) 
                 start_time = end_time - events_window
                 if start_time < 0:
                     start_count = f_event.seek_time(0)
