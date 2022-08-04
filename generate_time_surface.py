@@ -19,12 +19,17 @@ import torch.nn
 def taf_cuda(x, y, t, p, shape, lamdas, memory, now):
     H, W = shape
 
+    print(t.min(),t.max())
 
     t_img = torch.zeros((2, H, W)).float().to(x.device) + now - 5000000
     t_img.index_put_(indices= [p, y, x], values= t)
 
+    print(t_img.min(),t_img.max())
+
     if not memory is None:
         t_img = torch.where(t_img>memory, t_img, memory)
+
+    print(t_img.min(),t_img.max())
 
     memory = t_img
     t_img = t_img - now
@@ -34,6 +39,8 @@ def taf_cuda(x, y, t, p, shape, lamdas, memory, now):
         t_img_ = torch.exp(lamda * t_img)
         t_imgs.append(t_img_)
     ecd = torch.stack(t_imgs, 0)
+
+    print(ecd.min(),ecd.max())
 
     ecd_viewed = ecd.view(len(lamdas) * 2, H, W) * 255
 
@@ -155,8 +162,6 @@ if __name__ == '__main__':
                 time_upper_bound = unique_time
                 count_upper_bound = end_count
 
-                if not memory is None:
-                    print(memory.max(),memory.min())
 
                 if target_shape[0] < shape[0]:
                     events[:,0] = events[:,0] * rw
@@ -165,9 +170,6 @@ if __name__ == '__main__':
                 else:
                     volume, memory = generate_leaky_cuda(events, shape, lamdas, memory, unique_time)
                     volume = torch.nn.functional.interpolate(volume[None,:,:,:], size = target_shape, mode='nearest')[0]
-                
-                print(volume.max(),volume.min())
-                print(memory.max(),memory.min())
 
                 volume = volume.view(len(lamdas), 2, target_shape[0], target_shape[1])
                 for j,i in enumerate(lamdas):
@@ -180,7 +182,6 @@ if __name__ == '__main__':
                     ecd = volume[j].cpu().numpy().copy()
                     ecd.astype(np.uint8).tofile(os.path.join(save_dir,file_name+"_"+str(unique_time)+".npy"))
                 
-                print(volume.max(),volume.min())
                             
                 torch.cuda.empty_cache()
             #h5.close()
