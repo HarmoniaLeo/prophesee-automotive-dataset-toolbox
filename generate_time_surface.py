@@ -146,10 +146,9 @@ if __name__ == '__main__':
                 events = torch.from_numpy(rfn.structured_to_unstructured(events)[:, [1, 2, 0, 3]].astype(float)).cuda()
 
                 reserve = len(events)
-                print(reserve)
-                memory = memory[(-10000000+reserve):]
 
                 if not memory is None:
+                    memory = memory[(-10000000+reserve):]
                     events = torch.cat([memory, events])
                 events = events[-10000000:]
                 
