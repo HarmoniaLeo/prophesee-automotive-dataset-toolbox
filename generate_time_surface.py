@@ -144,6 +144,7 @@ if __name__ == '__main__':
                 events = dat_event.load_n_events(int(end_count - start_count))
                 del dat_event
                 events = torch.from_numpy(rfn.structured_to_unstructured(events)[:, [1, 2, 0, 3]].astype(float)).cuda()
+                events = events[-10000000:]
 
                 if not memory is None:
                     events = torch.cat([memory, events])
