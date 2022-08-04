@@ -30,7 +30,9 @@ def taf_cuda(x, y, t, p, shape, lamdas, memory, now):
 
     t_imgs = []
     for lamda in lamdas:
+        print(t_img.min(),t_img.max())
         t_img_ = torch.exp(lamda * t_img)
+        print(t_img_.min(),t_img_.max())
         t_imgs.append(t_img_)
     ecd = torch.stack(t_imgs, 0)
 
