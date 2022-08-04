@@ -19,7 +19,7 @@ import torch.nn
 def taf_cuda(x, y, t, p, shape, lamdas, memory, now):
     H, W = shape
 
-    t_img = torch.zeros((2, H, W)).float().to(x.device) - 60000000
+    t_img = torch.zeros((2, H, W)).float().to(x.device) - 5000000
     t_img.index_put_(indices= [p, y, x], values= t)
 
     if not memory is None:
@@ -163,7 +163,6 @@ if __name__ == '__main__':
                     volume = torch.nn.functional.interpolate(volume[None,:,:,:], size = target_shape, mode='nearest')[0]
 
                 volume = volume.view(len(lamdas), 2, target_shape[0], target_shape[1])
-                print(volume.shape)
                 for j,i in enumerate(lamdas):
                     save_dir = os.path.join(target_dir,"leaky{0}".format(i))
                     if not os.path.exists(save_dir):
@@ -171,7 +170,6 @@ if __name__ == '__main__':
                     save_dir = os.path.join(save_dir, mode)
                     if not os.path.exists(save_dir):
                         os.makedirs(save_dir)
-                    print(volume.min(),volume.max())
                     ecd = volume[j].cpu().numpy().copy()
                     
                     ecd.astype(np.uint8).tofile(os.path.join(save_dir,file_name+"_"+str(unique_time)+".npy"))
