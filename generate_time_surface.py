@@ -106,6 +106,8 @@ if __name__ == '__main__':
         pbar = tqdm.tqdm(total=len(files), unit='File', unit_scale=True)
 
         for i_file, file_name in enumerate(files):
+            if (i_file == 3) and (mode == "train"):
+                continue
             # if not file_name == "17-04-13_15-05-43_3599500000_3659500000":
             #     continue
             # if not file_name == "moorea_2019-06-26_test_02_000_1708500000_1768500000":
@@ -171,11 +173,8 @@ if __name__ == '__main__':
                     save_dir = os.path.join(save_dir, mode)
                     if not os.path.exists(save_dir):
                         os.makedirs(save_dir)
-                    try:
-                        ecd = volume[j].cpu().numpy().copy()
-                        ecd.astype(np.uint8).tofile(os.path.join(save_dir,file_name+"_"+str(unique_time)+".npy"))
-                    except Exception:
-                        memory = None
+                    ecd = volume[j].cpu().numpy().copy()
+                    ecd.astype(np.uint8).tofile(os.path.join(save_dir,file_name+"_"+str(unique_time)+".npy"))
                             
                 torch.cuda.empty_cache()
             #h5.close()
