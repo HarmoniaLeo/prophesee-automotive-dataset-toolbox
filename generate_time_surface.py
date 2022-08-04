@@ -16,11 +16,15 @@ import argparse
 import torch.nn
 
 
-def taf_cuda(x, y, t, p, shape, lamdas):
+def taf_cuda(x, y, t, p, shape, lamdas, memory, now):
     H, W = shape
 
-    t_img = torch.zeros((2, H, W)).float().to(x.device) - 2000000
+    t_img = torch.zeros((2, H, W)).float().to(x.device) - 60000000
     t_img.index_put_(indices= [p, y, x], values= t)
+
+    t_img = torch.where(t_img>memory, t_img, memory)
+    memory = t_img
+    t_img = t_img - now
 
     t_imgs = []
     for lamda in lamdas:
@@ -31,16 +35,16 @@ def taf_cuda(x, y, t, p, shape, lamdas):
     ecd_viewed = ecd.view(len(lamdas) * 2, H, W) * 255
 
     #print(generate_volume_time, filter_time, generate_encode_time)
-    return ecd_viewed
+    return ecd_viewed, memory
 
-def generate_leaky_cuda(events, shape, lamdas):
+def generate_leaky_cuda(events, shape, lamdas, memory, now):
     x, y, t, p = events.unbind(-1)
 
     x, y, t, p = x.long(), y.long(), t.float(), p.long()
     
-    histogram_ecd = taf_cuda(x, y, t, p, shape, lamdas)
+    histogram_ecd = taf_cuda(x, y, t, p, shape, lamdas, memory, now)
 
-    return histogram_ecd
+    return histogram_ecd, memory
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(
@@ -145,27 +149,15 @@ if __name__ == '__main__':
                 del dat_event
                 events = torch.from_numpy(rfn.structured_to_unstructured(events)[:, [1, 2, 0, 3]].astype(float)).cuda()
 
-                reserve = len(events)
-
-                if not memory is None:
-                    memory = memory[(-10000000+reserve):]
-                    events = torch.cat([memory, events])
-                events = events[-10000000:]
-                
-                events = events[events[:, 2] > unique_time - events_window]
-                memory = events.clone()
-
                 time_upper_bound = unique_time
                 count_upper_bound = end_count
-
-                events[:, 2] = events[:, 2] - unique_time
 
                 if target_shape[0] < shape[0]:
                     events[:,0] = events[:,0] * rw
                     events[:,1] = events[:,1] * rh
-                    volume = generate_leaky_cuda(events, target_shape, lamdas)
+                    volume, memory = generate_leaky_cuda(events, target_shape, lamdas, memory, unique_time)
                 else:
-                    volume = generate_leaky_cuda(events, shape, lamdas)
+                    volume, memory = generate_leaky_cuda(events, shape, lamdas, memory, unique_time)
                     volume = torch.nn.functional.interpolate(volume[None,:,:,:], size = target_shape, mode='nearest')[0]
 
                 volume = volume.view(len(lamdas), 2, target_shape[0], target_shape[1])
