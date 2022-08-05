@@ -15,6 +15,31 @@ import math
 import argparse
 import torch.nn
 
+def generate_agile_event_volume_cuda(events, shape, events_window = 50000, volume_bins=5):
+    H, W = shape
+
+    x, y, t, p = events.unbind(-1)
+
+    x, y, p = x.long(), y.long(), p.long()
+
+    t_star = (volume_bins * t.float())[:,None,None]
+    channels = volume_bins
+
+    adder = torch.stack([torch.arange(channels),torch.arange(channels)],dim = 1).to(x.device)[None,:,:] + 1   #1, 2, 2
+    adder = (1 - torch.abs(adder-t_star)) * torch.stack([p,1 - p],dim=1)[:,None,:]  #n, 2, 2
+    adder = torch.where(adder>=0,adder,torch.zeros_like(adder)).view(adder.shape[0], channels * 2) #n, 4
+
+    img = torch.zeros((H * W, volume_bins * 2)).float().to(x.device)
+    img.index_add_(0, x + W * y, adder)
+    img = img.view(H * W, volume_bins, 2)
+
+    img_viewed = img.view((H, W, img.shape[1] * 2)).permute(2, 0, 1).contiguous()
+
+    # print(torch.quantile(img_viewed[img_viewed>0],0.95))
+
+    img_viewed = img_viewed / 5 * 255
+
+    return img_viewed
 
 def taf_cuda(x, y, t, p, shape, lamdas, memory, now):
     H, W = shape
@@ -56,12 +81,14 @@ if __name__ == '__main__':
     parser.add_argument('-raw_dir', type=str)
     parser.add_argument('-label_dir', type=str)
     parser.add_argument('-target_dir', type=str)
+    parser.add_argument('-target_dir_volume', type=str)
     parser.add_argument('-dataset', type=str, default="gen4")
 
     args = parser.parse_args()
     raw_dir = args.raw_dir
     label_dir = args.label_dir
     target_dir = args.target_dir
+    target_dir_volume = args.target_dir_volume
     dataset = args.dataset
 
     if dataset == "gen4":
@@ -77,6 +104,7 @@ if __name__ == '__main__':
         shape = [240,304]
         target_shape = [256, 320]
     events_window = 5000000
+    time_window = 1000000
 
     if not os.path.exists(target_dir):
         os.makedirs(target_dir)
@@ -91,9 +119,6 @@ if __name__ == '__main__':
         file_dir = os.path.join(raw_dir, mode)
         root = file_dir
         label_root = os.path.join(label_dir, mode)
-        target_root = os.path.join(target_dir, mode)
-        if not os.path.exists(target_root):
-            os.makedirs(target_root)
         try:
             files = os.listdir(file_dir)
         except Exception:
@@ -156,6 +181,7 @@ if __name__ == '__main__':
                 time_upper_bound = unique_time
                 count_upper_bound = end_count
 
+                events_ = events[events[:,2] > end_time - time_window].clone()
 
                 if target_shape[0] < shape[0]:
                     events[:,0] = events[:,0] * rw
@@ -176,7 +202,32 @@ if __name__ == '__main__':
                     ecd = volume[j].cpu().numpy().copy()
                     ecd.astype(np.uint8).tofile(os.path.join(save_dir,file_name+"_"+str(unique_time)+".npy"))
                 
-                            
+                events_[:,2] = (events_[:,2] - (end_time - time_window)) / time_window
+                events = events_
+                torch.cuda.empty_cache()
+
+                if target_shape[0] < shape[0]:
+                    events[:,0] = events[:,0] * rw
+                    events[:,1] = events[:,1] * rh
+                    volume = generate_agile_event_volume_cuda(events, target_shape, time_window, 5)
+                else:
+                    volume = generate_agile_event_volume_cuda(events, shape, time_window, 5)
+                    volume = torch.nn.functional.interpolate(volume[None,:,:,:], size = target_shape, mode='nearest')[0]
+
+                volume = volume.cpu().numpy()
+                volume = np.where(volume > 255, 255, volume)
+                volume = volume.astype(np.uint8)
+
+                target_root_volume = os.path.join(target_dir_volume, "long{0}".format(time_window))
+                if not os.path.exists(target_root_volume):
+                    os.makedirs(target_root_volume)
+
+                save_dir = os.path.join(target_root_volume,mode)
+                if not os.path.exists(save_dir):
+                    os.makedirs(save_dir)
+                
+                volume.tofile(os.path.join(save_dir,file_name+"_"+str(unique_time)+".npy"))
+                    
                 torch.cuda.empty_cache()
             #h5.close()
             pbar.update(1)
