@@ -264,12 +264,13 @@ if __name__ == '__main__':
                 volume = leaky_transform(volume)
                 ecd = volume.cpu().numpy().copy()
                 ecd = np.flip(ecd, axis = 0)
-                if not os.path.exists(os.path.join(target_root,"bins{0}".format(int(event_volume_bins/2)))):
-                    os.makedirs(os.path.join(target_root,"bins{0}".format(int(event_volume_bins/2))))
-                ecd[:4].astype(np.uint8).tofile(os.path.join(os.path.join(target_root,"bins{0}".format(int(event_volume_bins/2))),file_name+"_"+str(unique_time)+".npy")) 
-                if not os.path.exists(os.path.join(target_root,"bins{0}".format(event_volume_bins))):
-                    os.makedirs(os.path.join(target_root,"bins{0}".format(event_volume_bins)))
-                ecd[4:].astype(np.uint8).tofile(os.path.join(os.path.join(target_root,"bins{0}".format(event_volume_bins)),file_name+"_"+str(unique_time)+".npy")) 
+                print(ecd.mean((1,2)))
+                # if not os.path.exists(os.path.join(target_root,"bins{0}".format(int(event_volume_bins/2)))):
+                #     os.makedirs(os.path.join(target_root,"bins{0}".format(int(event_volume_bins/2))))
+                # ecd[:4].astype(np.uint8).tofile(os.path.join(os.path.join(target_root,"bins{0}".format(int(event_volume_bins/2))),file_name+"_"+str(unique_time)+".npy")) 
+                # if not os.path.exists(os.path.join(target_root,"bins{0}".format(event_volume_bins))):
+                #     os.makedirs(os.path.join(target_root,"bins{0}".format(event_volume_bins)))
+                # ecd[4:].astype(np.uint8).tofile(os.path.join(os.path.join(target_root,"bins{0}".format(event_volume_bins)),file_name+"_"+str(unique_time)+".npy")) 
                 
                 time_upperbound = end_time
                 count_upperbound = end_count
