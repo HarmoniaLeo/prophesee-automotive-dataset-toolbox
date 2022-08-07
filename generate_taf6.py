@@ -261,11 +261,12 @@ if __name__ == '__main__':
                         volume, memory = generate_taf_cuda(events_, shape, memory, event_volume_bins)
                         volume = torch.nn.functional.interpolate(volume[None,:,:,:], size = target_shape, mode='nearest')[0]
                 volume = volume.view(event_volume_bins, 2, target_shape[0], target_shape[1])
+                print(volume.mean((1,2,3)))
                 volume = leaky_transform(volume)
                 ecd = volume.cpu().numpy().copy()
                 ecd = np.flip(ecd, axis = 0)
                 #print(ecd.shape)
-                print(ecd.mean((1,2,3)))
+                #print(ecd.mean((1,2,3)))
                 # if not os.path.exists(os.path.join(target_root,"bins{0}".format(int(event_volume_bins/2)))):
                 #     os.makedirs(os.path.join(target_root,"bins{0}".format(int(event_volume_bins/2))))
                 # ecd[:4].astype(np.uint8).tofile(os.path.join(os.path.join(target_root,"bins{0}".format(int(event_volume_bins/2))),file_name+"_"+str(unique_time)+".npy")) 
