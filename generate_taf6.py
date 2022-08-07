@@ -235,7 +235,7 @@ if __name__ == '__main__':
                 del dat_event
                 events = torch.from_numpy(rfn.structured_to_unstructured(events)[:, [1, 2, 0, 3]].astype(float)).cuda()
                 
-                print(events[:,2].max(),events[:,2].min())
+                print(len(events),events[:,2].max(),events[:,2].min())
                 z = torch.zeros_like(events[:,0])
 
                 bins = math.ceil((end_time - start_time) / events_window_abin)
