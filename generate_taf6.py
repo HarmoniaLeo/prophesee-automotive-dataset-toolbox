@@ -119,7 +119,7 @@ if __name__ == '__main__':
     target_dir = args.target_dir
     dataset = args.dataset
 
-    min_event_count = 10000000
+    min_event_count = 50000000
     if dataset == "gen4":
         # min_event_count = 800000
         shape = [720,1280]
@@ -244,20 +244,22 @@ if __name__ == '__main__':
                     z = torch.where((events[:,2] >= start_time + i * events_window_abin)&(events[:,2] <= start_time + (i + 1) * events_window_abin), torch.zeros_like(events[:,2])+i, z)
                 events = torch.cat([events,z[:,None]], dim=1)
 
+                if start_time > time_upperbound:
+                    if target_shape[0] < shape[0]:
+                        memory = torch.zeros((target_shape[0], target_shape[1], 2, event_volume_bins)).cuda() - 6000
+                    else:
+                        memory = torch.zeros((shape[0], shape[1], 2, event_volume_bins)).cuda() - 6000
+
                 for iter in range(bins):
                     events_ = events[events[...,4] == iter]
                     t_max = start_time + (iter + 1) * events_window_abin
                     t_min = start_time + iter * events_window_abin
                     events_[:,2] = (events_[:, 2] - t_min)/(t_max - t_min + 1e-8)
                     if target_shape[0] < shape[0]:
-                        if start_time > time_upperbound:
-                            memory = torch.zeros((target_shape[0], target_shape[1], 2, event_volume_bins)).cuda() - 6000
                         events_[:,0] = events_[:,0] * rw
                         events_[:,1] = events_[:,1] * rh
                         volume, memory = generate_taf_cuda(events_, target_shape, memory, event_volume_bins)
                     else:
-                        if start_time > time_upperbound:
-                            memory = torch.zeros((shape[0], shape[1], 2, event_volume_bins)).cuda() - 6000
                         volume, memory = generate_taf_cuda(events_, shape, memory, event_volume_bins)
                         volume = torch.nn.functional.interpolate(volume[None,:,:,:], size = target_shape, mode='nearest')[0]
                 volume = volume.view(event_volume_bins, 2, target_shape[0], target_shape[1])
