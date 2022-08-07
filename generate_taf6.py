@@ -261,8 +261,8 @@ if __name__ == '__main__':
                         volume, memory = generate_taf_cuda(events_, shape, memory, event_volume_bins)
                         volume = torch.nn.functional.interpolate(volume[None,:,:,:], size = target_shape, mode='nearest')[0]
                 volume = volume.view(event_volume_bins, 2, target_shape[0], target_shape[1])
-                print(volume.max(dim=1)[0].max(dim=1)[0].max(dim=1)[0])
                 volume = leaky_transform(volume)
+                print(volume.max(dim=1)[0].max(dim=1)[0].max(dim=1)[0])
                 ecd = volume.cpu().numpy().copy()
                 ecd = np.flip(ecd, axis = 0)
                 #print(ecd.shape)
