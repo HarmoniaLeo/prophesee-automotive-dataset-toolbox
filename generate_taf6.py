@@ -235,7 +235,6 @@ if __name__ == '__main__':
                 del dat_event
                 events = torch.from_numpy(rfn.structured_to_unstructured(events)[:, [1, 2, 0, 3]].astype(float)).cuda()
                 
-                print(len(events),events[:,2].max(),events[:,2].min())
                 z = torch.zeros_like(events[:,0])
 
                 bins = math.ceil((end_time - start_time) / events_window_abin)
@@ -264,7 +263,6 @@ if __name__ == '__main__':
                         volume = torch.nn.functional.interpolate(volume[None,:,:,:], size = target_shape, mode='nearest')[0]
                 volume = volume.view(event_volume_bins, 2, target_shape[0], target_shape[1])
                 volume = leaky_transform(volume)
-                print(volume.max(dim=1)[0].max(dim=1)[0].max(dim=1)[0])
                 ecd = volume.cpu().numpy().copy()
                 ecd = np.flip(ecd, axis = 0)
                 #print(ecd.shape)
