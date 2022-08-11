@@ -82,7 +82,7 @@ if __name__ == '__main__':
         # min_event_count = 800000
         shape = [720,1280]
         target_shape = [512, 640]
-        events_windows = [800000, 400000, 200000, 100000, 40000]
+        events_windows = [1000000, 600000]
     elif dataset == "kitti":
         # min_event_count = 800000
         shape = [375,1242]
