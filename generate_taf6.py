@@ -263,7 +263,7 @@ if __name__ == '__main__':
                         volume = torch.nn.functional.interpolate(volume[None,:,:,:], size = target_shape, mode='nearest')[0]
                 volume = volume.view(event_volume_bins, 2, target_shape[0], target_shape[1])
                 volume = leaky_transform(volume)
-                print(volume.mean([1,2,3]))
+                print(volume.max([1,2,3]))
                 ecd = volume.cpu().numpy().copy()
                 ecd = np.flip(ecd, axis = 0)
                 #print(ecd.shape)
