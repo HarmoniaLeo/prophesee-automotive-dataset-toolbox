@@ -142,7 +142,7 @@ if __name__ == '__main__':
     if not os.path.exists(target_dir):
         os.makedirs(target_dir)
 
-    for mode in ["test"]:#["train","val","test"]:
+    for mode in ["train","val"]:
         file_dir = os.path.join(raw_dir, mode)
         root = file_dir
         label_root = os.path.join(label_dir, mode)
