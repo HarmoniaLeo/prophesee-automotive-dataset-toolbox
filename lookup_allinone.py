@@ -243,11 +243,11 @@ def visualizeFrame(volume,gt,dt,filename,path,time_stamp_end,tol,LABELMAP,suffix
     img = 127 * np.ones((volume.shape[1], volume.shape[2], 3), dtype=np.uint8)
     c_p = volume[1]
     c_n = volume[0]
-    c_p = np.where(c_p>c_n,c_p,0)
     c_p = c_p/255
+    c_n = c_n/255
+    c_p = np.where(c_p>c_n,c_p,0)
     c_p = np.where(c_p>1.0,127.0,c_p*127)
     c_n = np.where(c_n>c_p,c_n,0)
-    c_n = c_n/255
     c_n = np.where(c_n>1.0,-127.0,-c_n*127)
     c_map = c_p+c_n
     img_s = img + c_map.astype(np.uint8)[:,:,None]
