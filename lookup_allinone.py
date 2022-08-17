@@ -207,6 +207,7 @@ def visualizeTaf(ecds,gt,dt,filename,path,time_stamp_end,tol,LABELMAP,suffix):
     tar = ecd / 255
     img_0 = (120 * tar).astype(np.uint8) + 119
     tar2 = (0.5 - tar.var(0)) * 255
+    print(tar.var(0).max(),tar.var(0).min(),tar.var(0).quantile(0.9),tar.var(0).quantile(0.1))
     tar2 = np.where(tar2 > 255, 255, tar2).astype(np.uint8)
     #img_1 = (255 * tar).astype(np.uint8)
     #img_2 = (255 * tar).astype(np.uint8)
