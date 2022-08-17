@@ -93,7 +93,7 @@ def visualizeVolume(volume,gt,dt,filename,path,time_stamp_end,tol,LABELMAP,suffi
     
     for i in range(0,5):
         img_0 = (120 + i * 30)+ 119
-        tar2 = c[i] / 180 * 255
+        tar2 = c[i] / 255 * 255
         tar2 = np.where(tar2 > 255, 255, tar2).astype(np.uint8)
         img[:,:,0] = np.where(c[i] > img_buf, img_0, img[:,:,0])
         img[:,:,2] = np.where(c[i] > img_buf, tar2, img[:,:,2])
