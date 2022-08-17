@@ -204,7 +204,7 @@ def extract_flow(flow,gt,dt,filename,path,time_stamp_end,tol,LABELMAP,suffix):
 def visualizeTaf(ecds,gt,dt,filename,path,time_stamp_end,tol,LABELMAP,suffix):
     #ecd = (ecds[0] + ecds[1]) / 2
     img_s = 255 * np.ones((ecds[0].shape[0], ecds[0].shape[1], 3), dtype=np.uint8)
-    ecd = ecds.median(0)
+    ecd = np.median(ecds, 0)
     tar = ecd / 255
     img_0 = (120 * tar).astype(np.uint8) + 119
     #tar2 = 255 - (871 - ecds.var(0)) / 871 * 255
