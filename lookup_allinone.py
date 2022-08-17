@@ -202,7 +202,7 @@ def extract_flow(flow,gt,dt,filename,path,time_stamp_end,tol,LABELMAP,suffix):
     save_flow(flow, gt,dt,filename,path,time_stamp_end,tol,LABELMAP)
 
 def visualizeTaf(ecds,gt,dt,filename,path,time_stamp_end,tol,LABELMAP,suffix):
-    ecd = ecds[0]
+    ecd = (ecds[0] + ecds[1]) / 2
     img_s = 255 * np.ones((ecds[0].shape[0], ecds[0].shape[1], 3), dtype=np.uint8)
     tar = ecd / 255
     img_0 = (120 * tar).astype(np.uint8) + 119
@@ -293,39 +293,35 @@ def visualizeVolume(volume,gt,dt,filename,path,time_stamp_end,tol,LABELMAP,suffi
     cv2.imwrite(path_t,img_s)
 
 def visualizeTimeSurface(ecds,gt,dt,filename,path,time_stamp_end,tol,LABELMAP,suffix):
-    for i in range(0, len(ecds)):
-        ecd = ecds[i]
-        #ecd = volume[-1]
-        #ecd = volume[-1]
-        img_s = 255 * np.ones((ecd.shape[0], ecd.shape[1], 3), dtype=np.uint8)
-        #tar = volume[-1] - volume[-2]
-        #tar = ecd * 2
-        tar = ecd / 255
-        #tar = np.where(tar > 1, (tar - 1) / 7 + 1, tar)
-        #tar = tar
-        #tar = np.where(tar<0,0,tar)
-        #tar = np.where(tar * 10 > 1, 1, tar)
-        img_0 = (120 * tar).astype(np.uint8) + 119
-        #img_1 = (255 * tar).astype(np.uint8)
-        #img_2 = (255 * tar).astype(np.uint8)
-        img_s[:,:,0] = img_0
-        #img_s[:,:,1] = img_1
-        #img_s[:,:,2] = img_2
-        img_s = cv2.cvtColor(img_s, cv2.COLOR_HSV2BGR)
-        #mask = np.where(volume[:,:,None] > 1, 1, volume[:,:,None])
-        img_s = img_s.astype(np.uint8)
-        gt = gt[gt['t']==time_stamp_end]
-        draw_bboxes(img_s,gt,0,LABELMAP)
-        if not (dt is None):
-            dt = dt[(dt['t']>time_stamp_end-tol)&(dt['t']<time_stamp_end+tol)]
-            draw_bboxes(img_s,dt,1,LABELMAP)
-            path_t = os.path.join(path,filename+"_{0}_".format(int(time_stamp_end)) + suffix +"_timesurface_result.png")
-        else:
-            path_t = os.path.join(path,filename+"_{0}_{1}_".format(int(time_stamp_end),i) + suffix +"_timesurface.png")
-        cv2.imwrite(path_t,img_s)
-        # if not(os.path.exists(path_t)):
-        #     os.mkdir(path_t)
-        cv2.imwrite(path_t,img_s)
+    ecd = (ecds[0] + ecds[1])/2
+    #ecd = volume[-1]
+    #ecd = volume[-1]
+    img_s = 255 * np.ones((ecd.shape[0], ecd.shape[1], 3), dtype=np.uint8)
+    #tar = volume[-1] - volume[-2]
+    #tar = ecd * 2
+    tar = ecd / 255
+    #tar = np.where(tar > 1, (tar - 1) / 7 + 1, tar)
+    #tar = tar
+    #tar = np.where(tar<0,0,tar)
+    #tar = np.where(tar * 10 > 1, 1, tar)
+    img_0 = (120 * tar).astype(np.uint8) + 119
+    #img_1 = (255 * tar).astype(np.uint8)
+    #img_2 = (255 * tar).astype(np.uint8)
+    img_s[:,:,0] = img_0
+    #img_s[:,:,1] = img_1
+    #img_s[:,:,2] = img_2
+    img_s = cv2.cvtColor(img_s, cv2.COLOR_HSV2BGR)
+    #mask = np.where(volume[:,:,None] > 1, 1, volume[:,:,None])
+    img_s = img_s.astype(np.uint8)
+    gt = gt[gt['t']==time_stamp_end]
+    draw_bboxes(img_s,gt,0,LABELMAP)
+    if not (dt is None):
+        dt = dt[(dt['t']>time_stamp_end-tol)&(dt['t']<time_stamp_end+tol)]
+        draw_bboxes(img_s,dt,1,LABELMAP)
+        path_t = os.path.join(path,filename+"_{0}_".format(int(time_stamp_end)) + suffix +"_timesurface_result.png")
+    else:
+        path_t = os.path.join(path,filename+"_{0}_".format(int(time_stamp_end)) + suffix +"_timesurface.png")
+    cv2.imwrite(path_t,img_s)
 
 
 if __name__ == '__main__':
