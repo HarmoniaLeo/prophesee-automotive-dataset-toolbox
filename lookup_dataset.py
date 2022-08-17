@@ -121,6 +121,7 @@ if __name__ == '__main__':
     parser.add_argument('-tol', type = int, default=4999)
     parser.add_argument('-dataset', type = str, default="gen1")
     parser.add_argument('-data_path', type = str)
+    parser.add_argument('-bbox_path', type = str)
 
     args = parser.parse_args()
 
@@ -132,7 +133,7 @@ if __name__ == '__main__':
     time_stamp_end = args.end
 
     if args.dataset == "gen1":
-        bbox_path = "/data/lbd/ATIS_Automotive_Detection_Dataset/detection_dataset_duration_60s_ratio_1.0"
+        bbox_path = args.bbox_path
         data_path = args.data_path
         if not (args.exp_name is None):
             result_path = "/home/lbd/100-fps-event-det/" + args.exp_name + "/summarise.npz"
@@ -149,7 +150,7 @@ if __name__ == '__main__':
         shape = (192,640)
         LABELMAP = ["car", "pedestrian"]
     else:
-        bbox_path = "/data/lbd/Large_Automotive_Detection_Dataset_sampling"
+        bbox_path = args.bbox_path
         data_path = args.data_path
         if not (args.exp_name is None):
             result_path = "/home/liubingde/100-fps-event-det/" + args.exp_name + "/summarise.npz"
