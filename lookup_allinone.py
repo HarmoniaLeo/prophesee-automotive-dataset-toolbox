@@ -206,8 +206,7 @@ def visualizeTaf(ecds,gt,dt,filename,path,time_stamp_end,tol,LABELMAP,suffix):
     img_s = 255 * np.ones((ecd.shape[0], ecd.shape[1], 3), dtype=np.uint8)
     tar = ecd / 255
     img_0 = (120 * tar).astype(np.uint8) + 119
-    print(ecds.var(0).max(),ecds.var(0).max(),np.quantile(ecds.var(0),0.9),np.quantile(ecds.var(0),0.1))
-    tar2 = (0.05 - ecds.var(0)) / 0.05 * 255
+    tar2 = (871 - ecds.var(0)) / 871 * 255
     tar2 = np.where(tar2 > 255, 255, tar2).astype(np.uint8)
     tar2 = np.where(tar2 < 0, 0, tar2).astype(np.uint8)
     #img_1 = (255 * tar).astype(np.uint8)
