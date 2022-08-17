@@ -270,7 +270,8 @@ def visualizeVolume(volume,gt,dt,filename,path,time_stamp_end,tol,LABELMAP,suffi
     img[:,:,1] = 255
     c_p = volume[5:]
     c_n = volume[:5]
-    c = (c_p + c_n) / 2
+    c = np.stack([c_p,c_n])
+    c = np.max(c, 0)
     img_buf = np.zeros_like(c[0])
     
     for i in range(0,5):
