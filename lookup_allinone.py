@@ -202,18 +202,18 @@ def extract_flow(flow,gt,dt,filename,path,time_stamp_end,tol,LABELMAP,suffix):
     save_flow(flow, gt,dt,filename,path,time_stamp_end,tol,LABELMAP)
 
 def visualizeTaf(ecds,gt,dt,filename,path,time_stamp_end,tol,LABELMAP,suffix):
-    #ecd = (ecds[0] + ecds[1]) / 2
+    ecd = (ecds[0] + ecds[1]) / 2
     img_s = 255 * np.ones((ecds[0].shape[0], ecds[0].shape[1], 3), dtype=np.uint8)
-    ecd = np.median(ecds, 0)
     tar = ecd / 255
     img_0 = (120 * tar).astype(np.uint8) + 119
-    #tar2 = 255 - (871 - ecds.var(0)) / 871 * 255
+
+    tar2 = np.median(ecds, 0)
     #tar2 = np.where(tar2 > 255, 255, tar2).astype(np.uint8)
     #tar2 = np.where(tar2 < 0, 0, tar2).astype(np.uint8)
     #img_1 = (255 * tar).astype(np.uint8)
     #img_2 = (255 * tar).astype(np.uint8)
     img_s[:,:,0] = img_0
-    #img_s[:,:,2] = tar2
+    img_s[:,:,2] = tar2
     #img_s[:,:,1] = img_1
     #img_s[:,:,2] = img_2
     img_s = cv2.cvtColor(img_s, cv2.COLOR_HSV2BGR)
