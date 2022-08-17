@@ -77,28 +77,33 @@ def draw_bboxes(img, boxes, dt, labelmap):
 #     #     path_t = os.path.join(path,filename+"_{0}_all.png".format(int(time_stamp_end),i))
 #     # cv2.imwrite(path_t,img_all)
 
-def visualizeVolume(volume,gt,dt,filename,path,time_stamp_end,tol,LABELMAP, typ):
-    img = 127 * np.ones((volume.shape[1], volume.shape[2], 3), dtype=np.uint8)
+def visualizeVolume(volume,gt,dt,filename,path,time_stamp_end,tol,LABELMAP,suffix):
+    img = np.zeros((volume.shape[1], volume.shape[2], 3), dtype=np.uint8)
+    img[:,:,0] = 119
+    img[:,:,2] = 0
+    img[:,:,1] = 255
     c_p = volume[5:]
-    c_p = c_p.sum(axis=0)
     c_n = volume[:5]
-    c_n = c_n.sum(axis=0)
-    c_p = np.where(c_p>c_n,c_p,0)
-    c_p = c_p/255
-    c_p = np.where(c_p>1.0,127.0,c_p*127)
-    c_n = np.where(c_n>c_p,c_n,0)
-    c_n = c_n/255
-    c_n = np.where(c_n>1.0,-127.0,-c_n*127)
-    c_map = c_p+c_n
-    img_s = img + c_map.astype(np.uint8)[:,:,None]
+    c = (c_p + c_n) / 2
+    img_buf = np.zeros_like(c[0])
+    
+    for i in range(0,5):
+        img_0 = (120 + i * 30).astype(np.uint8) + 119
+        tar2 = c[i].astype(np.uint8)
+        img[:,:,0] = np.where(c[i] > img_buf, img_0, img[:,:,0])
+        img[:,:,2] = np.where(c[i] > img_buf, tar2, img[:,:,2])
+        img_buf = np.where(c[i]>img_buf, c[i], img_buf)
+
+    img_s = cv2.cvtColor(img_s, cv2.COLOR_HSV2BGR)
+
     gt = gt[gt['t']==time_stamp_end]
     draw_bboxes(img_s,gt,0,LABELMAP)
     if not (dt is None):
         dt = dt[(dt['t']>time_stamp_end-tol)&(dt['t']<time_stamp_end+tol)]
         draw_bboxes(img_s,dt,1,LABELMAP)
-        path_t = os.path.join(path,filename+"_{0}_".format(int(time_stamp_end)) + typ + "_result.png")
+        path_t = os.path.join(path,filename+"_{0}_".format(int(time_stamp_end)) + suffix + "_eventvolume_result.png")
     else:
-        path_t = os.path.join(path,filename+"_{0}_".format(int(time_stamp_end)) + typ + "png")
+        path_t = os.path.join(path,filename+"_{0}_".format(int(time_stamp_end)) + suffix + "_eventvolume.png")
     cv2.imwrite(path_t,img_s)
 
 if __name__ == '__main__':
@@ -106,7 +111,7 @@ if __name__ == '__main__':
         description='visualize one or several event files along with their boxes')
     parser.add_argument('-item', type=str)
     parser.add_argument('-end', type=int)
-    parser.add_argument('-type', type=str, default="normal")
+    parser.add_argument('-suffix', type=str, default="normal")
     parser.add_argument('-exp_name', type=str, default=None)
     parser.add_argument('-tol', type = int, default=4999)
     parser.add_argument('-dataset', type = str, default="gen1")
@@ -173,10 +178,7 @@ if __name__ == '__main__':
 
     events = np.stack([x, y, c, p, features], axis=1)
 
-    if args.type == "normal":
-        C = 5
-    if args.type == "long":
-        C = 5
+    C = 5
     volumes = generate_event_volume(events,shape,ori_shape,C)
     #print(np.quantile(volumes[volumes>0],0.05),np.quantile(volumes[volumes>0],0.2),np.quantile(volumes[volumes>0],0.5),np.quantile(volumes[volumes>0],0.75),np.quantile(volumes[volumes>0],0.95))
-    visualizeVolume(volumes,dat_bbox,dt,item,result_path,time_stamp_end,args.tol,LABELMAP,args.type)
+    visualizeVolume(volumes,dat_bbox,dt,item,result_path,time_stamp_end,args.tol,LABELMAP,args.suffix)
