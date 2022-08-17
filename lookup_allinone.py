@@ -293,7 +293,7 @@ def visualizeVolume(volume,gt,dt,filename,path,time_stamp_end,tol,LABELMAP,suffi
     cv2.imwrite(path_t,img_s)
 
 def visualizeTimeSurface(ecds,gt,dt,filename,path,time_stamp_end,tol,LABELMAP,suffix):
-    ecd = (ecds[0] + ecds[1])/2
+    ecd = ecds.max(0)
     #ecd = volume[-1]
     #ecd = volume[-1]
     img_s = 255 * np.ones((ecd.shape[0], ecd.shape[1], 3), dtype=np.uint8)
