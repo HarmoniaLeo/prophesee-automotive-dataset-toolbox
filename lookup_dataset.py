@@ -23,7 +23,7 @@ def generate_event_volume(events,shape,ori_shape,C):
 
     volume_t = volume_t.transpose(0,3,1,2).reshape(volume_t.shape[0] * volume_t.shape[3], volume_t.shape[1], volume_t.shape[2])
 
-    volume_t = torch.from_numpy(volume_t[None,:,:,:,:])
+    volume_t = torch.from_numpy(volume_t[None,:,:,:])
     volume_t = torch.nn.functional.interpolate(volume_t, size = ori_shape, mode='nearest')[0]
     return volume_t.numpy()
 
