@@ -224,7 +224,7 @@ def visualizeTaf(ecds,gt,dt,filename,path,time_stamp_end,tol,LABELMAP,suffix):
         draw_bboxes(img_s,dt,1,LABELMAP)
         path_t = os.path.join(path,filename+"_{0}".format(int(time_stamp_end)) + "_taf_result.png")
     else:
-        path_t = os.path.join(path,filename+"_{0}_{1}".format(int(time_stamp_end)) + "_taf.png")
+        path_t = os.path.join(path,filename+"_{0}".format(int(time_stamp_end)) + "_taf.png")
     cv2.imwrite(path_t,img_s)
 
 def visualizeE2vid(volume,gt,dt,filename,path,time_stamp_end,tol,LABELMAP,suffix):
