@@ -94,17 +94,17 @@ def visualizeVolume(volume,gt,dt,filename,path,time_stamp_end,tol,LABELMAP,suffi
         img[:,:,2] = np.where(c[i] > img_buf, tar2, img[:,:,2])
         img_buf = np.where(c[i]>img_buf, c[i], img_buf)
 
-    img_s = cv2.cvtColor(img_s, cv2.COLOR_HSV2BGR)
+    img = cv2.cvtColor(img, cv2.COLOR_HSV2BGR)
 
     gt = gt[gt['t']==time_stamp_end]
-    draw_bboxes(img_s,gt,0,LABELMAP)
+    draw_bboxes(img,gt,0,LABELMAP)
     if not (dt is None):
         dt = dt[(dt['t']>time_stamp_end-tol)&(dt['t']<time_stamp_end+tol)]
-        draw_bboxes(img_s,dt,1,LABELMAP)
+        draw_bboxes(img,dt,1,LABELMAP)
         path_t = os.path.join(path,filename+"_{0}_".format(int(time_stamp_end)) + suffix + "_eventvolume_result.png")
     else:
         path_t = os.path.join(path,filename+"_{0}_".format(int(time_stamp_end)) + suffix + "_eventvolume.png")
-    cv2.imwrite(path_t,img_s)
+    cv2.imwrite(path_t,img)
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(
