@@ -74,18 +74,18 @@ if __name__ == '__main__':
     file_names_gt = f_bbox["file_names"]
     densitys_gt = f_bbox["densitys"]
 
-    for i in range([0, 2]):
-        print(i,percentiles2[i],percentiles2[i+1])
+    for i in range([0, 3]):
+        print(i,percentiles1[i],percentiles1[i+1])
 
         for i_file, file_name in enumerate(np.unique(file_names_gt)):
 
-            gt_bbox = gts[(file_names_gt == file_name)&(densitys_gt >= percentiles2[i])&(densitys_gt < percentiles2[i+1])]
+            gt_bbox = gts[(file_names_gt == file_name)&(densitys_gt >= percentiles1[i])&(densitys_gt < percentiles1[i+1])]
 
             print(gt_bbox)
             for unique_ts in gt_bbox[:,0].unique():
                 gt_bbox_t = gt_bbox[gt_bbox[:,0] == unique_ts]
                 for j, dts in enumerate(dts_list):
-                    dt_bbox = dts[(file_names_dt_list[j] == file_name)&(densitys_dt_list[j] >= percentiles2[i])&(densitys_dt_list[j] < percentiles2[i+1])]
+                    dt_bbox = dts[(file_names_dt_list[j] == file_name)&(densitys_dt_list[j] >= percentiles1[i])&(densitys_dt_list[j] < percentiles1[i+1])]
                     dt_bbox_t = dt_bbox[dt_bbox[:,0] == unique_ts]
                     dt = [dt_bbox]
                     gt = [gt_bbox]
@@ -104,7 +104,7 @@ if __name__ == '__main__':
                     result = evaluate_detection(gt_boxes_list1, result_boxes_list1, time_tol = args.tol, classes=classes,height=shape[0],width=shape[1])
                     if i == 0:
                         results_slow[exp_names[j]].append(result)
-                    elif i == 2:
+                    elif:
                         results_fast[exp_names[j]].append(result)
 
         
