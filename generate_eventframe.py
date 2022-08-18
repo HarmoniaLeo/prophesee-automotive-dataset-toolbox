@@ -21,6 +21,7 @@ def generate_eventframe(events, shape):
     Events: N x 4, where cols are x, y, t, polarity, and polarity is in {0,1}. x and y correspond to image
     coordinates u and v.
     """
+    tick = time.time()
     H, W = shape
     x, y, t, p = events.unbind(-1)
 
@@ -34,7 +35,10 @@ def generate_eventframe(events, shape):
 
     histogram = img.view((H, W, 2)).permute(2, 0, 1).contiguous()
 
-    return histogram * 255
+    torch.cuda.synchronize()
+    generate_volume_time = time.time() - tick
+
+    return histogram * 255, generate_volume_time
 
 def generate_frame(events, shape, events_window = 50000, volume_bins=5):
     H, W = shape
@@ -91,7 +95,7 @@ if __name__ == '__main__':
         # min_event_count = 200000
         shape = [240,304]
         target_shape = [256, 320]
-        events_windows = [200000, 100000, 50000, 25000, 10000]
+        events_windows = [50000]
     #events_window = 500000
     
 
@@ -119,6 +123,9 @@ if __name__ == '__main__':
                         if time_seq_name[-3:] == 'dat']
 
         pbar = tqdm.tqdm(total=len(files), unit='File', unit_scale=True)
+
+        total_time = 0
+        total_count = 0
 
         for i_file, file_name in enumerate(files):
 
@@ -176,21 +183,25 @@ if __name__ == '__main__':
                     if target_shape[0] < shape[0]:
                         events_[:,0] = events_[:,0] * rw
                         events_[:,1] = events_[:,1] * rh
-                        volume = generate_eventframe(events_, target_shape)
+                        volume, generate_time = generate_eventframe(events_, target_shape)
                     else:
-                        volume = generate_eventframe(events_, shape)
+                        volume, generate_time = generate_eventframe(events_, shape)
                         volume = torch.nn.functional.interpolate(volume[None,:,:,:], size = target_shape, mode='nearest')[0]
+                    
+                    total_time += generate_time
+                    total_count += 1
+                    print(total_time / total_count)
 
-                    save_dir = os.path.join(target_dir,"frame{0}".format(events_window))
-                    if not os.path.exists(save_dir):
-                        os.makedirs(save_dir)
-                    save_dir = os.path.join(save_dir, mode)
-                    if not os.path.exists(save_dir):
-                        os.makedirs(save_dir)
+                    # save_dir = os.path.join(target_dir,"frame{0}".format(events_window))
+                    # if not os.path.exists(save_dir):
+                    #     os.makedirs(save_dir)
+                    # save_dir = os.path.join(save_dir, mode)
+                    # if not os.path.exists(save_dir):
+                    #     os.makedirs(save_dir)
                     
-                    ecd = volume.cpu().numpy().copy()
+                    # ecd = volume.cpu().numpy().copy()
                     
-                    ecd.astype(np.uint8).tofile(os.path.join(save_dir,file_name+"_"+str(unique_time)+".npy"))
+                    # ecd.astype(np.uint8).tofile(os.path.join(save_dir,file_name+"_"+str(unique_time)+".npy"))
                             
                 torch.cuda.empty_cache()
             #h5.close()
