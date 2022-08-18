@@ -86,29 +86,35 @@ if __name__ == '__main__':
 
             for unique_ts in np.unique(gt_bbox[:,0]):
                 gt_bbox_t = gt_bbox[gt_bbox[:,0] == unique_ts]
-                for j, dts in enumerate(dts_list):
-                    dt_bbox = dts[(file_names_dt_list[j] == file_name)&(densitys_dt_list[j] >= percentiles1[i])&(densitys_dt_list[j] < percentiles1[i+1])]
-                    dt_bbox_t = dt_bbox[(dt_bbox[:,0] <= unique_ts + args.tol)&(dt_bbox[:,0] >= unique_ts - args.tol)]
-                    dt = [dt_bbox_t]
-                    gt = [gt_bbox_t]
-                    gt_boxes_list = map(filter_boxes, gt)
-                    result_boxes_list = map(filter_boxes, dt)
-                    gt_boxes_list1 = []
-                    result_boxes_list1 = []
-                    for l1,l2 in zip(gt_boxes_list,result_boxes_list):
-                        if len(l1) > 0:
-                            gt_boxes_list1.append(l1)
-                            if len(l2) == 0:
-                                result_boxes_list1.append(np.array([[l1[0,0],0,0,0,0,0,0,0]]))
-                            else:
-                                result_boxes_list1.append(l2)
-                    if len(gt_boxes_list1) == 0:
-                        continue
-                    result = evaluate_detection(gt_boxes_list1, result_boxes_list1, time_tol = args.tol, classes=classes,height=shape[0],width=shape[1])
-                    if i == 0:
-                        results_slow[exp_names[j]].append(result[0])
-                    else:
-                        results_fast[exp_names[j]].append(result[0])
+                if file_name == "17-04-13_15-05-43_1647500000_1707500000":
+                    if unique_ts == 14099999:
+                        print("gt_bbox_t",gt_bbox_t)
+                    for j, dts in enumerate(dts_list):
+                        dt_bbox = dts[(file_names_dt_list[j] == file_name)&(densitys_dt_list[j] >= percentiles1[i])&(densitys_dt_list[j] < percentiles1[i+1])]
+                        dt_bbox_t = dt_bbox[(dt_bbox[:,0] <= unique_ts + args.tol)&(dt_bbox[:,0] >= unique_ts - args.tol)]
+                        print(exp_names[j], dt_bbox_t)
+                        dt = [dt_bbox_t]
+                        gt = [gt_bbox_t]
+                        gt_boxes_list = map(filter_boxes, gt)
+                        result_boxes_list = map(filter_boxes, dt)
+                        gt_boxes_list1 = []
+                        result_boxes_list1 = []
+                        for l1,l2 in zip(gt_boxes_list,result_boxes_list):
+                            if len(l1) > 0:
+                                gt_boxes_list1.append(l1)
+                                if len(l2) == 0:
+                                    result_boxes_list1.append(np.array([[l1[0,0],0,0,0,0,0,0,0]]))
+                                else:
+                                    result_boxes_list1.append(l2)
+                        if len(gt_boxes_list1) == 0:
+                            continue
+                        result = evaluate_detection(gt_boxes_list1, result_boxes_list1, time_tol = args.tol, classes=classes,height=shape[0],width=shape[1])
+                        if i == 0:
+                            results_slow[exp_names[j]].append(result[0])
+                        else:
+                            results_fast[exp_names[j]].append(result[0])
+                else:
+                    continue
                 lens = []
                 if i == 0:
                     for ls in results_slow.values():
