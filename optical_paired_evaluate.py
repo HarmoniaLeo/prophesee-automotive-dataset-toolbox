@@ -75,7 +75,7 @@ if __name__ == '__main__':
     file_names_gt = f_bbox["file_names"]
     densitys_gt = f_bbox["densitys"]
 
-    for i in [0, 3]:
+    for i in [0, 2]:
         print(i,percentiles1[i],percentiles1[i+1])
 
         for i_file, file_name in enumerate(np.unique(file_names_gt)):
