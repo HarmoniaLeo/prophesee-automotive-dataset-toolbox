@@ -126,9 +126,9 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
 
-    result_path = 'result_allinone'
-    if not os.path.exists(result_path):
-        os.mkdir(result_path)
+    target_path = 'result_allinone'
+    if not os.path.exists(target_path):
+        os.mkdir(target_path)
     data_folder = 'test'
     item = args.item
     time_stamp_end = args.end
@@ -187,4 +187,4 @@ if __name__ == '__main__':
     C = 5
     volumes = generate_event_volume(events,shape,ori_shape,C)
     #print(np.quantile(volumes[volumes>0],0.05),np.quantile(volumes[volumes>0],0.2),np.quantile(volumes[volumes>0],0.5),np.quantile(volumes[volumes>0],0.75),np.quantile(volumes[volumes>0],0.95))
-    visualizeVolume(volumes,dat_bbox,dt,item,result_path,time_stamp_end,args.tol,LABELMAP,args.suffix)
+    visualizeVolume(volumes,dat_bbox,dt,item,target_path,time_stamp_end,args.tol,LABELMAP,args.suffix)
