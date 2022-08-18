@@ -109,7 +109,7 @@ def visualizeVolume(volume,gt,dt,filename,path,time_stamp_end,tol,LABELMAP,suffi
         path_t = os.path.join(path,filename+"_{0}_".format(int(time_stamp_end)) + suffix + "_eventvolume_result.png")
     else:
         path_t = os.path.join(path,filename+"_{0}_".format(int(time_stamp_end)) + suffix + "_eventvolume.png")
-    print(path_t)
+    #print(path_t)
     cv2.imwrite(path_t,img)
 
 if __name__ == '__main__':
