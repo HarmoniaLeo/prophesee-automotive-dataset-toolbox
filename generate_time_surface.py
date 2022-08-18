@@ -191,11 +191,11 @@ if __name__ == '__main__':
                 events_ = events[events[:,2] > end_time - time_window].clone()
 
                 if target_shape[0] < shape[0]:
-                    events[:,0] = events[:,0] * rw
-                    events[:,1] = events[:,1] * rh
-                    volume, memory, generate_time = generate_leaky_cuda(events, target_shape, lamdas, memory, unique_time)
+                    events_[:,0] = events_[:,0] * rw
+                    events_[:,1] = events_[:,1] * rh
+                    volume, memory, generate_time = generate_leaky_cuda(events_, target_shape, lamdas, memory, unique_time)
                 else:
-                    volume, memory, generate_time = generate_leaky_cuda(events, shape, lamdas, memory, unique_time)
+                    volume, memory, generate_time = generate_leaky_cuda(events_, shape, lamdas, memory, unique_time)
                     volume = torch.nn.functional.interpolate(volume[None,:,:,:], size = target_shape, mode='nearest')[0]
 
                 volume = volume.view(len(lamdas), 2, target_shape[0], target_shape[1])
