@@ -55,16 +55,16 @@ def taf_cuda(x, y, t, p, shape, volume_bins, past_volume):
     ecd_viewed = ecd.permute(3, 2, 0, 1).contiguous().view(volume_bins * 2, H, W)
 
     #print(generate_volume_time, filter_time, generate_encode_time)
-    return ecd_viewed, ecd
+    return ecd_viewed, ecd, generate_encode_time + generate_volume_time
 
 def generate_taf_cuda(events, shape, past_volume = None, volume_bins=5):
     x, y, t, p, z = events.unbind(-1)
 
     x, y, t, p = x.long(), y.long(), t.float(), p.long()
     
-    histogram_ecd, past_volume = taf_cuda(x, y, t, p, shape, volume_bins, past_volume)
+    histogram_ecd, past_volume, generate_time = taf_cuda(x, y, t, p, shape, volume_bins, past_volume)
 
-    return histogram_ecd, past_volume
+    return histogram_ecd, past_volume, generate_time
 
 # def quantile_transform(ecd, head = [70], tail = 10):
 #     ecd = ecd.clone()
@@ -171,6 +171,9 @@ if __name__ == '__main__':
 
         pbar = tqdm.tqdm(total=total_length, unit='File', unit_scale=True)
 
+        total_time = 0
+        total_count = 0
+
         for i_file, file_name in enumerate(files):
             # if not file_name == "17-04-13_15-05-43_3599500000_3659500000":
             #     continue
@@ -257,22 +260,25 @@ if __name__ == '__main__':
                     if target_shape[0] < shape[0]:
                         events_[:,0] = events_[:,0] * rw
                         events_[:,1] = events_[:,1] * rh
-                        volume, memory = generate_taf_cuda(events_, target_shape, memory, event_volume_bins)
+                        volume, memory, generate_time = generate_taf_cuda(events_, target_shape, memory, event_volume_bins)
                     else:
-                        volume, memory = generate_taf_cuda(events_, shape, memory, event_volume_bins)
+                        volume, memory, generate_time = generate_taf_cuda(events_, shape, memory, event_volume_bins)
                         volume = torch.nn.functional.interpolate(volume[None,:,:,:], size = target_shape, mode='nearest')[0]
+                total_time += generate_time
+                total_count += 1
+                print(total_time / total_count)
                 volume = volume.view(event_volume_bins, 2, target_shape[0], target_shape[1])
                 volume = leaky_transform(volume)
                 ecd = volume.cpu().numpy().copy()
                 ecd = np.flip(ecd, axis = 0)
                 #print(ecd.shape)
                 #print(ecd.mean((1,2,3)))
-                if not os.path.exists(os.path.join(target_root,"bins{0}".format(int(event_volume_bins/2)))):
-                    os.makedirs(os.path.join(target_root,"bins{0}".format(int(event_volume_bins/2))))
-                ecd[:4].astype(np.uint8).tofile(os.path.join(os.path.join(target_root,"bins{0}".format(int(event_volume_bins/2))),file_name+"_"+str(unique_time)+".npy")) 
-                if not os.path.exists(os.path.join(target_root,"bins{0}".format(event_volume_bins))):
-                    os.makedirs(os.path.join(target_root,"bins{0}".format(event_volume_bins)))
-                ecd[4:].astype(np.uint8).tofile(os.path.join(os.path.join(target_root,"bins{0}".format(event_volume_bins)),file_name+"_"+str(unique_time)+".npy")) 
+                # if not os.path.exists(os.path.join(target_root,"bins{0}".format(int(event_volume_bins/2)))):
+                #     os.makedirs(os.path.join(target_root,"bins{0}".format(int(event_volume_bins/2))))
+                # ecd[:4].astype(np.uint8).tofile(os.path.join(os.path.join(target_root,"bins{0}".format(int(event_volume_bins/2))),file_name+"_"+str(unique_time)+".npy")) 
+                # if not os.path.exists(os.path.join(target_root,"bins{0}".format(event_volume_bins))):
+                #     os.makedirs(os.path.join(target_root,"bins{0}".format(event_volume_bins)))
+                # ecd[4:].astype(np.uint8).tofile(os.path.join(os.path.join(target_root,"bins{0}".format(event_volume_bins)),file_name+"_"+str(unique_time)+".npy")) 
                 
                 time_upperbound = end_time
                 count_upperbound = end_count
