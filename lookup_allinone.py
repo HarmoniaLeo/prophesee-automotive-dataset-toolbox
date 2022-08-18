@@ -23,7 +23,7 @@ def generate_taf_gen1(ecd_file, filename, timestamp, shape, ori_shape, volume_bi
         ecd = np.fromfile(ecd_file_, dtype=np.uint8).reshape(2, shape[0], shape[1]).astype(np.float32)
         ecds.append(ecd)
 
-    ecds = np.concatenate(ecds, 0)[None,:,:,:]
+    ecds = torch.from_numpy(np.concatenate(ecds, 0))[None,:,:,:]
     ecds = torch.nn.functional.interpolate(ecds, size = ori_shape, mode='nearest')[0]
     return ecds.numpy()
 
@@ -38,7 +38,7 @@ def generate_taf_gen4(ecd_file, filename, timestamp, shape, ori_shape, volume_bi
         volume2 = np.fromfile(ecd_file2, dtype=np.uint8).reshape(int(volume_bins), shape[0], shape[1]).astype(np.float32)
         volume = np.concatenate([volume, volume2], 0)
 
-    ecds = volume[None,:,:,:]
+    ecds = torch.from_numpy(volume[None,:,:,:])
     ecds = torch.nn.functional.interpolate(ecds, size = ori_shape, mode='nearest')[0]
     return ecds.numpy()
 
