@@ -101,7 +101,7 @@ if __name__ == '__main__':
                                 result_boxes_list1.append(np.array([[l1[0,0],0,0,0,0,0,0,0]]))
                             else:
                                 result_boxes_list1.append(l2)
-                    
+                    print(gt_boxes_list1, result_boxes_list1)
                     result = evaluate_detection(gt_boxes_list1, result_boxes_list1, time_tol = args.tol, classes=classes,height=shape[0],width=shape[1])
                     if i == 0:
                         results_slow[exp_names[j]].append(result)
