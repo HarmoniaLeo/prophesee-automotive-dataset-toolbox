@@ -106,9 +106,9 @@ if __name__ == '__main__':
                         continue
                     result = evaluate_detection(gt_boxes_list1, result_boxes_list1, time_tol = args.tol, classes=classes,height=shape[0],width=shape[1])
                     if i == 0:
-                        results_slow[exp_names[j]].append(result)
+                        results_slow[exp_names[j]].append(result[0])
                     else:
-                        results_fast[exp_names[j]].append(result)
+                        results_fast[exp_names[j]].append(result[0])
                 lens = []
                 if i == 0:
                     for ls in results_slow.values():
