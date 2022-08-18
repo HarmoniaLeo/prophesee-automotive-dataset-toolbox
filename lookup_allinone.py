@@ -215,7 +215,7 @@ def save_flow(flow, gt,dt,filename,flow_path,time_stamp_end,tol,LABELMAP):
     flow_img = 255 - flow_to_image(flow)
 
     flow_img = flow_img/255.0  #注意255.0得采用浮点数
-    flow_img = (np.power(flow_img,0.4)*255.0).astype(np.int)
+    flow_img = (np.power(flow_img,0.4)*255.0).astype(int)
 
     gt = gt[gt['t']==time_stamp_end]
     draw_bboxes(flow_img,gt,0,LABELMAP)
