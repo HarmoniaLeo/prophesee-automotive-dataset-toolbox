@@ -13,6 +13,7 @@ import argparse
 
 
 def generate_agile_event_volume_cuda(events, shape, events_window = 50000, volume_bins=5):
+    tick = time.time()
     H, W = shape
 
     x, y, t, p = events.unbind(-1)
@@ -21,6 +22,7 @@ def generate_agile_event_volume_cuda(events, shape, events_window = 50000, volum
 
     t_star = (volume_bins * t.float())[:,None,None]
     channels = volume_bins
+
 
     adder = torch.stack([torch.arange(channels),torch.arange(channels)],dim = 1).to(x.device)[None,:,:] + 1   #1, 2, 2
     adder = (1 - torch.abs(adder-t_star)) * torch.stack([p,1 - p],dim=1)[:,None,:]  #n, 2, 2
@@ -36,7 +38,10 @@ def generate_agile_event_volume_cuda(events, shape, events_window = 50000, volum
 
     img_viewed = img_viewed / 5 * 255
 
-    return img_viewed
+    torch.cuda.synchronize()
+    generate_volume_time = time.time() - tick
+
+    return img_viewed, generate_volume_time
 
 def denseToSparse(dense_tensor):
     """
@@ -104,7 +109,9 @@ if __name__ == '__main__':
         # Remove duplicates (.npy and .dat)
         # files = files[int(2*len(files)/3):]
         #files = files[int(len(files)/3):]
-            
+        
+        total_time = 0
+        total_count = 0
 
         for i_file, file_name in enumerate(files):
             # if not file_name == "moorea_2019-06-26_test_02_000_1708500000_1768500000":
@@ -148,24 +155,28 @@ if __name__ == '__main__':
                     if target_shape[0] < shape[0]:
                         events[:,0] = events[:,0] * rw
                         events[:,1] = events[:,1] * rh
-                        volume = generate_agile_event_volume_cuda(events, target_shape, time_window, event_volume_bins)
+                        volume, generate_time = generate_agile_event_volume_cuda(events, target_shape, time_window, event_volume_bins)
                     else:
-                        volume = generate_agile_event_volume_cuda(events, shape, time_window, event_volume_bins)
+                        volume, generate_time = generate_agile_event_volume_cuda(events, shape, time_window, event_volume_bins)
                         volume = torch.nn.functional.interpolate(volume[None,:,:,:], size = target_shape, mode='nearest')[0]
+
+                    total_time += generate_time
+                    total_count += 1
+                    print(total_time / total_count)
 
                     volume = volume.cpu().numpy()
                     volume = np.where(volume > 255, 255, volume)
                     volume = volume.astype(np.uint8)
 
-                    target_root = os.path.join(target_dir, "long{0}".format(time_window))
-                    if not os.path.exists(target_root):
-                        os.makedirs(target_root)
+                    # target_root = os.path.join(target_dir, "long{0}".format(time_window))
+                    # if not os.path.exists(target_root):
+                    #     os.makedirs(target_root)
 
-                    save_dir = os.path.join(target_root,mode)
-                    if not os.path.exists(save_dir):
-                        os.makedirs(save_dir)
+                    # save_dir = os.path.join(target_root,mode)
+                    # if not os.path.exists(save_dir):
+                    #     os.makedirs(save_dir)
                     
-                    volume.tofile(os.path.join(save_dir,file_name+"_"+str(unique_time)+".npy"))
+                    # volume.tofile(os.path.join(save_dir,file_name+"_"+str(unique_time)+".npy"))
 
                 torch.cuda.empty_cache()
             pbar.update(1)
