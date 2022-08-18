@@ -133,7 +133,7 @@ if __name__ == '__main__':
         shape = [240,304]
         target_shape = [256, 320]
     events_window_abin = 10000
-    event_volume_bins = 8
+    event_volume_bins = 4
     events_window = events_window_abin * event_volume_bins
 
     rh = target_shape[0] / shape[0]
