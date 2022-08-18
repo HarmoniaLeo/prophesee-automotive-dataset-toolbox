@@ -213,7 +213,6 @@ def save_flow(flow, gt,dt,filename,flow_path,time_stamp_end,tol,LABELMAP):
     if not os.path.exists(flow_path):
         os.mkdir(flow_path)
     flow_img = 255 - flow_to_image(flow)
-    draw_bboxes(flow_img, flow,gt,LABELMAP)
 
     draw_bboxes(flow_img,gt,0,LABELMAP)
     if not (dt is None):
