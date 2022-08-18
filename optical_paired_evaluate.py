@@ -75,7 +75,7 @@ if __name__ == '__main__':
     file_names_gt = f_bbox["file_names"]
     densitys_gt = f_bbox["densitys"]
 
-    for i in [0, 2]:
+    for i in [0, 3]:
         print(i,percentiles1[i],percentiles1[i+1])
 
         for i_file, file_name in enumerate(np.unique(file_names_gt)):
@@ -88,7 +88,7 @@ if __name__ == '__main__':
                 gt_bbox_t = gt_bbox[gt_bbox[:,0] == unique_ts]
                 for j, dts in enumerate(dts_list):
                     dt_bbox = dts[(file_names_dt_list[j] == file_name)&(densitys_dt_list[j] >= percentiles1[i])&(densitys_dt_list[j] < percentiles1[i+1])]
-                    dt_bbox_t = dt_bbox[dt_bbox[:,0] == unique_ts]
+                    dt_bbox_t = dt_bbox[(dt_bbox[:,0] <= unique_ts + args.tol)&(dt_bbox[:,0] >= unique_ts - args.tol)]
                     dt = [dt_bbox_t]
                     gt = [gt_bbox_t]
                     gt_boxes_list = map(filter_boxes, gt)
