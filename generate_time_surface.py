@@ -42,6 +42,7 @@ def generate_agile_event_volume_cuda(events, shape, events_window = 50000, volum
     return img_viewed
 
 def taf_cuda(x, y, t, p, shape, lamdas, memory, now):
+    tick = time.time()
     H, W = shape
 
     t_img = torch.zeros((2, H, W)).float().to(x.device) + now - 5000000
@@ -61,8 +62,11 @@ def taf_cuda(x, y, t, p, shape, lamdas, memory, now):
 
     ecd_viewed = ecd.view(len(lamdas) * 2, H, W) * 255
 
+    torch.cuda.synchronize()
+    generate_volume_time = time.time() - tick
+
     #print(generate_volume_time, filter_time, generate_encode_time)
-    return ecd_viewed, memory
+    return ecd_viewed, memory, generate_volume_time
 
 def generate_leaky_cuda(events, shape, lamdas, memory, now):
     events = events[(events[:,0]<shape[1])&(events[:,1]<shape[0])]
@@ -71,9 +75,9 @@ def generate_leaky_cuda(events, shape, lamdas, memory, now):
 
     x, y, t, p = x.long(), y.long(), t.float(), p.long()
     
-    histogram_ecd, memory = taf_cuda(x, y, t, p, shape, lamdas, memory, now)
+    histogram_ecd, memory, generate_volume_time = taf_cuda(x, y, t, p, shape, lamdas, memory, now)
 
-    return histogram_ecd, memory
+    return histogram_ecd, memory, generate_volume_time
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(
@@ -104,7 +108,7 @@ if __name__ == '__main__':
         shape = [240,304]
         target_shape = [256, 320]
     events_window = 5000000
-    time_window = 1000000
+    time_window = 554126
 
     if not os.path.exists(target_dir):
         os.makedirs(target_dir)
@@ -112,8 +116,8 @@ if __name__ == '__main__':
     rh = target_shape[0] / shape[0]
     rw = target_shape[1] / shape[1]
 
-    lamdas = [0.00001, 0.000005, 0.0000025, 0.000001]
-    #lamdas = [0.000001]
+    #lamdas = [0.00001, 0.000005, 0.0000025, 0.000001]
+    lamdas = [0.00001]
 
     for mode in ["train","val","test"]:
         file_dir = os.path.join(raw_dir, mode)
@@ -130,6 +134,9 @@ if __name__ == '__main__':
                         if time_seq_name[-3:] == 'dat']
 
         pbar = tqdm.tqdm(total=len(files), unit='File', unit_scale=True)
+
+        total_time = 0
+        total_count = 0
 
         for i_file, file_name in enumerate(files):
             # if not file_name == "17-04-13_15-05-43_3599500000_3659500000":
@@ -186,47 +193,52 @@ if __name__ == '__main__':
                 if target_shape[0] < shape[0]:
                     events[:,0] = events[:,0] * rw
                     events[:,1] = events[:,1] * rh
-                    volume, memory = generate_leaky_cuda(events, target_shape, lamdas, memory, unique_time)
+                    volume, memory, generate_time = generate_leaky_cuda(events, target_shape, lamdas, memory, unique_time)
                 else:
-                    volume, memory = generate_leaky_cuda(events, shape, lamdas, memory, unique_time)
+                    volume, memory, generate_time = generate_leaky_cuda(events, shape, lamdas, memory, unique_time)
                     volume = torch.nn.functional.interpolate(volume[None,:,:,:], size = target_shape, mode='nearest')[0]
 
                 volume = volume.view(len(lamdas), 2, target_shape[0], target_shape[1])
-                for j,i in enumerate(lamdas):
-                    save_dir = os.path.join(target_dir,"leaky{0}".format(i))
-                    if not os.path.exists(save_dir):
-                        os.makedirs(save_dir)
-                    save_dir = os.path.join(save_dir, mode)
-                    if not os.path.exists(save_dir):
-                        os.makedirs(save_dir)
-                    ecd = volume[j].cpu().numpy().copy()
-                    ecd.astype(np.uint8).tofile(os.path.join(save_dir,file_name+"_"+str(unique_time)+".npy"))
+
+                total_time += generate_time
+                total_count += 1
+                print(total_time / total_count)
+
+                # for j,i in enumerate(lamdas):
+                #     save_dir = os.path.join(target_dir,"leaky{0}".format(i))
+                #     if not os.path.exists(save_dir):
+                #         os.makedirs(save_dir)
+                #     save_dir = os.path.join(save_dir, mode)
+                #     if not os.path.exists(save_dir):
+                #         os.makedirs(save_dir)
+                #     ecd = volume[j].cpu().numpy().copy()
+                #     ecd.astype(np.uint8).tofile(os.path.join(save_dir,file_name+"_"+str(unique_time)+".npy"))
                 
-                events_[:,2] = (events_[:,2] - (end_time - time_window)) / time_window
-                events = events_
-                torch.cuda.empty_cache()
+                # events_[:,2] = (events_[:,2] - (end_time - time_window)) / time_window
+                # events = events_
+                # torch.cuda.empty_cache()
 
-                if target_shape[0] < shape[0]:
-                    events[:,0] = events[:,0] * rw
-                    events[:,1] = events[:,1] * rh
-                    volume = generate_agile_event_volume_cuda(events, target_shape, time_window, 5)
-                else:
-                    volume = generate_agile_event_volume_cuda(events, shape, time_window, 5)
-                    volume = torch.nn.functional.interpolate(volume[None,:,:,:], size = target_shape, mode='nearest')[0]
+                # if target_shape[0] < shape[0]:
+                #     events[:,0] = events[:,0] * rw
+                #     events[:,1] = events[:,1] * rh
+                #     volume = generate_agile_event_volume_cuda(events, target_shape, time_window, 5)
+                # else:
+                #     volume = generate_agile_event_volume_cuda(events, shape, time_window, 5)
+                #     volume = torch.nn.functional.interpolate(volume[None,:,:,:], size = target_shape, mode='nearest')[0]
 
-                volume = volume.cpu().numpy()
-                volume = np.where(volume > 255, 255, volume)
-                volume = volume.astype(np.uint8)
+                # volume = volume.cpu().numpy()
+                # volume = np.where(volume > 255, 255, volume)
+                # volume = volume.astype(np.uint8)
 
-                target_root_volume = os.path.join(target_dir_volume, "long{0}".format(time_window))
-                if not os.path.exists(target_root_volume):
-                    os.makedirs(target_root_volume)
+                # target_root_volume = os.path.join(target_dir_volume, "long{0}".format(time_window))
+                # if not os.path.exists(target_root_volume):
+                #     os.makedirs(target_root_volume)
 
-                save_dir = os.path.join(target_root_volume,mode)
-                if not os.path.exists(save_dir):
-                    os.makedirs(save_dir)
+                # save_dir = os.path.join(target_root_volume,mode)
+                # if not os.path.exists(save_dir):
+                #     os.makedirs(save_dir)
                 
-                volume.tofile(os.path.join(save_dir,file_name+"_"+str(unique_time)+".npy"))
+                # volume.tofile(os.path.join(save_dir,file_name+"_"+str(unique_time)+".npy"))
                     
                 torch.cuda.empty_cache()
             #h5.close()
