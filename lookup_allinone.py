@@ -248,6 +248,7 @@ def visualizeTaf(ecds,gt,dt,filename,path,time_stamp_end,tol,LABELMAP,suffix):
     gt = gt[gt['t']==time_stamp_end]
     draw_bboxes(img_s,gt,0,LABELMAP)
     if not (dt is None):
+        print(dt)
         dt = dt[(dt['t']>time_stamp_end-tol)&(dt['t']<time_stamp_end+tol)]
         draw_bboxes(img_s,dt,1,LABELMAP)
         path_t = os.path.join(path,filename+"_{0}_".format(int(time_stamp_end)) + suffix + "_taf_result.png")
@@ -343,7 +344,6 @@ def visualizeTimeSurface(ecds,gt,dt,filename,path,time_stamp_end,tol,LABELMAP,su
     gt = gt[gt['t']==time_stamp_end]
     draw_bboxes(img_s,gt,0,LABELMAP)
     if not (dt is None):
-        print(dt)
         dt = dt[(dt['t']>time_stamp_end-tol)&(dt['t']<time_stamp_end+tol)]
         draw_bboxes(img_s,dt,1,LABELMAP)
         path_t = os.path.join(path,filename+"_{0}_".format(int(time_stamp_end)) + suffix +"_timesurface_result.png")
