@@ -16,6 +16,32 @@ def generate_event_volume(ecd_file, shape, ori_shape, volume_bins):
     ecds = torch.nn.functional.interpolate(ecds, size = ori_shape, mode='nearest')[0]
     return ecds.numpy()
 
+def generate_taf_gen1(ecd_file, filename, timestamp, shape, ori_shape, volume_bins):
+    ecds = []
+    for i in range(volume_bins):
+        ecd_file = os.path.join(os.path.join(ecd_file,"bin{0}".format(7-i)), filename+ "_" + str(timestamp) + ".npy")
+        ecd = np.fromfile(ecd_file, dtype=np.uint8).reshape(2, shape[0], shape[1]).astype(np.float32)
+        ecds.append(ecd)
+
+    ecds = np.concatenate(ecds, 0)[None,:,:,:]
+    ecds = torch.nn.functional.interpolate(ecds, size = ori_shape, mode='nearest')[0]
+    return ecds.numpy()
+
+def generate_taf_gen4(ecd_file, filename, timestamp, shape, ori_shape, volume_bins):
+    if volume_bins == 4:
+        ecd_file = os.path.join(os.path.join(ecd_file,"bins{0}".format(int(volume_bins))), filename+ "_" + str(timestamp) + ".npy")
+        volume = np.fromfile(ecd_file, dtype=np.uint8).reshape(int(volume_bins * 2), shape[0], shape[1]).astype(np.float32)
+    else:
+        ecd_file = os.path.join(os.path.join(ecd_file,"bins{0}".format(int(volume_bins/2))), filename+ "_" + str(timestamp) + ".npy")
+        volume = np.fromfile(ecd_file, dtype=np.uint8).reshape(int(volume_bins), shape[0], shape[1]).astype(np.float32)
+        ecd_file2 = os.path.join(os.path.join(ecd_file,"bins{0}".format(int(volume_bins))), filename+ "_" + str(timestamp) + ".npy")
+        volume2 = np.fromfile(ecd_file2, dtype=np.uint8).reshape(int(volume_bins), shape[0], shape[1]).astype(np.float32)
+        volume = np.concatenate([volume, volume2], 0)
+
+    ecds = volume[None,:,:,:]
+    ecds = torch.nn.functional.interpolate(ecds, size = ori_shape, mode='nearest')[0]
+    return ecds.numpy()
+
 def generate_optflow(item, time_stamp_end):
     return np.load(os.path.join("optical_flow_buffer",item + "_{0}.npy".format(time_stamp_end)))
 
@@ -224,9 +250,9 @@ def visualizeTaf(ecds,gt,dt,filename,path,time_stamp_end,tol,LABELMAP,suffix):
     if not (dt is None):
         dt = dt[(dt['t']>time_stamp_end-tol)&(dt['t']<time_stamp_end+tol)]
         draw_bboxes(img_s,dt,1,LABELMAP)
-        path_t = os.path.join(path,filename+"_{0}".format(int(time_stamp_end)) + "_taf_result.png")
+        path_t = os.path.join(path,filename+"_{0}_".format(int(time_stamp_end)) + suffix + "_taf_result.png")
     else:
-        path_t = os.path.join(path,filename+"_{0}".format(int(time_stamp_end)) + "_taf.png")
+        path_t = os.path.join(path,filename+"_{0}_".format(int(time_stamp_end)) + suffix + "_taf.png")
     cv2.imwrite(path_t,img_s)
 
 def visualizeE2vid(volume,gt,dt,filename,path,time_stamp_end,tol,LABELMAP,suffix):
@@ -391,8 +417,7 @@ if __name__ == '__main__':
     else:
         
         if datatype == "taf":
-            ecd_file = os.path.join(os.path.join(os.path.join(data_path,data_folder),args.ecd), item+ "_" + str(time_stamp_end) + ".npy")
-            ecds = generate_event_volume(ecd_file, shape, ori_shape, args.volume_bins)
+            ecds = generate_taf(os.path.join(data_path,data_folder), item, time_stamp_end, shape, ori_shape, args.volume_bins)
             visualizeTaf(ecds,dat_bbox,dt,item,target_path,time_stamp_end,args.tol,LABELMAP,suffix)
         else:
             ecd_file = os.path.join(os.path.join(os.path.join(data_path,args.ecd),data_folder), item+ "_" + str(time_stamp_end) + ".npy")
