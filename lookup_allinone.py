@@ -19,8 +19,8 @@ def generate_event_volume(ecd_file, shape, ori_shape, volume_bins):
 def generate_taf_gen1(ecd_file, filename, timestamp, shape, ori_shape, volume_bins):
     ecds = []
     for i in range(int(volume_bins)):
-        ecd_file = os.path.join(os.path.join(ecd_file,"bin{0}".format(7-i)), filename+ "_" + str(timestamp) + ".npy")
-        ecd = np.fromfile(ecd_file, dtype=np.uint8).reshape(2, shape[0], shape[1]).astype(np.float32)
+        ecd_file_ = os.path.join(os.path.join(ecd_file,"bin{0}".format(7-i)), filename+ "_" + str(timestamp) + ".npy")
+        ecd = np.fromfile(ecd_file_, dtype=np.uint8).reshape(2, shape[0], shape[1]).astype(np.float32)
         ecds.append(ecd)
 
     ecds = np.concatenate(ecds, 0)[None,:,:,:]
