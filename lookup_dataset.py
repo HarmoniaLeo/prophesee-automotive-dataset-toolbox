@@ -117,7 +117,7 @@ if __name__ == '__main__':
     parser.add_argument('-item', type=str)
     parser.add_argument('-end', type=int)
     parser.add_argument('-suffix', type=str, default="normal")
-    parser.add_argument('-exp_name', type=str, default=None)
+    parser.add_argument('-result_path', type=str, default=None)
     parser.add_argument('-tol', type = int, default=4999)
     parser.add_argument('-dataset', type = str, default="gen1")
     parser.add_argument('-data_path', type = str)
@@ -135,8 +135,7 @@ if __name__ == '__main__':
     if args.dataset == "gen1":
         bbox_path = args.bbox_path
         data_path = args.data_path
-        if not (args.exp_name is None):
-            result_path = "/home/lbd/100-fps-event-det/" + args.exp_name + "/summarise.npz"
+        result_path = args.result_path
         ori_shape = (240,304)
         shape = (256,320)
         LABELMAP = ["car", "pedestrian"]
@@ -152,8 +151,7 @@ if __name__ == '__main__':
     else:
         bbox_path = args.bbox_path
         data_path = args.data_path
-        if not (args.exp_name is None):
-            result_path = "/home/liubingde/100-fps-event-det/" + args.exp_name + "/summarise.npz"
+        result_path = args.result_path
         ori_shape = (720,1280)
         shape = (512,640)
         LABELMAP = ['pedestrian', 'two wheeler', 'car', 'truck', 'bus', 'traffic sign', 'traffic light']
