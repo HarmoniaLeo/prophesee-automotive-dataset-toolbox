@@ -85,7 +85,7 @@ if __name__ == '__main__':
     rh = target_shape[0] / shape[0]
     rw = target_shape[1] / shape[1]
 
-    time_windows = [500000]
+    time_windows = [250000]
     event_volume_bins = 5
 
     if not os.path.exists(target_dir):
