@@ -108,7 +108,7 @@ if __name__ == '__main__':
         shape = [240,304]
         target_shape = [256, 320]
     events_window = 5000000
-    time_window = 554126 #554126,2216505,5541263
+    time_window = 2216505 #554126,2216505,5541263
 
     if not os.path.exists(target_dir):
         os.makedirs(target_dir)
