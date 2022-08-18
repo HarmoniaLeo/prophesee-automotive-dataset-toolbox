@@ -83,8 +83,7 @@ if __name__ == '__main__':
             if len(gt_bbox) == 0:
                 continue
 
-            print(gt_bbox)
-            for unique_ts in gt_bbox[:,0].unique():
+            for unique_ts in np.unique(gt_bbox[:,0]):
                 gt_bbox_t = gt_bbox[gt_bbox[:,0] == unique_ts]
                 for j, dts in enumerate(dts_list):
                     dt_bbox = dts[(file_names_dt_list[j] == file_name)&(densitys_dt_list[j] >= percentiles1[i])&(densitys_dt_list[j] < percentiles1[i+1])]
