@@ -86,12 +86,6 @@ if __name__ == '__main__':
 
             for unique_ts in np.unique(gt_bbox[:,0]):
                 gt_bbox_t = gt_bbox[gt_bbox[:,0] == unique_ts]
-                if i == 0:
-                    results_slow["File Name"].append(file_name)
-                    results_slow["Time stamp"].append(unique_ts)
-                else:
-                    results_fast["File Name"].append(file_name)
-                    results_fast["Time stamp"].append(unique_ts)
                 for j, dts in enumerate(dts_list):
                     dt_bbox = dts[(file_names_dt_list[j] == file_name)&(densitys_dt_list[j] >= percentiles1[i])&(densitys_dt_list[j] < percentiles1[i+1])]
                     dt_bbox_t = dt_bbox[dt_bbox[:,0] == unique_ts]
@@ -118,13 +112,19 @@ if __name__ == '__main__':
                 lens = []
                 for ls in results_slow.values():
                     lens.append(len(ls))
-                if lens[1:] == lens[:-1]:
-                    continue
-                else:
+                if lens[1:] != lens[:-1]:
+                    if i == 0:
+                        results_slow["File Name"].append(file_name)
+                        results_slow["Time stamp"].append(unique_ts)
+                    else:
+                        results_fast["File Name"].append(file_name)
+                        results_fast["Time stamp"].append(unique_ts)
+                lens = []
+                for ls in results_slow.values():
+                    lens.append(len(ls))
+                if lens[1:] != lens[:-1]:
                     print(lens)
                     raise Exception("Break")
-            print(lens)
-
-        
+                
     results_slow = pd.DataFrame(results_slow).to_csv("Result_slow.csv")
     results_fast = pd.DataFrame(results_fast).to_csv("Result_fast.csv")
