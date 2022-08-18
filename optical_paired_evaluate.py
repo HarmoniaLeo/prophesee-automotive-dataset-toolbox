@@ -1,4 +1,5 @@
 import numpy as np
+from sympy import EX
 from torch import exp_
 from src.io import npy_events_tools
 from src.io import psee_loader
@@ -117,6 +118,11 @@ if __name__ == '__main__':
                 lens = []
                 for ls in results_slow.values():
                     lens.append(len(ls))
+                if lens[1:] == lens[:-1]:
+                    continue
+                else:
+                    print(lens)
+                    raise Exception("Break")
             print(lens)
 
         
