@@ -77,7 +77,7 @@ if __name__ == '__main__':
     for i in [0, 3]:
         print(i,percentiles1[i],percentiles1[i+1])
 
-        for i_file, file_name in enumerate(np.unique(file_names_gt)):
+        for i_file, file_name in enumerate(np.unique(file_names_gt)[:5]):
 
             gt_bbox = gts[(file_names_gt == file_name)&(densitys_gt >= percentiles1[i])&(densitys_gt < percentiles1[i+1])]
             if len(gt_bbox) == 0:
@@ -85,6 +85,12 @@ if __name__ == '__main__':
 
             for unique_ts in np.unique(gt_bbox[:,0]):
                 gt_bbox_t = gt_bbox[gt_bbox[:,0] == unique_ts]
+                if i == 0:
+                    results_slow["File Name"].append(file_name)
+                    results_slow["Time stamp"].append(unique_ts)
+                else:
+                    results_fast["File Name"].append(file_name)
+                    results_fast["Time stamp"].append(unique_ts)
                 for j, dts in enumerate(dts_list):
                     dt_bbox = dts[(file_names_dt_list[j] == file_name)&(densitys_dt_list[j] >= percentiles1[i])&(densitys_dt_list[j] < percentiles1[i+1])]
                     dt_bbox_t = dt_bbox[dt_bbox[:,0] == unique_ts]
