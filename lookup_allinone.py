@@ -417,7 +417,10 @@ if __name__ == '__main__':
     else:
         
         if datatype == "taf":
-            ecds = generate_taf(os.path.join(data_path,data_folder), item, time_stamp_end, shape, ori_shape, args.volume_bins)
+            if args.dataset == "gen1":
+                ecds = generate_taf_gen1(os.path.join(data_path,data_folder), item, time_stamp_end, shape, ori_shape, args.volume_bins)
+            elif args.dataset == "gen4":
+                ecds = generate_taf_gen4(os.path.join(data_path,data_folder), item, time_stamp_end, shape, ori_shape, args.volume_bins)
             visualizeTaf(ecds,dat_bbox,dt,item,target_path,time_stamp_end,args.tol,LABELMAP,suffix)
         else:
             ecd_file = os.path.join(os.path.join(os.path.join(data_path,args.ecd),data_folder), item+ "_" + str(time_stamp_end) + ".npy")
