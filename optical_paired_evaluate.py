@@ -42,7 +42,7 @@ if __name__ == '__main__':
         percentiles1 = [0.0, 0.09472751189131885, 0.2538587115258659, 0.6169536673563197, 1.703355726917305, 1000]
     else:
         exp_names = ["gen4_basic_long_pp","gen4_basic_long500000_pp","gen4_basic_long1000000_pp","gen4_basic_frame400000","gen4_basic_frame800000",
-        "gen4_basic_frame1000000","gen4-taf2","gen4-taf_tcn_connect2","gen4_taf_bins8","gen4_taf_tcn_connect_bins8"]
+        "gen4_basic_frame1000000","gen4_basic_leaky1e5","gen4_basic_leaky25e6","gen4_basic_leaky1e6","gen4-taf2","gen4-taf_tcn_connect2","gen4_taf_bins8","gen4_taf_tcn_connect_bins8"]
         result_paths = []
         for exp_name in exp_names:
             result_paths.append("/home/liubingde/100-fps-event-det/log/" + exp_name + "/summarise_stats.npz")
