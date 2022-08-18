@@ -114,6 +114,10 @@ if __name__ == '__main__':
                         results_slow[exp_names[j]].append(result)
                     else:
                         results_fast[exp_names[j]].append(result)
+                lens = []
+                for ls in results_slow.values():
+                    lens.append(len(ls))
+            print(lens)
 
         
     results_slow = pd.DataFrame(results_slow).to_csv("Result_slow.csv")
