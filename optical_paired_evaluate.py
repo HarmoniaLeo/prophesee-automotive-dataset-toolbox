@@ -88,8 +88,8 @@ if __name__ == '__main__':
                 for j, dts in enumerate(dts_list):
                     dt_bbox = dts[(file_names_dt_list[j] == file_name)&(densitys_dt_list[j] >= percentiles1[i])&(densitys_dt_list[j] < percentiles1[i+1])]
                     dt_bbox_t = dt_bbox[dt_bbox[:,0] == unique_ts]
-                    dt = [dt_bbox]
-                    gt = [gt_bbox]
+                    dt = [dt_bbox_t]
+                    gt = [gt_bbox_t]
                     gt_boxes_list = map(filter_boxes, gt)
                     result_boxes_list = map(filter_boxes, dt)
                     gt_boxes_list1 = []
