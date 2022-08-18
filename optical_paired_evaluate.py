@@ -80,6 +80,8 @@ if __name__ == '__main__':
         for i_file, file_name in enumerate(np.unique(file_names_gt)):
 
             gt_bbox = gts[(file_names_gt == file_name)&(densitys_gt >= percentiles1[i])&(densitys_gt < percentiles1[i+1])]
+            if len(gt_bbox) == 0:
+                continue
 
             print(gt_bbox)
             for unique_ts in gt_bbox[:,0].unique():
