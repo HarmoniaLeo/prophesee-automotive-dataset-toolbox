@@ -95,7 +95,7 @@ if __name__ == '__main__':
         # min_event_count = 200000
         shape = [240,304]
         target_shape = [256, 320]
-        events_windows = [200000]
+        events_windows = [100000]
     #events_window = 500000
     
 
