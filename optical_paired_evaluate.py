@@ -112,12 +112,8 @@ if __name__ == '__main__':
                     result = evaluate_detection(gt_boxes_list1, result_boxes_list1, time_tol = args.tol, classes=classes,height=shape[0],width=shape[1])
                     if i == 0:
                         results_slow[exp_names[j]].append(result)
-                        results_slow["File Name"].append(file_name)
-                        results_slow["Time stamp"].append(unique_ts)
                     else:
                         results_fast[exp_names[j]].append(result)
-                        results_fast["File Name"].append(file_name)
-                        results_fast["Time stamp"].append(unique_ts)
 
         
     results_slow = pd.DataFrame(results_slow).to_csv("Result_slow.csv")
