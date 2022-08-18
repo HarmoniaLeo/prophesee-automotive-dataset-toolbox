@@ -110,21 +110,31 @@ if __name__ == '__main__':
                     else:
                         results_fast[exp_names[j]].append(result)
                 lens = []
-                for ls in results_slow.values():
-                    lens.append(len(ls))
-                if lens[1:] != lens[:-1]:
-                    if i == 0:
+                if i == 0:
+                    for ls in results_slow.values():
+                        lens.append(len(ls))
+                    if lens[1:] != lens[:-1]:
                         results_slow["File Name"].append(file_name)
                         results_slow["Time stamp"].append(unique_ts)
-                    else:
+                    lens = []
+                    for ls in results_slow.values():
+                        lens.append(len(ls))
+                    if lens[1:] != lens[:-1]:
+                        print(lens)
+                        raise Exception("Break")
+                else:
+                    for ls in results_fast.values():
+                        lens.append(len(ls))
+                    if lens[1:] != lens[:-1]:
                         results_fast["File Name"].append(file_name)
                         results_fast["Time stamp"].append(unique_ts)
-                lens = []
-                for ls in results_slow.values():
-                    lens.append(len(ls))
-                if lens[1:] != lens[:-1]:
-                    print(lens)
-                    raise Exception("Break")
+                    lens = []
+                    for ls in results_fast.values():
+                        lens.append(len(ls))
+                    if lens[1:] != lens[:-1]:
+                        print(lens)
+                        raise Exception("Break")
+                
                 
     results_slow = pd.DataFrame(results_slow).to_csv("Result_slow.csv")
     results_fast = pd.DataFrame(results_fast).to_csv("Result_fast.csv")
