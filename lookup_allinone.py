@@ -387,16 +387,16 @@ if __name__ == '__main__':
     if args.dataset == "gen1":
         ori_shape = (240,304)
         shape = (256,320)
-        LABELMAP = ["car", "pedestrian"]
+        LABELMAP = ["car", "ped"]
     elif args.dataset == "kitti":
         data_folder = 'val'
         ori_shape = (375,1242)
         shape = (192,640)
-        LABELMAP = ["car", "pedestrian"]
+        LABELMAP = ["car", "ped"]
     else:
         ori_shape = (720,1280)
         shape = (512,640)
-        LABELMAP = ['pedestrian', 'two wheeler', 'car', 'truck', 'bus', 'traffic sign', 'traffic light']
+        LABELMAP = ['ped', 'cyc', 'car', 'trk', 'bus', 'sign', 'light']
 
     if not (args.result_path is None):
         bbox_file = result_path
