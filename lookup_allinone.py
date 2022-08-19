@@ -32,8 +32,8 @@ def generate_taf_gen4(ecd_file, filename, timestamp, shape, ori_shape, volume_bi
         ecd_file = os.path.join(os.path.join(ecd_file,"bins{0}".format(int(volume_bins))), filename+ "_" + str(timestamp) + ".npy")
         volume = np.fromfile(ecd_file, dtype=np.uint8).reshape(int(volume_bins * 2), shape[0], shape[1]).astype(np.float32)
     else:
-        ecd_file = os.path.join(os.path.join(ecd_file,"bins{0}".format(int(volume_bins/2))), filename+ "_" + str(timestamp) + ".npy")
-        volume = np.fromfile(ecd_file, dtype=np.uint8).reshape(int(volume_bins), shape[0], shape[1]).astype(np.float32)
+        ecd_file1 = os.path.join(os.path.join(ecd_file,"bins{0}".format(int(volume_bins/2))), filename+ "_" + str(timestamp) + ".npy")
+        volume = np.fromfile(ecd_file1, dtype=np.uint8).reshape(int(volume_bins), shape[0], shape[1]).astype(np.float32)
         ecd_file2 = os.path.join(os.path.join(ecd_file,"bins{0}".format(int(volume_bins))), filename+ "_" + str(timestamp) + ".npy")
         volume2 = np.fromfile(ecd_file2, dtype=np.uint8).reshape(int(volume_bins), shape[0], shape[1]).astype(np.float32)
         volume = np.concatenate([volume, volume2], 0)
