@@ -102,7 +102,7 @@ def visualizeVolume(volume,gt,dt,filename,path,time_stamp_end,tol,LABELMAP,suffi
     img = cv2.cvtColor(img, cv2.COLOR_HSV2BGR)
 
     gt = gt[gt['t']==time_stamp_end]
-    draw_bboxes(img,gt,0,LABELMAP)
+    #draw_bboxes(img,gt,0,LABELMAP)
     if not (dt is None):
         dt = dt[(dt[:,0]>time_stamp_end-tol)&(dt[:,0]<time_stamp_end+tol)]
         draw_bboxes(img,dt,1,LABELMAP)
