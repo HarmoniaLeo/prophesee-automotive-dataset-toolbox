@@ -344,7 +344,7 @@ def visualizeTimeSurface(ecds,gt,dt,filename,path,time_stamp_end,tol,LABELMAP,su
     #mask = np.where(volume[:,:,None] > 1, 1, volume[:,:,None])
     img_s = img_s.astype(np.uint8)
     gt = gt[gt['t']==time_stamp_end]
-    draw_bboxes(img_s,gt,0,LABELMAP)
+    #draw_bboxes(img_s,gt,0,LABELMAP)
     if not (dt is None):
         dt = dt[(dt[:,0]>time_stamp_end-tol)&(dt[:,0]<time_stamp_end+tol)]
         draw_bboxes(img_s,dt,1,LABELMAP)
