@@ -56,7 +56,7 @@ def draw_bboxes(img, boxes, dt, labelmap, classes = []):
     colors = cv2.applyColorMap(np.arange(0, 255).astype(np.uint8), cv2.COLORMAP_HSV)
     colors = [tuple(*item) for item in colors.tolist()]
     
-    colors_classes = ["#F4EA2D","#D4AA20","#EB9C2F","#D45920","#F73025"]
+    colors_classes = [(244,234,45),(212,170,32),(235,156,47),(212,89,32),(247,48,37)]
 
     for i in range(boxes.shape[0]):
 
