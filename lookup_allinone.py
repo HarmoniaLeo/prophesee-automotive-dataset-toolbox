@@ -67,7 +67,7 @@ def draw_bboxes(img, boxes, dt, labelmap, classes = []):
         class_id = boxes[i][-3]
         class_name = labelmap[int(class_id)]
         if len(classes) > 0:
-            color = colors_classes[classes[i]]
+            color = colors_classes[classes[i]][:-1]
         else:
             color = colors[(dt+1) * 60]
         center = ((pt1[0] + pt2[0]) // 2, (pt1[1] + pt2[1]) // 2)
