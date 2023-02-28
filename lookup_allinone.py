@@ -216,6 +216,13 @@ def save_flow(flow, gt,dt,filename,flow_path,time_stamp_end,tol,LABELMAP):
     if not os.path.exists(flow_path):
         os.mkdir(flow_path)
     
+    flow_img = 255 - flow_to_image(flow)
+
+    flow_img = flow_img/255.0  #注意255.0得采用浮点数
+    flow_img = (np.power(flow_img,0.4)*255.0).astype(np.uint8)
+
+    gt = gt[gt['t']==time_stamp_end]
+
     for i in range(len(gt)):
         x1, y1, x2, y2 = gt[i][1], gt[i][2], gt[i][3] + gt[i][1], gt[i][4] + gt[i][2]
 
@@ -244,12 +251,6 @@ def save_flow(flow, gt,dt,filename,flow_path,time_stamp_end,tol,LABELMAP):
                 print(i)
                 break
 
-    flow_img = 255 - flow_to_image(flow)
-
-    flow_img = flow_img/255.0  #注意255.0得采用浮点数
-    flow_img = (np.power(flow_img,0.4)*255.0).astype(np.uint8)
-
-    gt = gt[gt['t']==time_stamp_end]
     draw_bboxes(flow_img,gt,0,LABELMAP)
     if not (dt is None):
         dt = dt[(dt['t']>time_stamp_end-tol)&(dt['t']<time_stamp_end+tol)]
