@@ -10,6 +10,8 @@ import pandas as pd
 import torch
 sns.set_style("darkgrid")
 
+percentiles1 = [0.0, 0.09472751189131885, 0.2538587115258659, 0.6169536673563197, 1.703355726917305, 1000]
+
 def generate_event_volume(ecd_file, shape, ori_shape, volume_bins):
     ecds = np.fromfile(ecd_file, dtype=np.uint8).reshape(1, int(volume_bins * 2), shape[0], shape[1]).astype(np.float32)
     ecds = torch.from_numpy(ecds)
@@ -55,6 +57,7 @@ def draw_bboxes(img, boxes, dt, labelmap):
     colors = [tuple(*item) for item in colors.tolist()]
 
     for i in range(boxes.shape[0]):
+
         pt1 = (int(boxes[i][1]), int(boxes[i][2]))
         size = (int(boxes[i][3]), int(boxes[i][4]))
         pt2 = (pt1[0] + size[0], pt1[1] + size[1])
@@ -212,6 +215,35 @@ def flow_to_image(flow):
 def save_flow(flow, gt,dt,filename,flow_path,time_stamp_end,tol,LABELMAP):
     if not os.path.exists(flow_path):
         os.mkdir(flow_path)
+    
+    for i in range(len(gt)):
+        x1, y1, x2, y2 = gt[i][1], gt[i][2], gt[i][3] + gt[i][1], gt[i][4] + gt[i][2]
+
+        if x1 >= shape[1]:
+            x1 = shape[1] - 1
+        if x1 < 0:
+            x1 = 0
+        if x2 >= shape[1]:
+            x2 = shape[1] - 1
+        if x2 < 0:
+            x2 = 0
+        
+        if y1 >= shape[0]:
+            y1 = shape[0] - 1
+        if y1 < 0:
+            y1 = 0
+        if y2 >= shape[0]:
+            y2 = shape[0] - 1
+        if y2 < 0:
+            y2 = 0
+    
+        density = np.sum(np.sqrt(flow[int(y1):int(y2),int(x1):int(x2),0]**2 + flow[int(y1):int(y2),int(x1):int(x2),1]**2))/(int(y2 - y1)*int(x2 - x1) + 1e-8)
+        print(density)
+        for i in range(0,5):
+            if density > percentiles1[i] and density <= percentiles1[i+1]:
+                print(i)
+                break
+
     flow_img = 255 - flow_to_image(flow)
 
     flow_img = flow_img/255.0  #注意255.0得采用浮点数
@@ -357,17 +389,18 @@ def visualizeTimeSurface(ecds,gt,dt,filename,path,time_stamp_end,tol,LABELMAP,su
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(
         description='visualize one or several event files along with their boxes')
-    parser.add_argument('-item', type=str)
-    parser.add_argument('-end', type=int)
-    parser.add_argument('-volume_bins', type=float)
-    parser.add_argument('-ecd', type=str)
-    parser.add_argument('-bbox_path', type=str)
-    parser.add_argument('-data_path', type=str)
-    parser.add_argument('-result_path', type=str, default=None)
-    parser.add_argument('-tol', type = int, default=4999)
-    parser.add_argument('-dataset', type = str, default="gen1")
-    parser.add_argument('-datatype', type = str)
-    parser.add_argument('-suffix', type = str)
+    parser.add_argument('-item', type=str)  #视频流名
+    parser.add_argument('-end', type=int)   #标注框时间戳
+    parser.add_argument('-volume_bins', type=float) #Event Representation的通道数/2
+    parser.add_argument('-ecd', type=str)   #data_path + ecd = 预处理数据（稠密）到train, val, test这一级的目录
+    parser.add_argument('-bbox_path', type=str) #数据集到train, val, test这一级的目录，用于读取标签
+    parser.add_argument('-data_path', type=str)   #data_path + ecd = 预处理数据（稠密）到train, val, test这一级的目录
+    parser.add_argument('-result_path', type=str, default=None) #summarise.npz路径。不设置时则不包含检测框
+    parser.add_argument('-tol', type = int, default=4999)   #检测框和标注框之间的时间容差。以4999时为例，要可视化50000μs位置的标注框时将会同时可视化45001μs到54999μs范围内的检测框
+    parser.add_argument('-dataset', type = str, default="gen1") #prophesee gen1/gen4数据集
+    parser.add_argument('-datatype', type = str)    #taf/timesurface/frame/eventvolume/opticalflow
+    parser.add_argument('-suffix', type = str)  #一个用于区分参数的后缀
+    #可视化结果会输出到"result_allinone/视频流名_标注框时间戳_suffix_datatype.png"（不包含检测框）或"result_allinone/视频流名_标注框时间戳_suffix_datatype_result.png"（包含检测框）
 
     args = parser.parse_args()
 

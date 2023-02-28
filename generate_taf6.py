@@ -108,10 +108,10 @@ def leaky_transform(ecd):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(
     description='visualize one or several event files along with their boxes')
-    parser.add_argument('-raw_dir', type=str)
-    parser.add_argument('-label_dir', type=str)
-    parser.add_argument('-target_dir', type=str)
-    parser.add_argument('-dataset', type=str, default="gen4")
+    parser.add_argument('-raw_dir', type=str)   #数据集到train, val, test这一级的目录，作为源数据
+    parser.add_argument('-label_dir', type=str) #数据集到train, val, test这一级的目录，用于读取标签
+    parser.add_argument('-target_dir', type=str)    #输出数据的目标目录
+    parser.add_argument('-dataset', type=str, default="gen4")   #prophesee gen1/gen4数据集
 
     args = parser.parse_args()
     raw_dir = args.raw_dir

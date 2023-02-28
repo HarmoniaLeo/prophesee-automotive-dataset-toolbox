@@ -115,14 +115,15 @@ def visualizeVolume(volume,gt,dt,filename,path,time_stamp_end,tol,LABELMAP,suffi
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(
         description='visualize one or several event files along with their boxes')
-    parser.add_argument('-item', type=str)
-    parser.add_argument('-end', type=int)
-    parser.add_argument('-suffix', type=str, default="normal")
-    parser.add_argument('-result_path', type=str, default=None)
-    parser.add_argument('-tol', type = int, default=4999)
-    parser.add_argument('-dataset', type = str, default="gen1")
-    parser.add_argument('-data_path', type = str)
-    parser.add_argument('-bbox_path', type = str)
+    parser.add_argument('-item', type=str)  #视频流名
+    parser.add_argument('-end', type=int)   #标注框时间戳
+    parser.add_argument('-suffix', type=str, default="normal")  #一个用于区分参数的后缀
+    parser.add_argument('-result_path', type=str, default=None) #summarise.npz路径。不设置时则不包含检测框
+    parser.add_argument('-tol', type = int, default=4999)   #检测框和标注框之间的时间容差。以4999时为例，要可视化50000μs位置的标注框时将会同时可视化45001μs到54999μs范围内的检测框
+    parser.add_argument('-dataset', type = str, default="gen1") #prophesee gen1/gen4数据集
+    parser.add_argument('-data_path', type = str)   #预处理数据（稀疏）到train, val, test这一级的目录
+    parser.add_argument('-bbox_path', type = str)   #数据集到train, val, test这一级的目录，用于读取标签
+    #可视化结果会输出到"result_allinone/视频流名_标注框时间戳_suffix_datatype.png"（不包含检测框）或"result_allinone/视频流名_标注框时间戳_suffix_datatype_result.png"（包含检测框）
 
     args = parser.parse_args()
 

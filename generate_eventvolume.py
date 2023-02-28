@@ -54,11 +54,11 @@ def denseToSparse(dense_tensor):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(
     description='visualize one or several event files along with their boxes')
-    parser.add_argument('-raw_dir', type=str)
-    parser.add_argument('-target_dir', type=str)
-    parser.add_argument('-dataset', type=str, default="gen1")
-    parser.add_argument('-time_window', type=int, default=50000)
-    parser.add_argument('-event_volume_bins', type=int, default=5)
+    parser.add_argument('-raw_dir', type=str)   #数据集到train, val, test这一级的目录，作为源数据
+    parser.add_argument('-target_dir', type=str) #输出数据的目标目录
+    parser.add_argument('-dataset', type=str, default="gen1")   #prophesee gen1/gen4数据集
+    parser.add_argument('-time_window', type=int, default=50000)    #时间窗口，单位为微秒
+    parser.add_argument('-event_volume_bins', type=int, default=5)  #Event Volume的bins数
 
 
     args = parser.parse_args()
