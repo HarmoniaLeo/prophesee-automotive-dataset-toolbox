@@ -49,12 +49,14 @@ def generate_optflow(item, time_stamp_end):
 
 LABELMAP = ["car", "pedestrian"]
 
-def draw_bboxes(img, boxes, dt, labelmap):
+def draw_bboxes(img, boxes, dt, labelmap, classes = []):
     """
     draw bboxes in the image img
     """
     colors = cv2.applyColorMap(np.arange(0, 255).astype(np.uint8), cv2.COLORMAP_HSV)
     colors = [tuple(*item) for item in colors.tolist()]
+    
+    colors_classes = ["#F4EA2D","#D4AA20","#EB9C2F","#D45920","#F73025"]
 
     for i in range(boxes.shape[0]):
 
@@ -64,7 +66,10 @@ def draw_bboxes(img, boxes, dt, labelmap):
         score = boxes[i][-2]
         class_id = boxes[i][-3]
         class_name = labelmap[int(class_id)]
-        color = colors[(dt+1) * 60]
+        if len(classes > 0):
+            color = colors_classes[classes[i]]
+        else:
+            color = colors[(dt+1) * 60]
         center = ((pt1[0] + pt2[0]) // 2, (pt1[1] + pt2[1]) // 2)
         cv2.rectangle(img, pt1, pt2, color, 2)
         if dt:
@@ -223,6 +228,8 @@ def save_flow(flow, gt,dt,filename,flow_path,time_stamp_end,tol,LABELMAP):
 
     gt = gt[gt['t']==time_stamp_end]
 
+    classes = []
+
     for i in range(len(gt)):
         x1, y1, x2, y2 = gt[i][1], gt[i][2], gt[i][3] + gt[i][1], gt[i][4] + gt[i][2]
 
@@ -245,13 +252,11 @@ def save_flow(flow, gt,dt,filename,flow_path,time_stamp_end,tol,LABELMAP):
             y2 = 0
     
         density = np.sum(np.sqrt(flow[int(y1):int(y2),int(x1):int(x2),0]**2 + flow[int(y1):int(y2),int(x1):int(x2),1]**2))/(int(y2 - y1)*int(x2 - x1) + 1e-8)
-        print(density)
         for i in range(0,5):
             if density > percentiles1[i] and density <= percentiles1[i+1]:
-                print(i)
-                break
+                classes.append(i)
 
-    draw_bboxes(flow_img,gt,0,LABELMAP)
+    draw_bboxes(flow_img,gt,0,LABELMAP,classes)
     if not (dt is None):
         dt = dt[(dt['t']>time_stamp_end-tol)&(dt['t']<time_stamp_end+tol)]
         draw_bboxes(flow_img,dt,1,LABELMAP)
