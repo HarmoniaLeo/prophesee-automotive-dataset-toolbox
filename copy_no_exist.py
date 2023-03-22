@@ -12,10 +12,11 @@ for data_division in ["train", "test", "val"]:
             os.makedirs(target_root + "/" + data_division + "/" + bin_division)
         f=open("already_exist_" + data_division + "_" + bin_division + ".txt", mode='rb')
         existing_files=f.readlines()
+        existing_files = [existing_file.decode("utf-8")[:-1] for existing_file in existing_files]
         root="/data/lbd/Large_Automotive_Detection_Dataset_processed/taf2/" + data_division + "/" + bin_division
         count = 0
         for target_file in os.listdir(root):
-            if target_file + "\n" not in existing_files:
+            if target_file not in existing_files:
                 # shutil.copy(root + "/" + target_file, target_root + "/" + data_division + "/" + bin_division)
                 count += 1
         print(count)
