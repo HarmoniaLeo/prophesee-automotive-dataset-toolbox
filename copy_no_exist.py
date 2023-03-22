@@ -17,6 +17,6 @@ for data_division in ["train", "test", "val"]:
         count = 0
         for target_file in os.listdir(root):
             if target_file not in existing_files:
-                # shutil.copy(root + "/" + target_file, target_root + "/" + data_division + "/" + bin_division)
+                shutil.copy(root + "/" + target_file, target_root + "/" + data_division + "/" + bin_division)
                 count += 1
         print(count)
