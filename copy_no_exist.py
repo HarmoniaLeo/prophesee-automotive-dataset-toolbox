@@ -14,7 +14,10 @@ for data_division in ["train", "test", "val"]:
         existing_files=f.readlines()
         root="/data/lbd/Large_Automotive_Detection_Dataset_processed/taf2/" + data_division + "/" + bin_division
         count = 0
+        print(existing_files[:5])
         for target_file in os.listdir(root):
+            print(target_file)
+            break
             if target_file not in existing_files:
                 # shutil.copy(root + "/" + target_file, target_root + "/" + data_division + "/" + bin_division)
                 count += 1
